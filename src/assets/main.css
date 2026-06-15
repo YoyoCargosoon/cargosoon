@@ -4,10 +4,6 @@ body{
   margin: 0;
 }
 
-#app{
-  min-width: 1280px;
-}
-
 .el-popper .el-menu--popup{
   min-width: 160px;
 }

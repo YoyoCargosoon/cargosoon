@@ -279,15 +279,11 @@ defineExpose({ sendFromExternal })
   <div
     @click="chatOpen"
     v-show="!chatShow && !fullpage"
-    class="chat-fab fixed bottom-20 right-10 p-2 bg-white rounded-full shadow-xxx flex cursor-pointer z-[60]"
+    class="chat-fab fixed bottom-[84px] right-[18px] p-[5px] bg-white rounded-full shadow-xxx flex cursor-pointer z-[60]"
   >
     <div class="relative">
-      <img :src="manageNew.image_url || manage.image_url" class="w-12 h-12 rounded-full" alt="">
+      <img :src="manageNew.image_url || manage.image_url" class="w-11 h-11 rounded-full" alt="">
       <div class="chat-fab-dot absolute right-0 bottom-0 w-2.5 h-2.5 bg-green-400 rounded-full"></div>
-    </div>
-    <div class="hidden sm:block px-2">
-      <div class="my-0.5 font-semibold">{{ manageNew.englishname || manage.englishname }}</div>
-      <div class="text-xs text-gray-500">Account Manager</div>
     </div>
     <div
       v-show="chatNum > 0"

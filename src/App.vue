@@ -31,19 +31,20 @@ provide('sendToChat', sendToChat)
       <el-header style="--el-header-padding: 0">
         <Layout></Layout>
       </el-header>
-      <el-main style="background: #F4F5F9;min-width: 1280px;padding: 0;">
+      <el-main style="background: #F4F5F9;padding: 0;">
         <RouterView />
       </el-main>
     </el-container>
 
     <template v-if="showFloatingChat">
       <!-- WhatsApp float -->
-      <div class="fixed bottom-5 right-10">
+      <div class="floating-whatsapp">
         <a
           :href="'https://api.whatsapp.com/send?phone=+86' + manage.whatsappp + '&text=Hello, ' + manage.englishname"
           target="_blank"
+          class="floating-whatsapp-link"
         >
-          <img src="@/assets/chat/whatsapp.svg" class="w-14 h-14 cursor-pointer" alt="">
+          <img src="@/assets/chat/whatsapp.svg" class="floating-whatsapp-icon" alt="">
         </a>
       </div>
 
@@ -63,5 +64,47 @@ provide('sendToChat', sendToChat)
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+</style>
+<style scoped>
+.floating-whatsapp {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 58;
+}
+
+.floating-whatsapp-link {
+  width: 54px;
+  height: 54px;
+  border-radius: 999px;
+  background: #4dc247;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 24px rgba(77, 194, 71, 0.22);
+}
+
+.floating-whatsapp-icon {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .floating-whatsapp {
+    right: 14px;
+    bottom: 14px;
+  }
+
+  .floating-whatsapp-link {
+    width: 48px;
+    height: 48px;
+  }
+
+  .floating-whatsapp-icon {
+    width: 27px;
+    height: 27px;
+  }
 }
 </style>
