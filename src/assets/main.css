@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+body{
+  margin: 0;
+}
+
+#app{
+  min-width: 1280px;
+}
+
+.el-popper .el-menu--popup{
+  min-width: 160px;
+}
+
+@theme {
+  --color-chatMsg: #EAEEF4;
+  --color-chatMsgs: #00bde7;
+  --color-orange: #e66a10;
+  --shadow-xxx: 0px 0px 6px 0px rgba(0, 0, 0, 0.30);
+  --spacing-700: 700px;
+  --text-13: 13px;
+  --color-orderHover: #325ba7;
+  --color-pricebg: #E9EFF5;
+}
