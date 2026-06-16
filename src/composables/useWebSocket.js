@@ -24,6 +24,7 @@ export function useWebSocket() {
   const entering = ref(false)
   const manageAI = ref(false)
   const waitingAI = ref(false)
+  const connected = ref(false)
   const nologinHello = ref([])
   const guessList = ref([]) // msg_type 15: suggested questions ("猜你想问")
   const manage = ref({ id: '', image_url: '', englishname: '', whatsappp: '', service_email: '' })
@@ -68,6 +69,7 @@ export function useWebSocket() {
 
   const _onOpen = () => {
     // reset backoff on successful connect
+    connected.value = true
     reconnectDelay = 1000
     if (_userInfo.token) {
       send({
@@ -84,10 +86,12 @@ export function useWebSocket() {
   }
 
   const _onClose = () => {
+    connected.value = false
     _scheduleReconnect()
   }
 
   const _onError = () => {
+    connected.value = false
     // onerror is always followed by onclose, so just ensure ws is closed
     if (ws && ws.readyState !== WebSocket.CLOSED) {
       ws.close()
@@ -275,6 +279,7 @@ export function useWebSocket() {
       ws.close()
       ws = null
     }
+    connected.value = false
   }
 
   const sendChatMsg = (msg, userInfo) => {
@@ -355,6 +360,7 @@ export function useWebSocket() {
     entering,
     manageAI,
     waitingAI,
+    connected,
     nologinHello,
     guessList,
     manage,

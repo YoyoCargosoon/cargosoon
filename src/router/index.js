@@ -20,6 +20,16 @@ const router = createRouter({
       component: () => import('../views/chat/index.vue'),
     },
     {
+      path: '/track',
+      name: 'track',
+      component: () => import('../views/track/index.vue'),
+    },
+    {
+      path: '/track/result',
+      name: 'track-result',
+      component: () => import('../views/track/result.vue'),
+    },
+    {
       path: '/about',
       name: 'about',
       component: () => import('../views/AboutView.vue'),

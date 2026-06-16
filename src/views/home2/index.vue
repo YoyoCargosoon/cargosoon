@@ -1,93 +1,76 @@
 <script setup>
-import { inject, nextTick, onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { Microphone, Paperclip, Picture, RefreshRight, Search } from '@element-plus/icons-vue'
 
-const sendToChat = inject('sendToChat', () => {})
+const router = useRouter()
 
 const askInput = ref('')
 const searchInputRef = ref(null)
 const attachmentInputRef = ref(null)
 const imageInputRef = ref(null)
 
-const promptColumns = [
+const promptSets = [
   [
-    'Sea DDP to Los Angeles',
-    'Air freight to Germany',
-    'Amazon FBA delivery to the UK',
-    'Warehouse storage in Shenzhen',
-    'DDP delivery to Amazon FBA',
+    [
+      'Sea DDP to Los Angeles',
+      'Air freight to Germany',
+      'Amazon FBA delivery to the UK',
+      'Warehouse storage in Shenzhen',
+      'DDP delivery to Amazon FBA',
+    ],
+    [
+      'Best route to Sydney',
+      'Track my shipment status',
+      'Check my order from China',
+      '1688 sourcing and inspection',
+      'Sea freight to Europe',
+    ],
   ],
   [
-    'Best route to Sydney',
-    'Track my shipment status',
-    'Check my order from China',
-    '1688 sourcing and inspection',
-    'Sea freight to Europe',
+    [
+      'Ship 3 pallets from Ningbo to Dallas',
+      'DDP sea shipping to New Jersey',
+      'Compare air and sea freight to Canada',
+      'FBA replenishment from Shenzhen',
+      'Consolidate 1688 orders for export',
+    ],
+    [
+      'Quote 10 cartons to Los Angeles',
+      'Track container arrival update',
+      'Warehouse inspection before shipment',
+      'Customs-ready DDP delivery',
+      'Door delivery to Amazon warehouse',
+    ],
   ],
 ]
 
-const quickAccess = [
-  {
-    eyebrow: 'AI Freight Rates',
-    title: 'Access freight rate search',
-    body: 'Review sea freight, air freight, and DDP pricing scenarios from China.',
-    action: 'Open Freight Rates',
-    href: '/main/pricelist',
-    items: ['Sea freight', 'Air freight', 'DDP freight'],
-  },
-  {
-    eyebrow: 'Tracking & Orders',
-    title: 'Access tracking and order updates',
-    body: 'Review shipment milestones, tracking status, and order progress in one workflow.',
-    action: 'Open Tracking',
-    href: '/order/tracking',
-    items: ['Shipment tracking', 'Order status', 'Latest updates'],
-  },
-  {
-    eyebrow: 'Warehouse Services',
-    title: 'Access warehouse operations',
-    body: 'Review warehouse services for cargo handling before export and delivery.',
-    action: 'Open Warehouse',
-    href: '/warehouse/SKUManagement',
-    items: ['Consolidation', 'Storage', 'Relabeling', 'Inspection'],
-  },
-  {
-    eyebrow: '1688 Sourcing',
-    title: 'Access sourcing and fulfillment support',
-    body: 'Review supplier sourcing, inspection, and delivery planning from one service entry point.',
-    action: 'Open 1688 Sourcing',
-    href: 'https://codropshipping.com/',
-    items: ['Product sourcing', 'Supplier verification', 'Quality inspection', 'Final delivery'],
-  },
-]
-
-const trustPoints = [
-  {
-    title: '18+ years in international freight forwarding',
-    body: 'Built on long-term experience in export logistics, customer coordination, and shipment execution from China.',
-  },
-  {
-    title: 'Freight, warehousing, and sourcing in one operating model',
-    body: 'Support rate inquiry, tracking, warehouse handling, and 1688 sourcing without splitting the service workflow across separate teams.',
-  },
-  {
-    title: 'AI efficiency with operational follow-through',
-    body: 'Use AI to accelerate inquiry and updates, backed by operational teams when booking, handling, and delivery need to move forward.',
-  },
-]
+const activePromptSetIndex = ref(0)
+const promptColumns = ref(promptSets[activePromptSetIndex.value])
 
 const askAI = (text) => {
   const q = (text ?? askInput.value).trim()
   if (!q) return
-  sendToChat(q, 1)
+  router.push({
+    name: 'chat',
+    query: {
+      mode: 'ai',
+      q,
+    },
+  })
   askInput.value = ''
 }
 
-const openQuickAccess = (href) => {
-  window.open(href, '_blank')
+const openAssistant = () => {
+  router.push({
+    name: 'chat',
+    query: { mode: 'ai' },
+  })
 }
 
-const openAssistant = () => {
-  window.open('/new/chat', '_blank')
+const refreshPrompts = () => {
+  activePromptSetIndex.value = (activePromptSetIndex.value + 1) % promptSets.length
+  promptColumns.value = promptSets[activePromptSetIndex.value]
 }
 
 const triggerAttachmentUpload = () => {
@@ -161,31 +144,13 @@ onMounted(() => {
     <section class="hero-wrap">
       <div class="hero-inner">
         <div class="hero-brand">
-          <div class="brand-art" aria-hidden="true">
-            <div class="brand-side brand-side-left">
-              <div class="brand-side-icon brand-side-ship-icon"></div>
-              <div class="brand-side-line"></div>
-            </div>
-            <div class="brand-word brand-word-left">Cargo</div>
-            <div class="brand-center">
-              <div class="brand-shadow"></div>
-              <div class="brand-wave brand-wave-a"></div>
-              <div class="brand-wave brand-wave-b"></div>
-              <div class="brand-plane"></div>
-              <div class="brand-ship"></div>
-              <div class="brand-orbit"></div>
-              <div class="brand-core">
-                <img src="@/assets/logo/cargosoonLogo1.png" class="brand-core-icon" alt="">
-              </div>
-              <div class="brand-trail"></div>
-              <div class="brand-trail brand-trail-b"></div>
-            </div>
-            <div class="brand-word brand-word-right">Soon</div>
-            <div class="brand-side brand-side-right">
-              <div class="brand-side-line"></div>
-              <div class="brand-side-icon brand-side-plane-icon"></div>
+          <div class="brand-art">
+            <div class="brand-original" aria-label="CargoSoon">
+              <img src="@/assets/logo/cargosoonLogo1.png" class="brand-original-mark" alt="" />
+              <img src="@/assets/logo/cargosoonLogo2.png" class="brand-original-text" alt="CargoSoon" />
             </div>
           </div>
+          <h1 class="sr-only">CargoSoon</h1>
         </div>
 
         <div id="ai-quote-box" class="search-shell">
@@ -195,7 +160,7 @@ onMounted(() => {
               v-model="askInput"
               class="search-input"
               rows="3"
-              placeholder="Ask for freight rates, tracking, or order updates from China"
+              placeholder="Enter your logistics request, e.g. Sea DDP to Los Angeles"
               @keyup.enter.exact.prevent="askAI()"
               @keyup.ctrl.enter.stop
             ></textarea>
@@ -223,12 +188,7 @@ onMounted(() => {
                   aria-label="Voice search"
                   @click="startVoiceSearch"
                 >
-                  <svg class="search-icon search-icon-svg" viewBox="0 0 24 24" aria-hidden="true">
-                    <rect x="9" y="3" width="6" height="11" rx="3"></rect>
-                    <path d="M6 11.5a6 6 0 0 0 12 0"></path>
-                    <path d="M12 17v4"></path>
-                    <path d="M9 21h6"></path>
-                  </svg>
+                  <Microphone class="search-icon" aria-hidden="true" />
                 </button>
                 <button
                   class="search-icon-btn"
@@ -237,9 +197,7 @@ onMounted(() => {
                   aria-label="Upload attachment"
                   @click="triggerAttachmentUpload"
                 >
-                  <svg class="search-icon search-icon-svg" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M9.5 12.5 15 7a3.5 3.5 0 1 1 5 5l-8.5 8.5a5 5 0 0 1-7-7L13 5"></path>
-                  </svg>
+                  <Paperclip class="search-icon" aria-hidden="true" />
                 </button>
                 <button
                   class="search-icon-btn"
@@ -248,30 +206,32 @@ onMounted(() => {
                   aria-label="Search by image"
                   @click="triggerImageSearch"
                 >
-                  <svg class="search-icon search-icon-svg" viewBox="0 0 24 24" aria-hidden="true">
-                    <rect x="3" y="4" width="18" height="16" rx="3"></rect>
-                    <circle cx="9" cy="10" r="1.8"></circle>
-                    <path d="m6 17 4.2-4.2a1 1 0 0 1 1.4 0L14 15l1.6-1.6a1 1 0 0 1 1.4 0L20 16.4"></path>
-                  </svg>
+                  <Picture class="search-icon" aria-hidden="true" />
                 </button>
               </div>
-              <button class="primary-btn" @click="askAI()">Search</button>
+              <button class="primary-btn" @click="askAI()">
+                <Search class="primary-icon" aria-hidden="true" />
+                AI Search
+              </button>
             </div>
           </div>
 
           <div class="hero-promo">
             <button class="hero-promo-pill" @click="openAssistant">
-              AI assistant for freight rates, shipment tracking, and order updates
+              <span>AI Assistant</span>
+              Get freight rates, tracking updates, and booking guidance
             </button>
           </div>
 
           <div class="prompt-board">
             <div class="prompt-board-head">
-              <button class="prompt-board-title-wrap" @click="openQuickAccess('/main/pricelist')">
-                <span class="prompt-board-title">Popular searches</span>
-                <span class="prompt-board-title-arrow"></span>
+              <div class="prompt-board-title-wrap">
+                <span class="prompt-board-title">CargoSoon Trending</span>
+              </div>
+              <button class="prompt-board-switch" @click="refreshPrompts">
+                <RefreshRight class="prompt-refresh-icon" aria-hidden="true" />
+                Refresh
               </button>
-              <button class="prompt-board-switch" @click="openQuickAccess('/main/pricelist')">Refresh</button>
             </div>
 
             <div class="prompt-columns">
@@ -305,72 +265,19 @@ onMounted(() => {
         </div>
       </div>
     </section>
-
-    <section class="capability-wrap">
-        <div class="capability-inner">
-          <div class="capability-head">
-            <div class="section-badge">Quick Access</div>
-            <h2>Access the service you need</h2>
-            <p>
-              Open the main service pages directly, with the core functions available inside each workflow.
-            </p>
-          </div>
-
-          <div class="capability-grid">
-            <article
-              v-for="item in quickAccess"
-              :key="item.title"
-              class="capability-card"
-            >
-              <div class="capability-eyebrow">{{ item.eyebrow }}</div>
-              <h3>{{ item.title }}</h3>
-              <p>{{ item.body }}</p>
-              <div class="tag-grid">
-                <div
-                  v-for="service in item.items"
-                  :key="service"
-                  class="service-tag-btn"
-                >
-                  {{ service }}
-                </div>
-              </div>
-              <button class="card-link" @click="openQuickAccess(item.href)">{{ item.action }}</button>
-            </article>
-          </div>
-        </div>
-      </section>
-
-    <section class="trust-wrap">
-      <div class="trust-inner">
-        <div class="trust-head">
-          <div class="section-badge">Why CargoSoon</div>
-          <h2>Built for buyers who value speed, clarity, and execution</h2>
-        </div>
-
-        <div class="trust-grid">
-          <article
-            v-for="item in trustPoints"
-            :key="item.title"
-            class="trust-card"
-          >
-            <h3>{{ item.title }}</h3>
-            <p>{{ item.body }}</p>
-          </article>
-        </div>
-      </div>
-    </section>
   </div>
 </template>
 
 <style scoped>
 .hero-page {
+  min-height: calc(100vh - 56px);
   background: #ffffff;
-  color: #201914;
+  color: #222222;
 }
 
 .hero-wrap {
-  min-height: calc(100vh - 72px);
-  padding: 48px 20px 72px;
+  min-height: calc(100vh - 56px);
+  padding: 34px 20px 10px;
   display: flex;
   align-items: flex-start;
 }
@@ -388,269 +295,72 @@ onMounted(() => {
 }
 
 .brand-art {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-height: 128px;
+  width: min(100%, 980px);
+  min-height: 118px;
 }
 
-.brand-side {
-  display: flex;
+.brand-original {
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
-  opacity: 0.95;
+  padding: 0 10px;
 }
 
-.brand-side-left {
-  margin-right: 12px;
+.brand-original-mark {
+  width: clamp(62px, 6vw, 80px);
+  height: auto;
+  display: block;
 }
 
-.brand-side-right {
-  margin-left: 12px;
-}
-
-.brand-side-line {
-  width: 34px;
-  height: 2px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(244, 149, 80, 0.12), rgba(236, 125, 56, 0.76));
-}
-
-.brand-side-icon {
-  position: relative;
-  flex: 0 0 auto;
-}
-
-.brand-side-ship-icon {
-  width: 32px;
-  height: 20px;
-}
-
-.brand-side-ship-icon::before {
-  content: '';
-  position: absolute;
-  left: 8px;
-  top: 1px;
-  width: 10px;
-  height: 6px;
-  border-radius: 4px 4px 0 0;
-  background: #f38a42;
-  box-shadow: 10px 0 0 0 rgba(243, 138, 66, 0.9);
-}
-
-.brand-side-ship-icon::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 1px;
-  width: 32px;
-  height: 10px;
-  border-radius: 0 0 10px 10px;
-  background: linear-gradient(135deg, #ffb881, #ea742f);
-  transform: skewX(-24deg);
-}
-
-.brand-side-plane-icon {
-  width: 34px;
-  height: 18px;
-  background: linear-gradient(135deg, #ffbf92, #ec7d38);
-  clip-path: polygon(0 44%, 44% 44%, 72% 0, 82% 0, 74% 44%, 100% 44%, 100% 56%, 74% 56%, 82% 100%, 72% 100%, 44% 56%, 0 56%);
-  transform: rotate(16deg);
-  filter: drop-shadow(0 2px 4px rgba(228, 111, 47, 0.14));
-}
-
-.brand-word {
-  font-size: clamp(32px, 4.2vw, 56px);
-  line-height: 0.9;
-  font-weight: 800;
-  letter-spacing: -0.06em;
-  background: linear-gradient(135deg, #ffb37c 0%, #f2853d 45%, #d95f27 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.brand-word-left {
-  margin-right: -4px;
-  opacity: 0.95;
-}
-
-.brand-word-right {
-  margin-left: -4px;
-  opacity: 0.95;
-}
-
-.brand-center {
-  position: relative;
-  width: clamp(78px, 7vw, 102px);
-  height: clamp(78px, 7vw, 102px);
-  margin: 0 -2px 0;
-}
-
-.brand-shadow {
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: -6px;
-  height: 14px;
-  border-radius: 999px;
-  background: radial-gradient(circle, rgba(191, 224, 154, 0.48), rgba(191, 224, 154, 0));
-  filter: blur(3px);
-}
-
-.brand-wave {
-  position: absolute;
-  border-radius: 999px 999px 999px 999px;
-  border-top: 2px solid rgba(234, 123, 53, 0.55);
-  border-left: 2px solid transparent;
-  border-right: 2px solid transparent;
-  border-bottom: 0;
-  opacity: 0.8;
-}
-
-.brand-wave-a {
-  width: 56px;
-  height: 22px;
-  left: -22px;
-  bottom: 14px;
-  transform: rotate(-6deg);
-}
-
-.brand-wave-b {
-  width: 44px;
-  height: 18px;
-  right: -14px;
-  bottom: 34px;
-  transform: rotate(20deg);
-}
-
-.brand-ship {
-  position: absolute;
-  left: -50px;
-  bottom: 10px;
-  width: 42px;
-  height: 18px;
-  transform: rotate(-6deg);
-}
-
-.brand-ship::before {
-  content: '';
-  position: absolute;
-  left: 9px;
-  top: 0;
-  width: 10px;
-  height: 6px;
-  border-radius: 4px 4px 0 0;
-  background: rgba(243, 132, 62, 0.96);
-  box-shadow: 10px 0 0 0 rgba(243, 132, 62, 0.88);
-}
-
-.brand-ship::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 42px;
-  height: 12px;
-  border-radius: 0 0 12px 12px;
-  background: linear-gradient(135deg, #ffbe88, #e9712d);
-  transform: skewX(-24deg);
-}
-
-.brand-plane {
-  position: absolute;
-  right: -30px;
-  top: -12px;
-  width: 34px;
-  height: 18px;
-  background: linear-gradient(135deg, #ffc8a1, #ec7d38);
-  clip-path: polygon(0 44%, 45% 44%, 72% 0, 82% 0, 74% 44%, 100% 44%, 100% 56%, 74% 56%, 82% 100%, 72% 100%, 45% 56%, 0 56%);
-  transform: rotate(18deg);
-  filter: drop-shadow(0 2px 4px rgba(228, 111, 47, 0.14));
-}
-
-.brand-orbit {
-  position: absolute;
-  inset: 0;
-  border-radius: 999px;
-  background:
-    radial-gradient(circle at 35% 30%, rgba(255, 224, 198, 0.98), transparent 34%),
-    linear-gradient(145deg, #ffbf93 0%, #f08b45 54%, #d95f27 100%);
-  box-shadow: 0 10px 26px rgba(228, 111, 47, 0.14);
-}
-
-.brand-core {
-  position: absolute;
-  inset: 18%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: inset 0 0 0 1px rgba(228, 111, 47, 0.12);
-}
-
-.brand-core-icon {
-  width: 74%;
-  opacity: 0.95;
-}
-
-.brand-trail {
-  position: absolute;
-  left: -54px;
-  top: 14px;
-  width: 82px;
-  height: 18px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(255, 196, 159, 0), rgba(247, 158, 98, 0.92));
-  filter: blur(2px);
-}
-
-.brand-trail-b {
-  left: auto;
-  right: -18px;
-  top: 36px;
-  width: 32px;
-  height: 10px;
-  transform: rotate(24deg);
-  opacity: 0.72;
+.brand-original-text {
+  width: clamp(168px, 18vw, 246px);
+  height: auto;
+  display: block;
 }
 
 .search-shell {
-  width: min(100%, 738px);
+  width: min(100%, 800px);
   margin: 18px auto 0;
 }
 
 .search-card {
   position: relative;
-  padding: 6px 12px 6px 12px;
-  border-radius: 24px;
+  padding: 14px 14px;
+  border-radius: 18px;
   background: #ffffff;
-  border: 2px solid rgba(232, 114, 48, 0.58);
-  box-shadow: 0 16px 34px rgba(122, 102, 76, 0.06);
+  border: 1px solid rgba(242, 106, 27, 0.32);
+  box-shadow: 0 16px 38px rgba(242, 106, 27, 0.08);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.search-card:focus-within {
+  border-color: rgba(242, 106, 27, 0.62);
+  box-shadow: 0 18px 42px rgba(242, 106, 27, 0.13);
 }
 
 .search-input {
   width: 100%;
-  min-height: 36px;
+  min-height: 72px;
   resize: none;
   border: 0;
   outline: 0;
   background: transparent;
-  border-radius: 20px;
-  padding: 3px 204px 3px 4px;
+  border-radius: 14px;
+  padding: 2px 234px 2px 4px;
   box-sizing: border-box;
-  font-size: clamp(14px, 1.12vw, 15px);
+  font-size: 15px;
   line-height: 1.25;
-  color: #231c16;
-  caret-color: #e46f2f;
+  color: #2a241f;
+  caret-color: #f26a1b;
   text-align: left;
 }
 
 .search-input::placeholder {
-  color: #c9c3bb;
+  color: #a0a7b5;
 }
 
 .search-input:focus::placeholder {
@@ -691,16 +401,20 @@ onMounted(() => {
 .search-icon {
   width: 22px;
   height: 22px;
-  color: #3d372f;
-  opacity: 0.92;
+  color: #61554d;
+  opacity: 0.84;
+  transition: color 0.18s ease, opacity 0.18s ease;
 }
 
-.search-icon-svg {
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.search-icon-btn:hover .search-icon,
+.search-icon-btn:focus-visible .search-icon {
+  color: #f26a1b;
+  opacity: 1;
+}
+
+.primary-icon {
+  width: 15px;
+  height: 15px;
 }
 
 .primary-btn {
@@ -710,40 +424,49 @@ onMounted(() => {
 }
 
 .primary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   padding: 12px 28px;
   border-radius: 18px;
-  background: linear-gradient(135deg, #f08c47 0%, #e46f2f 100%);
+  background: linear-gradient(135deg, #ff9340 0%, #f37a24 64%, #eb691a 100%);
   color: #fff;
   font-size: 14px;
   font-weight: 700;
-  box-shadow: 0 10px 24px rgba(228, 111, 47, 0.18);
+  box-shadow: 0 12px 28px rgba(242, 106, 27, 0.2);
 }
 
 .primary-btn:hover {
   transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(242, 106, 27, 0.24);
 }
 
 .hero-promo {
-  margin-top: 36px;
+  margin-top: 30px;
   display: flex;
   justify-content: center;
 }
 
 .hero-promo-pill {
   border: 0;
-  background: #f7f7f8;
-  color: #544d46;
-  font-size: 13px;
+  background: linear-gradient(180deg, #fff8f3 0%, #fff4ec 100%);
+  color: #1f2430;
+  font-size: 14px;
   line-height: 1.4;
-  padding: 11px 18px;
+  padding: 12px 20px;
   border-radius: 999px;
   cursor: pointer;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.03);
+  box-shadow: inset 0 0 0 1px rgba(242, 106, 27, 0.1);
+}
+
+.hero-promo-pill span {
+  color: #f26a1b;
+  font-weight: 700;
 }
 
 .prompt-board {
-  width: min(100%, 880px);
-  margin: 50px auto 0;
+  width: min(100%, 780px);
+  margin: 42px auto 0;
   text-align: left;
 }
 
@@ -752,7 +475,7 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .prompt-board-title-wrap {
@@ -762,33 +485,22 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 0;
-  cursor: pointer;
 }
 
 .prompt-board-title {
-  font-size: 19px;
-  font-weight: 800;
+  font-size: 16px;
+  font-weight: 700;
   line-height: 1.05;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
   color: #272a31;
-}
-
-.prompt-board-title-arrow {
-  width: 11px;
-  height: 11px;
-  margin-left: 9px;
-  border-top: 2px solid #9ca3b3;
-  border-right: 2px solid #9ca3b3;
-  transform: rotate(45deg) translateY(1px);
-  flex-shrink: 0;
 }
 
 .prompt-board-switch {
   border: 0;
   background: transparent;
-  color: #a3a9b7;
+  color: #8b95a7;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -796,26 +508,20 @@ onMounted(() => {
   line-height: 1;
 }
 
-.prompt-board-switch::before {
-  content: '';
-  width: 12px;
-  height: 12px;
-  box-sizing: border-box;
-  border: 2px solid #a4abbb;
-  border-right-color: transparent;
-  border-radius: 999px;
-  display: inline-block;
+.prompt-refresh-icon {
+  width: 14px;
+  height: 14px;
 }
 
 .prompt-columns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 58px;
+  gap: 78px;
 }
 
 .prompt-column {
   display: grid;
-  gap: 12px;
+  gap: 18px;
 }
 
 .prompt-column:nth-child(2) {
@@ -829,14 +535,14 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #32363f;
+  color: #222222;
   font-size: 16px;
   line-height: 1.2;
   font-weight: 500;
-  letter-spacing: -0.025em;
+  letter-spacing: 0;
   text-align: left;
   cursor: pointer;
-  min-height: 34px;
+  min-height: 28px;
 }
 
 .prompt-line:hover {
@@ -844,7 +550,7 @@ onMounted(() => {
 }
 
 .prompt-line:hover .prompt-line-text {
-  color: #e46f2f;
+  color: #f26a1b;
 }
 
 .prompt-rank {
@@ -912,6 +618,8 @@ onMounted(() => {
 .prompt-line-text {
   color: inherit;
   white-space: nowrap;
+  min-width: 0;
+  overflow-wrap: anywhere;
   transform: translateY(-0.5px);
 }
 
@@ -924,181 +632,11 @@ onMounted(() => {
   padding: 0 6px;
   margin-left: 3px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #ff8d43, #ff5f40);
+  background: linear-gradient(135deg, #ff7f31, #ff5f1f);
   color: #ffffff;
   font-size: 10px;
   font-weight: 700;
   line-height: 1;
-}
-
-.capability-wrap {
-  padding: 12px 20px 84px;
-}
-
-.capability-inner {
-  width: 100%;
-  max-width: 1080px;
-  margin: 0 auto;
-}
-
-.capability-head {
-  max-width: 760px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.section-badge,
-.capability-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.section-badge {
-  padding: 8px 14px;
-  background: rgba(228, 111, 47, 0.08);
-  color: #d86a2d;
-}
-
-.capability-head h2 {
-  margin: 18px 0 0;
-  font-size: clamp(28px, 3.5vw, 42px);
-  line-height: 1.12;
-  letter-spacing: -0.03em;
-  color: #221a14;
-}
-
-.capability-head p {
-  margin: 14px auto 0;
-  max-width: 620px;
-  color: #74685f;
-  font-size: 16px;
-  line-height: 1.7;
-}
-
-.capability-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-  margin-top: 36px;
-}
-
-.capability-card {
-  padding: 26px;
-  border-radius: 28px;
-  background: #fff;
-  border: 1px solid rgba(228, 111, 47, 0.14);
-  box-shadow: 0 18px 44px rgba(129, 83, 46, 0.06);
-  text-align: left;
-}
-
-.capability-eyebrow {
-  padding: 6px 10px;
-  background: #fff4ea;
-  color: #c05d26;
-}
-
-.capability-card h3 {
-  margin: 16px 0 0;
-  font-size: 24px;
-  line-height: 1.2;
-  color: #221a14;
-  letter-spacing: -0.02em;
-}
-
-.capability-card p {
-  margin: 12px 0 0;
-  color: #74685f;
-  font-size: 15px;
-  line-height: 1.72;
-}
-
-.tag-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.service-tag-btn {
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: #fff8f1;
-  color: #7a675b;
-  font-size: 13px;
-  line-height: 1.5;
-  text-align: left;
-  cursor: default;
-}
-
-.card-link {
-  margin-top: 18px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #d86a2d;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.trust-wrap {
-  padding: 0 20px 96px;
-}
-
-.trust-inner {
-  width: 100%;
-  max-width: 1080px;
-  margin: 0 auto;
-}
-
-.trust-head {
-  max-width: 760px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.trust-head h2 {
-  margin: 18px 0 0;
-  font-size: clamp(28px, 3.3vw, 40px);
-  line-height: 1.12;
-  letter-spacing: -0.03em;
-  color: #221a14;
-}
-
-.trust-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-  margin-top: 34px;
-}
-
-.trust-card {
-  padding: 24px;
-  border-radius: 24px;
-  background: #fff;
-  border: 1px solid rgba(228, 111, 47, 0.12);
-  box-shadow: 0 14px 34px rgba(129, 83, 46, 0.05);
-}
-
-.trust-card h3 {
-  margin: 0;
-  font-size: 22px;
-  line-height: 1.26;
-  color: #221a14;
-  letter-spacing: -0.02em;
-}
-
-.trust-card p {
-  margin: 12px 0 0;
-  color: #74685f;
-  font-size: 15px;
-  line-height: 1.72;
 }
 
 @media (max-width: 900px) {
@@ -1108,8 +646,7 @@ onMounted(() => {
   }
 
   .hero-wrap {
-    min-height: calc(100vh - 68px);
-    padding: 34px 16px 56px;
+    padding: 22px 16px 24px;
   }
 
   .hero-inner {
@@ -1117,23 +654,19 @@ onMounted(() => {
   }
 
   .brand-art {
+    width: min(100%, 760px);
     min-height: 108px;
-    gap: 8px;
-  }
-
-  .brand-center {
-    margin-bottom: 6px;
   }
 
   .search-card {
-    padding: 8px 12px 8px 12px;
-    border-radius: 22px;
+    padding: 10px 12px;
+    border-radius: 16px;
   }
 
   .search-input {
     min-height: 74px;
     padding: 6px 10px 50px 2px;
-    border-radius: 18px;
+    border-radius: 14px;
   }
 
   .search-actions {
@@ -1151,22 +684,15 @@ onMounted(() => {
 
   .prompt-board {
     width: min(100%, 620px);
-    margin-top: 36px;
+    margin-top: 26px;
   }
 
   .hero-promo {
-    margin-top: 22px;
+    margin-top: 18px;
   }
 
-  .prompt-board-title,
   .prompt-board-title {
     font-size: 17px;
-  }
-
-  .prompt-board-title-arrow {
-    width: 11px;
-    height: 11px;
-    margin-left: 8px;
   }
 
   .prompt-columns {
@@ -1182,53 +708,31 @@ onMounted(() => {
     padding-top: 0;
   }
 
-  .capability-wrap {
-    padding: 0 16px 60px;
-  }
-
-  .trust-wrap {
-    padding: 0 16px 68px;
-  }
-
-  .capability-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
-    margin-top: 28px;
-  }
-
-  .capability-card {
-    padding: 22px;
-    border-radius: 24px;
-  }
-
-  .trust-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
-    margin-top: 28px;
-  }
-
-  .trust-card {
-    padding: 22px;
-  }
-
 }
 
 @media (max-width: 560px) {
+  .hero-wrap {
+    padding: 16px 14px 18px;
+  }
+
   .search-shell {
     width: 100%;
   }
 
   .search-shell {
-    margin-top: 24px;
+    margin-top: 16px;
   }
 
-  .brand-word {
-    font-size: 34px;
+  .brand-original {
+    gap: 8px;
   }
 
-  .brand-center {
-    width: 62px;
-    height: 62px;
+  .brand-original-mark {
+    width: 48px;
+  }
+
+  .brand-original-text {
+    width: min(46vw, 180px);
   }
 
   .search-input {
@@ -1238,30 +742,47 @@ onMounted(() => {
   }
 
   .hero-promo {
-    margin-top: 28px;
+    margin-top: 22px;
+  }
+
+  .prompt-board {
+    margin-top: 24px;
   }
 
   .prompt-board-head {
     align-items: flex-start;
   }
 
-  .prompt-line {
+  .prompt-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .prompt-column {
     gap: 8px;
-    font-size: 15px;
+  }
+
+  .prompt-line {
+    align-items: flex-start;
+    gap: 5px;
+    font-size: 13px;
     line-height: 1.2;
-    min-height: 30px;
+    min-height: 42px;
   }
 
   .prompt-rank {
-    width: 20px;
-    flex-basis: 20px;
-    font-size: 17px;
+    width: 16px;
+    flex-basis: 16px;
+    padding-top: 1px;
+    font-size: 14px;
   }
 
   .prompt-badge {
-    min-width: 22px;
-    height: 17px;
-    font-size: 10px;
+    min-width: 20px;
+    height: 16px;
+    padding: 0 4px;
+    margin-left: 0;
+    font-size: 9px;
   }
 
   .prompt-line-text {

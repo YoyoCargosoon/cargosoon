@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { useRoute } from 'vue-router'
 import Notice from './components/notice.vue'
@@ -10,6 +10,10 @@ import router from '@/router/index.js'
 
 const route = useRoute()
 const isHome2 = computed(() => route.name === 'home2' || route.name === 'home')
+const isTrackPage = computed(() => route.name === 'track' || route.name === 'track-result')
+const usesLandingNav = computed(() => isHome2.value || isTrackPage.value)
+const sendToChat = inject('sendToChat', () => {})
+const isCoLogisticsHost = window.location.host === 'app.cargosoon.com'
 
 const activeIndex2 = ref('/new/')
 const input = ref('')
@@ -17,6 +21,8 @@ const superLevel = ref('')
 const userName = ref('')
 const istoken = ref(false)
 const userImg = ref('')
+const activeLandingKey = ref('')
+const openLandingMenu = ref('')
 const loadingStore = useLoadingStore()
 
 if (getLocal('TOKEN')) {
@@ -46,17 +52,25 @@ const handleSelect = (key) => {
   } else if (key == '0') {
     activeIndex2.value = '/new/'
     router.push('/new/')
+  } else if (key == '/track') {
+    router.push('/track')
   } else {
     window.location.href = key
   }
 }
+
+const legacyAppOrigin = 'https://app.cargosoon.com'
 
 const goCodrop = () => {
   window.open('https://codropshipping.com/', '_blank')
 }
 
 const goLogin = () => {
-  window.location.href = '/login'
+  window.location.href = `${legacyAppOrigin}/login`
+}
+
+const goSignUp = () => {
+  window.location.href = `${legacyAppOrigin}/login`
 }
 
 const goQuote = () => {
@@ -68,30 +82,129 @@ const goQuote = () => {
   window.location.href = '/main/pricelist'
 }
 
-const openChat = () => {
-  if (isHome2.value) {
-    window.location.href = '/new/chat'
-    return
-  }
-  window.location.href = '/chat'
+const openAssistantPage = () => {
+  router.push({
+    name: 'chat',
+    query: { mode: 'ai' },
+  })
 }
 
-const goWarehouse = () => {
-  window.location.href = '/warehouse/SKUManagement'
+const goWarehouse = () => { window.location.href = '/warehouse/SKUManagement' }
+const goWarehouseBox = () => { window.location.href = '/warehouse/PreloadManagement' }
+const goWarehouseApply = () => { window.location.href = '/warehouse/Apply' }
+const goWarehouseInventory = () => { window.location.href = '/warehouse/InventoryStatistics' }
+const goWarehouseTransfer = () => { window.location.href = '/warehouse/CargoManagements' }
+const goShippingOrder = () => { window.location.href = '/order/shippingOrder' }
+const goTrackingOrder = () => { window.location.href = '/order/tracking' }
+const goStore = () => { window.location.href = '/account/Shopify' }
+const goStoreOrder = () => { window.location.href = '/account/storeOrder' }
+const goBilling = () => { window.location.href = '/account/Bill' }
+const goAboutUs = () => { window.location.href = '/aboutUs' }
+
+const activateLanding = (key, handler) => {
+  activeLandingKey.value = key
+  openLandingMenu.value = ''
+  handler()
 }
+
+const toggleLandingMenu = (key) => {
+  openLandingMenu.value = openLandingMenu.value === key ? '' : key
+}
+
+const handleLandingItemClick = (key, handler) => {
+  activeLandingKey.value = key
+  openLandingMenu.value = ''
+  handler()
+}
+
+const handleDocumentClick = (event) => {
+  if (!event.target.closest('.landing-dropdown')) {
+    openLandingMenu.value = ''
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleDocumentClick)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleDocumentClick)
+})
 </script>
 
 <template>
   <div class="relative">
-    <template v-if="isHome2">
+    <template v-if="usesLandingNav">
       <header class="landing-nav">
-        <div class="landing-brand-spacer"></div>
-
         <nav class="landing-links">
-          <button @click="goQuote">Freight Rates</button>
-          <button @click="openChat">Tracking</button>
-          <button @click="goWarehouse">Warehouse Services</button>
-          <button @click="goCodrop">1688 Sourcing</button>
+          <button
+            :class="{ 'is-active': activeLandingKey === 'assistant' }"
+            @click="activateLanding('assistant', openAssistantPage)"
+          >
+            AI Assistant
+          </button>
+          <div class="landing-dropdown" :class="{ 'is-active': activeLandingKey === 'quote', 'is-open': openLandingMenu === 'quote' }">
+            <button
+              type="button"
+              class="landing-dropdown-trigger"
+              :class="{ 'is-active': activeLandingKey === 'quote' }"
+              @click.stop="toggleLandingMenu('quote')"
+            >
+              Quote
+              <span class="landing-dropdown-caret" aria-hidden="true"></span>
+            </button>
+            <div class="landing-dropdown-menu">
+              <button type="button" @click.stop="handleLandingItemClick('quote', goQuote)">FCL/DDP freight</button>
+              <button type="button" @click.stop="handleLandingItemClick('quote', goShippingOrder)">Order</button>
+              <button type="button" @click.stop="handleLandingItemClick('quote', goTrackingOrder)">Tracking</button>
+            </div>
+          </div>
+          <div class="landing-dropdown" :class="{ 'is-active': activeLandingKey === 'warehouse', 'is-open': openLandingMenu === 'warehouse' }">
+            <button
+              type="button"
+              class="landing-dropdown-trigger"
+              :class="{ 'is-active': activeLandingKey === 'warehouse' }"
+              @click.stop="toggleLandingMenu('warehouse')"
+            >
+              Warehouse
+              <span class="landing-dropdown-caret" aria-hidden="true"></span>
+            </button>
+            <div class="landing-dropdown-menu">
+              <button type="button" @click.stop="handleLandingItemClick('warehouse', goWarehouse)">Product</button>
+              <button type="button" @click.stop="handleLandingItemClick('warehouse', goWarehouseBox)">Box</button>
+              <button type="button" @click.stop="handleLandingItemClick('warehouse', goWarehouseApply)">Apply</button>
+              <button type="button" @click.stop="handleLandingItemClick('warehouse', goWarehouseInventory)">Inventory</button>
+              <button type="button" @click.stop="handleLandingItemClick('warehouse', goWarehouseTransfer)">Transfer inventory</button>
+            </div>
+          </div>
+          <div class="landing-dropdown" :class="{ 'is-active': activeLandingKey === 'dropshipping', 'is-open': openLandingMenu === 'dropshipping' }">
+            <button
+              type="button"
+              class="landing-dropdown-trigger"
+              :class="{ 'is-active': activeLandingKey === 'dropshipping' }"
+              @click.stop="toggleLandingMenu('dropshipping')"
+            >
+              DropShipping
+              <span class="landing-dropdown-caret" aria-hidden="true"></span>
+            </button>
+            <div class="landing-dropdown-menu">
+              <button type="button" @click.stop="handleLandingItemClick('dropshipping', goCodrop)">CoDropshipping</button>
+              <button type="button" @click.stop="handleLandingItemClick('dropshipping', goStore)">Store</button>
+              <button type="button" @click.stop="handleLandingItemClick('dropshipping', goStoreOrder)">Store Order</button>
+            </div>
+          </div>
+          <button
+            :class="{ 'is-active': activeLandingKey === 'billing' }"
+            @click="activateLanding('billing', goBilling)"
+          >
+            Billing
+          </button>
+          <button
+            :class="{ 'is-active': activeLandingKey === 'about' }"
+            @click="activateLanding('about', goAboutUs)"
+          >
+            About Us
+          </button>
         </nav>
 
         <div class="landing-actions">
@@ -117,7 +230,7 @@ const goWarehouse = () => {
                 src="@/assets/logo/co-logistics.png"
                 class="h-10"
                 alt=""
-                v-if="window?.location.host=='app.cargosoon.com'"
+                v-if="isCoLogisticsHost"
               />
 
               <div v-else class="flex items-center">
@@ -212,37 +325,172 @@ const goWarehouse = () => {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 18px 24px 10px;
+  padding: 20px 24px 10px;
   background: #ffffff;
-}
-
-.landing-brand-spacer {
-  width: 0;
-  flex-shrink: 0;
 }
 
 .landing-links {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 24px;
   margin-left: 0;
   margin-right: auto;
 }
 
 .landing-links button,
+.landing-dropdown-trigger,
+.landing-dropdown-menu button,
 .landing-link-btn,
 .landing-cta-btn {
   border: 0;
-  background: transparent;
   cursor: pointer;
 }
 
 .landing-links button,
-.landing-link-btn {
-  color: #3f3a36;
+.landing-dropdown-trigger {
+  position: relative;
+  background: transparent;
+  color: #222222;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1;
+  white-space: nowrap;
+  transition: color 0.18s ease;
+}
+
+.landing-links button:hover,
+.landing-links button:focus-visible,
+.landing-links button:active,
+.landing-links button.is-active,
+.landing-dropdown-trigger:hover,
+.landing-dropdown-trigger:focus-visible,
+.landing-dropdown-trigger.is-active,
+.landing-dropdown:hover .landing-dropdown-trigger,
+.landing-dropdown.is-open .landing-dropdown-trigger {
+  color: #f26a1b;
+}
+
+.landing-links button:focus-visible,
+.landing-dropdown-trigger:focus-visible {
+  outline: 0;
+}
+
+.landing-links button.is-active::after,
+.landing-dropdown-trigger.is-active::after,
+.landing-dropdown:hover .landing-dropdown-trigger::after,
+.landing-dropdown.is-open .landing-dropdown-trigger::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -8px;
+  height: 2px;
+  border-radius: 999px;
+  background: #f26a1b;
+}
+
+.landing-dropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.landing-dropdown-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.landing-dropdown-caret {
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg) translateY(-1px);
+  transition: transform 0.18s ease;
+}
+
+.landing-dropdown:hover .landing-dropdown-caret,
+.landing-dropdown.is-open .landing-dropdown-caret {
+  transform: rotate(225deg) translateY(-1px);
+}
+
+.landing-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 0;
+  min-width: 188px;
+  padding: 8px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid rgba(242, 106, 27, 0.14);
+  box-shadow: 0 18px 38px rgba(37, 32, 28, 0.1);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  z-index: 30;
+}
+
+.landing-dropdown:hover .landing-dropdown-menu,
+.landing-dropdown.is-open .landing-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.landing-dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 20px;
+  width: 12px;
+  height: 12px;
+  background: #ffffff;
+  border-top: 1px solid rgba(242, 106, 27, 0.12);
+  border-left: 1px solid rgba(242, 106, 27, 0.12);
+  transform: rotate(45deg);
+}
+
+.landing-dropdown-menu button {
+  width: 100%;
+  padding: 10px 12px;
+  text-align: left;
+  background: transparent;
+  color: #2d2a27;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.25;
+  border-radius: 10px;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.landing-dropdown-menu button:first-child {
+  margin-top: 0;
+}
+
+.landing-dropdown-menu button:hover {
+  background: #fff4ec;
+  color: #f26a1b;
+}
+
+.landing-link-btn {
+  min-width: 48px;
+  height: 28px;
+  padding: 0 13px;
+  border-radius: 7px;
+  background: #f26a1b;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.landing-link-btn:hover {
+  background: #e45f14;
+  box-shadow: 0 8px 20px rgba(242, 106, 27, 0.2);
 }
 
 .landing-actions {
@@ -268,7 +516,7 @@ const goWarehouse = () => {
 
 @media (max-width: 900px) {
   .landing-nav {
-    padding: 16px 16px 12px;
+    padding: 16px;
     gap: 12px;
     flex-wrap: wrap;
   }
@@ -279,6 +527,11 @@ const goWarehouse = () => {
     justify-content: flex-start;
     gap: 14px;
     overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .landing-links::-webkit-scrollbar {
+    display: none;
   }
 
   .landing-actions {
@@ -287,13 +540,18 @@ const goWarehouse = () => {
 }
 
 @media (max-width: 560px) {
-  .landing-brand-word {
-    height: 18px;
+  .landing-links {
+    gap: 9px;
   }
 
   .landing-links button,
+  .landing-dropdown-trigger,
   .landing-link-btn {
-    font-size: 13px;
+    font-size: 11px;
+  }
+
+  .landing-dropdown-menu {
+    min-width: 156px;
   }
 }
 </style>

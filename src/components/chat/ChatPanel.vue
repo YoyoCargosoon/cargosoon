@@ -18,6 +18,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  externalLauncher: {
+    type: Boolean,
+    default: false,
+  },
+  launcherCollapsed: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['manage-ready', 'user-send'])
@@ -128,6 +136,12 @@ watch(manageNew, (val) => {
   if (!manage.value.englishname) emit('manage-ready', val)
 }, { immediate: true })
 
+watch(() => props.launcherCollapsed, (collapsed) => {
+  if (collapsed && !props.fullpage) {
+    chatShow.value = false
+  }
+})
+
 // auto-scroll on new messages
 watch(chatList, async () => {
   await nextTick()
@@ -154,6 +168,14 @@ const chatOpen = () => {
 
 const closeChat = () => {
   chatShow.value = false
+}
+
+const openPanel = () => {
+  chatOpen()
+}
+
+const closePanel = () => {
+  closeChat()
 }
 
 // --- send ---
@@ -271,14 +293,14 @@ const sendFromExternal = (text, openAI) => {
   sendMessage(openAI)
 }
 
-defineExpose({ sendFromExternal })
+defineExpose({ sendFromExternal, openPanel, closePanel })
 </script>
 
 <template>
   <!-- floating trigger button -->
   <div
     @click="chatOpen"
-    v-show="!chatShow && !fullpage"
+    v-show="!chatShow && !fullpage && !externalLauncher && !launcherCollapsed"
     class="chat-fab fixed bottom-[84px] right-[18px] p-[5px] bg-white rounded-full shadow-xxx flex cursor-pointer z-[60]"
   >
     <div class="relative">
@@ -293,7 +315,7 @@ defineExpose({ sendFromExternal })
 
   <!-- chat window -->
   <div
-    v-show="chatShow || fullpage"
+    v-show="((chatShow && !launcherCollapsed) || fullpage)"
     :class="['chat-window flex bg-white', fullpage ? 'chat-fullpage' : 'rounded-md shadow-xxx z-[60] fixed bottom-20 right-10']"
   >
     <!-- toolbar -->
