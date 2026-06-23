@@ -97,6 +97,17 @@ export const TRACKING_SOURCE_LABELS: Record<TrackingSource, string> = {
   partner_order: 'Logistics Order',
 }
 
+export const TRACKING_NUMBER_TYPE_LABELS: Record<TrackingNumberType, string> = {
+  cargosoon_order: 'CargoSoon order number',
+  shipment_number: 'Shipment number',
+  customer_reference: 'Customer reference',
+  express: 'Express tracking number',
+  container: 'Container number',
+  ocean_bl: 'Ocean B/L number',
+  air_awb: 'Air AWB number',
+  partner_order: 'Logistics order ID',
+}
+
 const isBrowser = () => typeof window !== 'undefined' && Boolean(window.localStorage)
 
 export const normalizeTrackingNumber = (value: string) =>

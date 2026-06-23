@@ -5,10 +5,11 @@ import { ArrowLeft, Search } from '@element-plus/icons-vue'
 import { getLocal } from '@/utils/common'
 import {
   EMPTY_TRACKING_MESSAGE,
+  TRACKING_NUMBER_TYPE_LABELS,
   TRACKING_SOURCE_LABELS,
   getGuestTrackingUsage,
   searchTracking,
-} from '@/services/trackingService'
+} from '@/services/trackingService.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -23,6 +24,11 @@ const guestUsage = ref(getGuestTrackingUsage())
 const isAuthenticated = computed(() => Boolean(getLocal('TOKEN')))
 const sourceLabel = computed(() =>
   result.value ? TRACKING_SOURCE_LABELS[result.value.source] || 'Tracking' : 'Tracking',
+)
+const numberTypeLabel = computed(() =>
+  result.value
+    ? TRACKING_NUMBER_TYPE_LABELS[result.value.numberType] || 'Tracking number'
+    : 'Tracking number',
 )
 const visibleEvents = computed(() => {
   if (!result.value) return []
@@ -54,6 +60,15 @@ const hasFullDetails = computed(
       result.value.delivery ||
       result.value.documents?.length),
 )
+const cargoSoonReferenceRows = computed(() => {
+  if (!result.value || result.value.source !== 'cargosoon_order') return []
+
+  return [
+    { label: 'CargoSoon order', value: result.value.displayNumber },
+    { label: 'Shipment number', value: result.value.shipmentNumber || '-' },
+    { label: 'Customer reference', value: result.value.customerReference || '-' },
+  ]
+})
 
 const labelMap = {
   orderNumber: 'Order number',
@@ -243,6 +258,14 @@ watch(
 
           <div class="summary-grid">
             <div>
+              <span>Matched as</span>
+              <strong>{{ sourceLabel }}</strong>
+            </div>
+            <div>
+              <span>Search type</span>
+              <strong>{{ numberTypeLabel }}</strong>
+            </div>
+            <div>
               <span>Origin</span>
               <strong>{{ result.origin }}</strong>
             </div>
@@ -265,6 +288,13 @@ watch(
             <div>
               <span>ETA</span>
               <strong>{{ result.eta || '-' }}</strong>
+            </div>
+          </div>
+
+          <div v-if="cargoSoonReferenceRows.length" class="reference-strip">
+            <div v-for="item in cargoSoonReferenceRows" :key="item.label">
+              <span>{{ item.label }}</span>
+              <strong>{{ item.value }}</strong>
             </div>
           </div>
 
@@ -695,6 +725,36 @@ watch(
   margin-top: 14px;
 }
 
+.reference-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.reference-strip div {
+  min-width: 0;
+  padding: 12px 13px;
+  border-radius: 8px;
+  background: #fff8f2;
+}
+
+.reference-strip span {
+  display: block;
+  margin-bottom: 5px;
+  color: #8791a1;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.reference-strip strong {
+  color: #293241;
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
 .guest-result-callout {
   display: flex;
   align-items: center;
@@ -887,6 +947,7 @@ watch(
   }
 
   .summary-grid,
+  .reference-strip,
   .details-grid {
     grid-template-columns: 1fr;
   }

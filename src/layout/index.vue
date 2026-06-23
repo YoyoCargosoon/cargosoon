@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { useRoute } from 'vue-router'
 import Notice from './components/notice.vue'
@@ -9,9 +9,11 @@ import { useLoadingStore } from '@/stores/loading'
 import router from '@/router/index.js'
 
 const route = useRoute()
+const isAdminRoute = computed(() => String(route.path || '').startsWith('/admin'))
 const isHome2 = computed(() => route.name === 'home2' || route.name === 'home')
 const isTrackPage = computed(() => route.name === 'track' || route.name === 'track-result')
-const usesLandingNav = computed(() => isHome2.value || isTrackPage.value)
+const isFreightPage = computed(() => route.name === 'fcl-ddp-freight')
+const usesLandingNav = computed(() => isHome2.value || isTrackPage.value || isFreightPage.value)
 const sendToChat = inject('sendToChat', () => {})
 const isCoLogisticsHost = window.location.host === 'app.cargosoon.com'
 
@@ -25,16 +27,33 @@ const activeLandingKey = ref('')
 const openLandingMenu = ref('')
 const loadingStore = useLoadingStore()
 
-if (getLocal('TOKEN')) {
-  istoken.value = true
-  const userInfo = JSON.parse(getLocal('userInfo'))
-  userName.value = userInfo.first_name + ' ' + userInfo.last_name
-  superLevel.value = userInfo.super_level
+const parseLocalJson = (key) => {
+  const raw = getLocal(key)
+  if (!raw) {
+    return null
+  }
 
-  const dt = new Date()
-  userImg.value = userInfo.img + userInfo.id + '_40_40.png?v=' + dt.getTime()
-} else {
-  istoken.value = false
+  try {
+    return JSON.parse(raw)
+  } catch (error) {
+    console.warn(`Failed to parse local storage key: ${key}`, error)
+    return null
+  }
+}
+
+if (getLocal('TOKEN')) {
+  const userInfo = parseLocalJson('userInfo')
+
+  if (userInfo) {
+    istoken.value = true
+    userName.value = `${userInfo.first_name || ''} ${userInfo.last_name || ''}`.trim()
+    superLevel.value = userInfo.super_level || ''
+
+    const dt = new Date()
+    userImg.value = `${userInfo.img || ''}${userInfo.id || ''}_40_40.png?v=${dt.getTime()}`
+  } else {
+    istoken.value = false
+  }
 }
 
 const logout = () => {
@@ -79,7 +98,7 @@ const goQuote = () => {
     el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     return
   }
-  window.location.href = '/main/pricelist'
+  router.push({ name: 'fcl-ddp-freight' })
 }
 
 const openAssistantPage = () => {
@@ -89,17 +108,59 @@ const openAssistantPage = () => {
   })
 }
 
-const goWarehouse = () => { window.location.href = '/warehouse/SKUManagement' }
-const goWarehouseBox = () => { window.location.href = '/warehouse/PreloadManagement' }
-const goWarehouseApply = () => { window.location.href = '/warehouse/Apply' }
-const goWarehouseInventory = () => { window.location.href = '/warehouse/InventoryStatistics' }
-const goWarehouseTransfer = () => { window.location.href = '/warehouse/CargoManagements' }
-const goShippingOrder = () => { window.location.href = '/order/shippingOrder' }
-const goTrackingOrder = () => { window.location.href = '/order/tracking' }
-const goStore = () => { window.location.href = '/account/Shopify' }
-const goStoreOrder = () => { window.location.href = '/account/storeOrder' }
-const goBilling = () => { window.location.href = '/account/Bill' }
-const goAboutUs = () => { window.location.href = '/aboutUs' }
+const openTrackingPage = () => {
+  router.push({ name: 'track' })
+}
+
+const goWarehouse = () => {
+  window.location.href = '/warehouse/SKUManagement'
+}
+const goWarehouseBox = () => {
+  window.location.href = '/warehouse/PreloadManagement'
+}
+const goWarehouseApply = () => {
+  window.location.href = '/warehouse/Apply'
+}
+const goWarehouseInventory = () => {
+  window.location.href = '/warehouse/InventoryStatistics'
+}
+const goWarehouseTransfer = () => {
+  window.location.href = '/warehouse/CargoManagements'
+}
+const goShippingOrder = () => {
+  window.location.href = '/order/shippingOrder'
+}
+const goStore = () => {
+  window.location.href = '/account/Shopify'
+}
+const goStoreOrder = () => {
+  window.location.href = '/account/storeOrder'
+}
+const goBilling = () => {
+  window.location.href = '/account/Bill'
+}
+const goAboutUs = () => {
+  window.location.href = '/aboutUs'
+}
+
+const syncLandingNavState = () => {
+  if (route.name === 'chat') {
+    activeLandingKey.value = 'assistant'
+    return
+  }
+
+  if (route.name === 'track' || route.name === 'track-result') {
+    activeLandingKey.value = 'quote'
+    return
+  }
+
+  if (route.name === 'fcl-ddp-freight') {
+    activeLandingKey.value = 'quote'
+    return
+  }
+
+  activeLandingKey.value = ''
+}
 
 const activateLanding = (key, handler) => {
   activeLandingKey.value = key
@@ -124,8 +185,11 @@ const handleDocumentClick = (event) => {
 }
 
 onMounted(() => {
+  syncLandingNavState()
   document.addEventListener('click', handleDocumentClick)
 })
+
+watch(() => route.name, syncLandingNavState, { immediate: true })
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleDocumentClick)
@@ -134,7 +198,12 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="relative">
-    <template v-if="usesLandingNav">
+    <template v-if="isAdminRoute">
+      <LoadingVue v-show="loadingStore.showLoading"></LoadingVue>
+      <router-view />
+    </template>
+
+    <template v-else-if="usesLandingNav">
       <header class="landing-nav">
         <nav class="landing-links">
           <button
@@ -143,7 +212,13 @@ onBeforeUnmount(() => {
           >
             AI Assistant
           </button>
-          <div class="landing-dropdown" :class="{ 'is-active': activeLandingKey === 'quote', 'is-open': openLandingMenu === 'quote' }">
+          <div
+            class="landing-dropdown"
+            :class="{
+              'is-active': activeLandingKey === 'quote',
+              'is-open': openLandingMenu === 'quote',
+            }"
+          >
             <button
               type="button"
               class="landing-dropdown-trigger"
@@ -154,12 +229,24 @@ onBeforeUnmount(() => {
               <span class="landing-dropdown-caret" aria-hidden="true"></span>
             </button>
             <div class="landing-dropdown-menu">
-              <button type="button" @click.stop="handleLandingItemClick('quote', goQuote)">FCL/DDP freight</button>
-              <button type="button" @click.stop="handleLandingItemClick('quote', goShippingOrder)">Order</button>
-              <button type="button" @click.stop="handleLandingItemClick('quote', goTrackingOrder)">Tracking</button>
+              <button type="button" @click.stop="handleLandingItemClick('quote', goQuote)">
+                FCL/DDP freight
+              </button>
+              <button type="button" @click.stop="handleLandingItemClick('quote', goShippingOrder)">
+                Order
+              </button>
+              <button type="button" @click.stop="handleLandingItemClick('quote', openTrackingPage)">
+                Tracking
+              </button>
             </div>
           </div>
-          <div class="landing-dropdown" :class="{ 'is-active': activeLandingKey === 'warehouse', 'is-open': openLandingMenu === 'warehouse' }">
+          <div
+            class="landing-dropdown"
+            :class="{
+              'is-active': activeLandingKey === 'warehouse',
+              'is-open': openLandingMenu === 'warehouse',
+            }"
+          >
             <button
               type="button"
               class="landing-dropdown-trigger"
@@ -170,14 +257,42 @@ onBeforeUnmount(() => {
               <span class="landing-dropdown-caret" aria-hidden="true"></span>
             </button>
             <div class="landing-dropdown-menu">
-              <button type="button" @click.stop="handleLandingItemClick('warehouse', goWarehouse)">Product</button>
-              <button type="button" @click.stop="handleLandingItemClick('warehouse', goWarehouseBox)">Box</button>
-              <button type="button" @click.stop="handleLandingItemClick('warehouse', goWarehouseApply)">Apply</button>
-              <button type="button" @click.stop="handleLandingItemClick('warehouse', goWarehouseInventory)">Inventory</button>
-              <button type="button" @click.stop="handleLandingItemClick('warehouse', goWarehouseTransfer)">Transfer inventory</button>
+              <button type="button" @click.stop="handleLandingItemClick('warehouse', goWarehouse)">
+                Product
+              </button>
+              <button
+                type="button"
+                @click.stop="handleLandingItemClick('warehouse', goWarehouseBox)"
+              >
+                Box
+              </button>
+              <button
+                type="button"
+                @click.stop="handleLandingItemClick('warehouse', goWarehouseApply)"
+              >
+                Apply
+              </button>
+              <button
+                type="button"
+                @click.stop="handleLandingItemClick('warehouse', goWarehouseInventory)"
+              >
+                Inventory
+              </button>
+              <button
+                type="button"
+                @click.stop="handleLandingItemClick('warehouse', goWarehouseTransfer)"
+              >
+                Transfer inventory
+              </button>
             </div>
           </div>
-          <div class="landing-dropdown" :class="{ 'is-active': activeLandingKey === 'dropshipping', 'is-open': openLandingMenu === 'dropshipping' }">
+          <div
+            class="landing-dropdown"
+            :class="{
+              'is-active': activeLandingKey === 'dropshipping',
+              'is-open': openLandingMenu === 'dropshipping',
+            }"
+          >
             <button
               type="button"
               class="landing-dropdown-trigger"
@@ -188,9 +303,18 @@ onBeforeUnmount(() => {
               <span class="landing-dropdown-caret" aria-hidden="true"></span>
             </button>
             <div class="landing-dropdown-menu">
-              <button type="button" @click.stop="handleLandingItemClick('dropshipping', goCodrop)">CoDropshipping</button>
-              <button type="button" @click.stop="handleLandingItemClick('dropshipping', goStore)">Store</button>
-              <button type="button" @click.stop="handleLandingItemClick('dropshipping', goStoreOrder)">Store Order</button>
+              <button type="button" @click.stop="handleLandingItemClick('dropshipping', goCodrop)">
+                CoDropshipping
+              </button>
+              <button type="button" @click.stop="handleLandingItemClick('dropshipping', goStore)">
+                Store
+              </button>
+              <button
+                type="button"
+                @click.stop="handleLandingItemClick('dropshipping', goStoreOrder)"
+              >
+                Store Order
+              </button>
             </div>
           </div>
           <button
@@ -234,17 +358,17 @@ onBeforeUnmount(() => {
               />
 
               <div v-else class="flex items-center">
-                <img src="@/assets/logo/cargosoonLogo1.png" class="h-8 mr-1 hidden sm:block" alt="" />
+                <img
+                  src="@/assets/logo/cargosoonLogo1.png"
+                  class="h-8 mr-1 hidden sm:block"
+                  alt=""
+                />
                 <img src="@/assets/logo/cargosoonLogo2.png" class="h-6" alt="" />
               </div>
             </a>
 
             <div class="mx-3 w-3xs">
-              <el-input
-                v-model="input"
-                placeholder="Please input"
-                :prefix-icon="Search"
-              />
+              <el-input v-model="input" placeholder="Please input" :prefix-icon="Search" />
             </div>
           </div>
         </el-menu-item>
@@ -254,7 +378,7 @@ onBeforeUnmount(() => {
           <template #title>Quote</template>
           <el-menu-item index="/main/pricelist">FCL/DDP freight</el-menu-item>
           <el-menu-item index="/order/shippingOrder">Order</el-menu-item>
-          <el-menu-item index="/order/tracking">Tracking</el-menu-item>
+          <el-menu-item index="/track">Tracking</el-menu-item>
         </el-sub-menu>
         <el-sub-menu index="3">
           <template #title>Warehouse</template>
@@ -287,15 +411,17 @@ onBeforeUnmount(() => {
                       src="@/assets/logo/lv1.png"
                       class="absolute right-0 -bottom-1.5 w-7"
                       alt=""
-                    >
+                    />
                     <img
                       v-if="superLevel == 'L2'"
                       src="@/assets/logo/lv2.png"
                       class="absolute right-0 -bottom-1.5 w-7"
                       alt=""
-                    >
+                    />
                   </div>
-                  <div class="max-w-200 overflow-hidden whitespace-nowrap overflow-ellipsis">{{userName}}</div>
+                  <div class="max-w-200 overflow-hidden whitespace-nowrap overflow-ellipsis">
+                    {{ userName }}
+                  </div>
                 </div>
               </template>
               <el-menu-item index="/account/wallet">Wallet</el-menu-item>
@@ -308,14 +434,27 @@ onBeforeUnmount(() => {
           </div>
 
           <div v-else class="mr-8">
-            <button class="text-sm px-3 py-0.5 rounded bg-orange hover:bg-orange1 text-white" @click="goLogin">Log in</button>
-            <button class="ml-3 text-sm px-3 py-0.5 rounded bg-orange hover:bg-orange1 text-white" @click="goSignUp">Sign up</button>
+            <button
+              class="text-sm px-3 py-0.5 rounded bg-orange hover:bg-orange1 text-white"
+              @click="goLogin"
+            >
+              Log in
+            </button>
+            <button
+              class="ml-3 text-sm px-3 py-0.5 rounded bg-orange hover:bg-orange1 text-white"
+              @click="goSignUp"
+            >
+              Sign up
+            </button>
           </div>
         </div>
       </el-menu>
     </template>
 
-    <LoadingVue v-show="loadingStore.showLoading"></LoadingVue>
+    <template v-if="!isAdminRoute">
+      <LoadingVue v-show="loadingStore.showLoading"></LoadingVue>
+      <router-view />
+    </template>
   </div>
 </template>
 
@@ -428,7 +567,10 @@ onBeforeUnmount(() => {
   opacity: 0;
   visibility: hidden;
   transform: translateY(6px);
-  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease,
+    visibility 0.18s ease;
   z-index: 30;
 }
 
@@ -462,7 +604,9 @@ onBeforeUnmount(() => {
   font-weight: 400;
   line-height: 1.25;
   border-radius: 10px;
-  transition: background 0.16s ease, color 0.16s ease;
+  transition:
+    background 0.16s ease,
+    color 0.16s ease;
 }
 
 .landing-dropdown-menu button:first-child {
@@ -485,7 +629,9 @@ onBeforeUnmount(() => {
   font-weight: 500;
   line-height: 1;
   white-space: nowrap;
-  transition: background 0.18s ease, box-shadow 0.18s ease;
+  transition:
+    background 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .landing-link-btn:hover {

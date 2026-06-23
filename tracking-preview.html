@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CargoSoon Tracking Preview</title>
+    <style>
+      :root {
+        --bg: #f7f8fb;
+        --panel: #ffffff;
+        --text: #20242d;
+        --muted: #687284;
+        --line: #e6ebf2;
+        --orange: #f26a1b;
+        --orange-soft: #fff3ea;
+        --orange-border: #ffd8bf;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        background:
+          radial-gradient(circle at top, rgba(242, 106, 27, 0.08), transparent 28%),
+          linear-gradient(180deg, #ffffff 0%, var(--bg) 100%);
+        color: var(--text);
+      }
+
+      .page {
+        width: min(100%, 1040px);
+        margin: 0 auto;
+        padding: 40px 20px 56px;
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 18px 22px 12px;
+        background: #fff;
+        border-bottom: 1px solid #f1f3f7;
+      }
+
+      .nav a {
+        color: #2b2f36;
+        font-size: 14px;
+        text-decoration: none;
+      }
+
+      .nav a.active {
+        color: var(--orange);
+        font-weight: 700;
+      }
+
+      .kicker {
+        display: inline-flex;
+        align-items: center;
+        height: 24px;
+        padding: 0 10px;
+        border-radius: 999px;
+        background: var(--orange-soft);
+        color: var(--orange);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .hero {
+        text-align: center;
+        margin-bottom: 22px;
+      }
+
+      .hero h1 {
+        width: min(100%, 720px);
+        margin: 16px auto 12px;
+        font-size: 46px;
+        line-height: 1.06;
+      }
+
+      .hero p {
+        width: min(100%, 720px);
+        margin: 0 auto;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.55;
+      }
+
+      .note,
+      .panel,
+      .guest-panel,
+      .summary,
+      .timeline,
+      .details article,
+      .state {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: 0 16px 34px rgba(31, 36, 48, 0.06);
+      }
+
+      .note {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        width: min(100%, 820px);
+        margin: 0 auto 22px;
+        padding: 12px 16px;
+        border-color: var(--orange-border);
+        background: #fff8f2;
+      }
+
+      .note strong {
+        color: #e45f14;
+      }
+
+      .note span {
+        color: #4d586a;
+      }
+
+      .panel {
+        padding: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .search-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 12px;
+      }
+
+      input {
+        width: 100%;
+        min-width: 0;
+        height: 52px;
+        padding: 0 16px;
+        border: 1px solid #dfe4ec;
+        border-radius: 8px;
+        font-size: 15px;
+      }
+
+      button {
+        border: 0;
+        cursor: pointer;
+      }
+
+      .primary {
+        min-width: 152px;
+        height: 52px;
+        padding: 0 22px;
+        border-radius: 8px;
+        background: var(--orange);
+        color: #fff;
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      .examples,
+      .types {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .examples button,
+      .types span {
+        height: 28px;
+        padding: 0 11px;
+        border-radius: 999px;
+        background: #f7f8fb;
+        color: #5f697a;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .examples button {
+        border: 1px solid #e5eaf1;
+      }
+
+      .guest-panel {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        margin-top: 18px;
+        padding: 16px 18px;
+      }
+
+      .guest-panel p,
+      .summary p,
+      .state p,
+      .timeline p,
+      .details dd {
+        color: var(--muted);
+      }
+
+      .guest-actions,
+      .state-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .light {
+        height: 36px;
+        padding: 0 14px;
+        border-radius: 8px;
+        background: var(--orange-soft);
+        color: #e45f14;
+        font-weight: 700;
+      }
+
+      .dark {
+        height: 36px;
+        padding: 0 14px;
+        border-radius: 8px;
+        background: #1f2430;
+        color: #fff;
+        font-weight: 700;
+      }
+
+      .result-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 30px;
+        padding: 0 12px;
+        border-radius: 999px;
+        background: #eef4ff;
+        color: #2463ad;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .summary-grid,
+      .reference-grid,
+      .details {
+        display: grid;
+        gap: 14px;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-top: 20px;
+      }
+
+      .summary-grid > div,
+      .reference-grid > div,
+      .route,
+      .timeline-item,
+      .details article {
+        min-width: 0;
+      }
+
+      .summary-grid > div,
+      .route {
+        padding: 13px;
+        border-radius: 8px;
+        background: #f7f8fb;
+      }
+
+      .reference-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-top: 14px;
+      }
+
+      .reference-grid > div {
+        padding: 12px 13px;
+        border-radius: 8px;
+        background: #fff8f2;
+      }
+
+      .timeline,
+      .summary,
+      .details article,
+      .state {
+        margin-top: 18px;
+        padding: 22px;
+      }
+
+      .timeline-list {
+        display: grid;
+        gap: 14px;
+      }
+
+      .timeline-item {
+        padding-left: 14px;
+        border-left: 2px solid #e7ebf2;
+      }
+
+      .timeline-item strong,
+      .summary strong,
+      .details strong {
+        color: #293241;
+      }
+
+      .details {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      dl {
+        display: grid;
+        grid-template-columns: minmax(120px, 0.45fr) minmax(0, 1fr);
+        gap: 10px 16px;
+        margin: 16px 0 0;
+      }
+
+      dt {
+        color: #8791a1;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      dd {
+        margin: 0;
+        overflow-wrap: anywhere;
+      }
+
+      .state {
+        text-align: center;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      @media (max-width: 720px) {
+        .hero h1 {
+          font-size: 34px;
+        }
+
+        .search-row,
+        .summary-grid,
+        .reference-grid,
+        .details {
+          grid-template-columns: 1fr;
+        }
+
+        .note,
+        .guest-panel {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .guest-actions,
+        .state-actions {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="nav">
+      <a href="#">AI Assistant</a>
+      <a href="#">Quote</a>
+      <a class="active" href="#">Tracking</a>
+      <a href="#">Warehouse</a>
+    </div>
+
+    <main class="page">
+      <section id="home-view">
+        <header class="hero">
+          <span class="kicker">CargoSoon Tracking</span>
+          <h1>Track CargoSoon shipments and global logistics numbers</h1>
+          <p>
+            Search CargoSoon orders, international express, container numbers, ocean B/L, air AWB,
+            and logistics company order IDs in one place.
+          </p>
+        </header>
+
+        <div class="note">
+          <strong>Not arranged by CargoSoon?</strong>
+          <span>You can still search the tracking number here.</span>
+        </div>
+
+        <section class="panel">
+          <label for="tracking-input">Tracking number</label>
+          <div class="search-row">
+            <input
+              id="tracking-input"
+              placeholder="CargoSoon order, express tracking, container, B/L, AWB, or logistics order ID"
+            />
+            <button id="track-btn" class="primary">Track Now</button>
+          </div>
+          <p id="input-error" class="hidden" style="margin: 10px 0 0; color: #c93a22; font-size: 13px">
+            Please enter a tracking number.
+          </p>
+
+          <div class="examples">
+            <button data-example="CSO-DDP-SEA-1001">CSO-DDP-SEA-1001</button>
+            <button data-example="1Z999AA10123456784">1Z999AA10123456784</button>
+            <button data-example="MSKU1234567">MSKU1234567</button>
+            <button data-example="3PL-ORDER-889900">3PL-ORDER-889900</button>
+          </div>
+
+          <div class="types">
+            <span>CargoSoon order</span>
+            <span>International express</span>
+            <span>Container number</span>
+            <span>Ocean B/L</span>
+            <span>Air AWB</span>
+            <span>Logistics order ID</span>
+          </div>
+        </section>
+
+        <section class="guest-panel">
+          <div>
+            <strong id="guest-usage-text">5 of 5 free guest searches remaining</strong>
+            <p>Log in to view full order details, customs status, delivery status, and documents.</p>
+          </div>
+          <div class="guest-actions">
+            <button class="light">Log In</button>
+            <button class="dark">Create Account</button>
+          </div>
+        </section>
+      </section>
+
+      <section id="result-view" class="hidden">
+        <button id="back-btn" class="light" style="margin-bottom: 18px">Back to Track</button>
+
+        <section class="panel">
+          <label for="result-input">Tracking number</label>
+          <div class="search-row">
+            <input
+              id="result-input"
+              placeholder="CargoSoon order, express tracking, container, B/L, AWB, or logistics order ID"
+            />
+            <button id="result-track-btn" class="primary">Track Now</button>
+          </div>
+          <p id="result-input-error" class="hidden" style="margin: 10px 0 0; color: #c93a22; font-size: 13px">
+            Please enter a tracking number.
+          </p>
+        </section>
+
+        <section id="state-panel" class="state hidden"></section>
+
+        <section id="result-panel" class="hidden">
+          <article class="summary">
+            <div class="result-top">
+              <div>
+                <span id="result-source" class="kicker">CargoSoon Order</span>
+                <h2 id="result-number" style="margin: 10px 0 0; font-size: 28px"></h2>
+              </div>
+              <span id="result-status" class="status"></span>
+            </div>
+
+            <p id="result-latest" style="margin: 18px 0 0; font-size: 15px"></p>
+
+            <div id="summary-grid" class="summary-grid"></div>
+            <div id="reference-grid" class="reference-grid hidden"></div>
+            <div id="route-box" class="route" style="margin-top: 14px"></div>
+          </article>
+
+          <article class="timeline">
+            <h3 id="timeline-title" style="margin: 0 0 14px">Latest Updates</h3>
+            <div id="timeline-list" class="timeline-list"></div>
+          </article>
+
+          <section id="details-grid" class="details hidden"></section>
+        </section>
+      </section>
+    </main>
+
+    <script>
+      const GUEST_USAGE_KEY = 'cargosoon_guest_tracking_count'
+      const LIMIT = 5
+
+      const records = {
+        'CSO-DDP-SEA-1001': {
+          source: 'CargoSoon Order',
+          numberType: 'CargoSoon order number',
+          displayNumber: 'CSO-DDP-SEA-1001',
+          shipmentNumber: 'SHP-SZLA-1001',
+          customerReference: 'REF-AMZ-LAX-1001',
+          status: 'In transit',
+          latestUpdate: 'Loaded on vessel. The shipment is moving to the port of discharge.',
+          origin: 'Shenzhen warehouse, China',
+          destination: 'Los Angeles, CA, United States',
+          service: 'Sea DDP door-to-door',
+          carrier: 'CargoSoon Sea DDP',
+          etd: 'Jun 8, 2026',
+          eta: 'Jul 9, 2026',
+          route: 'Shenzhen -> Yantian Port -> Los Angeles -> Door delivery',
+          events: [
+            ['Jun 16, 2026 09:30', 'South China Sea', 'Vessel departure confirmed', 'Container is on the ocean leg to the United States.'],
+            ['Jun 13, 2026 18:20', 'Yantian Port, China', 'Loaded on vessel', 'Export handover has been completed.'],
+            ['Jun 10, 2026 15:40', 'Shenzhen warehouse, China', 'Cargo consolidated', 'Cartons were measured, labeled, and prepared for export.'],
+          ],
+          details: {
+            'Order Information': {
+              'Order number': 'CSO-DDP-SEA-1001',
+              Incoterm: 'DDP',
+              Consignee: 'Amazon FBA - LAX9',
+            },
+            'Cargo Information': {
+              Commodity: 'Home storage organizers',
+              Cartons: '86',
+              'Gross weight': '1,248 kg',
+              Volume: '7.6 CBM',
+            },
+            'Customs Status': {
+              Status: 'Export released',
+              Note: 'Import clearance will start after arrival notice.',
+            },
+          },
+        },
+        '1Z999AA10123456784': {
+          source: 'Global Express',
+          numberType: 'Express tracking number',
+          displayNumber: '1Z999AA10123456784',
+          status: 'In transit',
+          latestUpdate: 'Package departed regional sorting facility.',
+          origin: 'Ontario, CA, United States',
+          destination: 'Dallas, TX, United States',
+          service: 'International express',
+          carrier: 'UPS style express',
+          etd: 'Jun 14, 2026',
+          eta: 'Jun 18, 2026',
+          route: 'Ontario -> Dallas -> Delivery',
+          events: [
+            ['Jun 16, 2026 06:45', 'Phoenix, AZ', 'Departed facility', 'Package is moving through the carrier network.'],
+            ['Jun 15, 2026 19:10', 'Ontario, CA', 'Origin scan', 'Carrier received the package.'],
+          ],
+        },
+        'MSKU1234567': {
+          source: 'Container',
+          numberType: 'Container number',
+          displayNumber: 'MSKU1234567',
+          status: 'On vessel',
+          latestUpdate: 'Container loaded on vessel and departed origin port.',
+          origin: 'Yantian, China',
+          destination: 'Long Beach, CA, United States',
+          service: 'Ocean container',
+          carrier: 'Maersk style container tracking',
+          etd: 'Jun 10, 2026',
+          eta: 'Jul 2, 2026',
+          route: 'Yantian -> Pacific Ocean -> Long Beach',
+          events: [
+            ['Jun 12, 2026 23:30', 'Yantian Port, China', 'Vessel departed', 'Container is on the ocean leg.'],
+            ['Jun 10, 2026 16:20', 'Yantian Port, China', 'Loaded on vessel', 'Container was loaded at origin terminal.'],
+          ],
+        },
+        '3PL-ORDER-889900': {
+          source: 'Logistics Order',
+          numberType: 'Logistics order ID',
+          displayNumber: '3PL-ORDER-889900',
+          status: 'Handover received',
+          latestUpdate: 'The partner logistics provider has received the shipment and shared the latest handover event.',
+          origin: 'Shenzhen, China',
+          destination: 'Los Angeles, CA, United States',
+          service: 'Third-party logistics order tracking',
+          carrier: 'Partner logistics system',
+          etd: 'Jun 18, 2026',
+          eta: 'Jul 12, 2026',
+          route: 'Shenzhen -> Partner hub -> Los Angeles',
+          events: [
+            ['Jun 16, 2026 15:35', 'Shenzhen partner hub', 'Handover received', 'Shipment was received under the partner logistics order ID.'],
+            ['Jun 16, 2026 10:10', 'Supplier warehouse, China', 'Pickup completed', 'Partner carrier collected the cartons from supplier warehouse.'],
+          ],
+        },
+      }
+
+      const homeView = document.getElementById('home-view')
+      const resultView = document.getElementById('result-view')
+      const trackingInput = document.getElementById('tracking-input')
+      const resultInput = document.getElementById('result-input')
+      const inputError = document.getElementById('input-error')
+      const resultInputError = document.getElementById('result-input-error')
+      const statePanel = document.getElementById('state-panel')
+      const resultPanel = document.getElementById('result-panel')
+      const guestUsageText = document.getElementById('guest-usage-text')
+
+      const getGuestUsage = () => {
+        const count = Number(localStorage.getItem(GUEST_USAGE_KEY) || 0)
+        return { count, remaining: Math.max(LIMIT - count, 0) }
+      }
+
+      const renderGuestUsage = () => {
+        const usage = getGuestUsage()
+        guestUsageText.textContent = `${usage.remaining} of ${LIMIT} free guest searches remaining`
+      }
+
+      const setState = (title, text) => {
+        statePanel.innerHTML = `<h2 style="margin:0 0 8px">${title}</h2><p style="margin:0">${text}</p>`
+        statePanel.classList.remove('hidden')
+        resultPanel.classList.add('hidden')
+      }
+
+      const renderResult = (record) => {
+        document.getElementById('result-source').textContent = record.source
+        document.getElementById('result-number').textContent = record.displayNumber
+        document.getElementById('result-status').textContent = record.status
+        document.getElementById('result-latest').textContent = record.latestUpdate
+
+        const summaryRows = [
+          ['Matched as', record.source],
+          ['Search type', record.numberType],
+          ['Origin', record.origin],
+          ['Destination', record.destination],
+          ['Service', record.service || '-'],
+          ['Carrier', record.carrier || '-'],
+          ['ETD', record.etd || '-'],
+          ['ETA', record.eta || '-'],
+        ]
+
+        document.getElementById('summary-grid').innerHTML = summaryRows
+          .map(([label, value]) => `<div><span style="display:block;margin-bottom:5px;color:#8791a1;font-size:12px;font-weight:700">${label}</span><strong>${value}</strong></div>`)
+          .join('')
+
+        const referenceGrid = document.getElementById('reference-grid')
+        if (record.shipmentNumber || record.customerReference) {
+          referenceGrid.innerHTML = [
+            ['CargoSoon order', record.displayNumber],
+            ['Shipment number', record.shipmentNumber || '-'],
+            ['Customer reference', record.customerReference || '-'],
+          ]
+            .map(([label, value]) => `<div><span style="display:block;margin-bottom:5px;color:#8791a1;font-size:12px;font-weight:700">${label}</span><strong>${value}</strong></div>`)
+            .join('')
+          referenceGrid.classList.remove('hidden')
+        } else {
+          referenceGrid.classList.add('hidden')
+          referenceGrid.innerHTML = ''
+        }
+
+        document.getElementById('route-box').innerHTML =
+          `<span style="display:block;margin-bottom:5px;color:#8791a1;font-size:12px;font-weight:700">Route</span><strong>${record.route}</strong>`
+
+        document.getElementById('timeline-title').textContent = 'Tracking Timeline'
+        document.getElementById('timeline-list').innerHTML = record.events
+          .map(
+            ([time, location, title, description]) =>
+              `<div class="timeline-item"><div style="color:#8791a1;font-size:12px;font-weight:700">${time} · ${location}</div><strong style="display:block;margin:5px 0">${title}</strong><p style="margin:0">${description}</p></div>`,
+          )
+          .join('')
+
+        const detailsGrid = document.getElementById('details-grid')
+        if (record.details) {
+          detailsGrid.innerHTML = Object.entries(record.details)
+            .map(([title, rows]) => {
+              const list = Object.entries(rows)
+                .map(([label, value]) => `<dt>${label}</dt><dd>${value}</dd>`)
+                .join('')
+              return `<article><h3 style="margin:0">${title}</h3><dl>${list}</dl></article>`
+            })
+            .join('')
+          detailsGrid.classList.remove('hidden')
+        } else {
+          detailsGrid.classList.add('hidden')
+          detailsGrid.innerHTML = ''
+        }
+
+        statePanel.classList.add('hidden')
+        resultPanel.classList.remove('hidden')
+      }
+
+      const search = (value, fromResult = false) => {
+        const normalized = value.trim().toUpperCase()
+        const errorEl = fromResult ? resultInputError : inputError
+        if (!normalized) {
+          errorEl.classList.remove('hidden')
+          return
+        }
+        errorEl.classList.add('hidden')
+
+        const usage = getGuestUsage()
+        if (usage.remaining <= 0) {
+          homeView.classList.add('hidden')
+          resultView.classList.remove('hidden')
+          ;(fromResult ? resultInput : trackingInput).value = normalized
+          setState('Free search limit reached', 'You have used your 5 free guest searches. Log in or create an account to continue tracking.')
+          return
+        }
+
+        localStorage.setItem(GUEST_USAGE_KEY, String(Math.min(usage.count + 1, LIMIT)))
+        renderGuestUsage()
+
+        homeView.classList.add('hidden')
+        resultView.classList.remove('hidden')
+        resultInput.value = normalized
+
+        if (normalized === 'ERROR-TRACK-500') {
+          setState('Something went wrong', 'Tracking service is temporarily unavailable. Please try again.')
+          return
+        }
+
+        const record = records[normalized]
+        if (!record) {
+          setState('No result found', 'We couldn’t find this shipment yet. Please check the number or contact our support team.')
+          return
+        }
+
+        renderResult(record)
+      }
+
+      document.getElementById('track-btn').addEventListener('click', () => search(trackingInput.value))
+      document.getElementById('result-track-btn').addEventListener('click', () => search(resultInput.value, true))
+      document.getElementById('back-btn').addEventListener('click', () => {
+        resultView.classList.add('hidden')
+        homeView.classList.remove('hidden')
+      })
+
+      trackingInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault()
+          search(trackingInput.value)
+        }
+      })
+
+      resultInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault()
+          search(resultInput.value, true)
+        }
+      })
+
+      document.querySelectorAll('[data-example]').forEach((button) => {
+        button.addEventListener('click', () => {
+          trackingInput.value = button.dataset.example
+        })
+      })
+
+      renderGuestUsage()
+    </script>
+  </body>
+</html>

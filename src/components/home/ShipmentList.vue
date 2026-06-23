@@ -1,10 +1,13 @@
 <script setup>
+import { useRouter } from 'vue-router'
+
 const props = defineProps({
   shipmentList: { type: Array, default: () => [] },
   transportStatus: { type: Array, default: () => [] },
 })
 
 const emit = defineEmits(['view-track'])
+const router = useRouter()
 
 const toOrder = (id, box) => {
   if (box == null) {
@@ -12,6 +15,10 @@ const toOrder = (id, box) => {
   } else {
     window.open(`/order/forwardingOrder/${id}?boxId=${box}`)
   }
+}
+
+const openTrackingPage = () => {
+  router.push({ name: 'track' })
 }
 </script>
 
@@ -21,9 +28,9 @@ const toOrder = (id, box) => {
       <a href="/order/shippingOrder" class="mr-2">
         <h2 style="margin-right: 20px;">Shipment List</h2>
       </a>
-      <a href="/order/tracking">
+      <button type="button" @click="openTrackingPage">
         <el-button color="#2A4577">My Tracking</el-button>
-      </a>
+      </button>
     </div>
 
     <div v-if="shipmentList.length == 0" class="shipment-info relative overflow-y-auto">

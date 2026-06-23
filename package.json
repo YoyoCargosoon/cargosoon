@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "build:test": "vite build --mode test",
+    "dev": "vite --configLoader runner",
+    "build": "vite build --configLoader runner",
+    "build:test": "vite build --mode test --configLoader runner",
     "preview": "vite preview",
     "format": "prettier --write src/"
   },

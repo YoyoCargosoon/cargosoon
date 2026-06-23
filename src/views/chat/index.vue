@@ -23,7 +23,6 @@ import { useWebSocket } from '@/composables/useWebSocket'
 import { getLocal, removeLocal, setLocal } from '@/utils/common'
 
 const AI_STORAGE_KEY = 'cargosoon_ai_conversations'
-const SERVICE_STORAGE_KEY = 'cargosoon_service_conversations'
 
 const route = useRoute()
 const router = useRouter()
@@ -120,6 +119,7 @@ const createConversation = () => ({
   title: 'New Chat',
   createdAt: Date.now(),
   updatedAt: Date.now(),
+  serviceRequestedAt: 0,
   messages: [],
 })
 
@@ -142,30 +142,71 @@ const canSend = computed(() => {
 })
 const isServiceMode = computed(() => route.query.mode === 'service')
 const activeStorageKey = computed(() => AI_STORAGE_KEY)
-const pageTitle = computed(() => (isServiceMode.value ? 'CargoSoon Customer Service' : 'CargoSoon AI Assistant'))
-const pageSubtitle = computed(() => (
+const pageTitle = computed(() => 'CargoSoon Assistant')
+const pageSubtitle = computed(() => 'Freight quotes, tracking, booking, warehouse, and 1688 sourcing support.')
+const emptyTitle = computed(() => (
   isServiceMode.value
-    ? 'AI replies instantly while a CargoSoon logistics specialist can follow up in the same chat.'
-    : 'Ask for freight rates, tracking updates, booking guidance, or 1688 sourcing. Customer service can follow up here too.'
+    ? 'Customer service is the priority here. AI can help while your specialist follows up.'
+    : 'AI can answer first, and customer service can jump into the same conversation.'
 ))
-const emptyTitle = computed(() => (isServiceMode.value ? 'How can AI and customer service help?' : 'How can CargoSoon help today?'))
 const activeStarterPrompts = computed(() => (isServiceMode.value ? serviceStarterPrompts : starterPrompts))
 const activeSidebarShortcuts = computed(() => (isServiceMode.value ? serviceSidebarShortcuts : sidebarShortcuts))
-const recentTitle = computed(() => 'Recent Chats')
+const recentTitle = computed(() => 'Recent Conversations')
 const composerPlaceholder = computed(() => (isServiceMode.value ? 'Message CargoSoon Customer Service or AI...' : 'Message CargoSoon AI or Customer Service...'))
 const serviceAvatarUrl = computed(() => serviceManage.value.image_url || '')
+const servicePanelOpened = ref(route.query.mode === 'service')
 const serviceConnectionNotice = computed(() => {
-  if (!isServiceMode.value) return ''
   if (serviceConnectionError.value) return serviceConnectionError.value
   if (serviceConnecting.value) return 'Connecting to CargoSoon Customer Service...'
-  if (!serviceConnected.value) return 'Customer service is reconnecting. Messages can be sent after the connection is restored.'
-  if (serviceManage.value.englishname) return `Connected to ${serviceManage.value.englishname}.`
+  if (!serviceConnected.value) return 'Customer service will follow up in this chat when the live connection is ready.'
   return 'Connected to CargoSoon Customer Service.'
+})
+const serviceEntryLabel = computed(() => {
+  if (serviceConnected.value) return isServiceMode.value ? 'Customer Service Connected' : 'Open Customer Service'
+  return 'Contact Customer Service'
+})
+const specialistName = computed(() => serviceManage.value.englishname || 'CargoSoon Specialist')
+const supportMenuItems = computed(() => ([
+  {
+    key: 'freight_quote',
+    label: 'Freight Quote',
+    description: 'DDP, air, sea, FBA',
+    prompt: 'I need a freight quote',
+  },
+  {
+    key: 'tracking',
+    label: 'Tracking',
+    description: 'Container, B/L, AWB',
+    prompt: 'Track my shipment',
+  },
+  {
+    key: 'booking',
+    label: 'Booking',
+    description: 'Start a shipment order',
+    prompt: 'I want to start a booking',
+  },
+  {
+    key: 'sourcing_1688',
+    label: '1688 Sourcing',
+    description: 'Links, inspection, consolidation',
+    prompt: 'I need 1688 sourcing help',
+  },
+  {
+    key: 'warehouse',
+    label: 'Warehouse',
+    description: 'Storage, relabel, repack',
+    prompt: 'I need warehouse help',
+  },
+]))
+const showServiceBanner = computed(() => servicePanelOpened.value)
+const serviceBannerText = computed(() => {
+  if (serviceConnectionError.value) return serviceConnectionError.value
+  if (serviceConnecting.value) return 'Customer service is joining this conversation.'
+  if (serviceConnected.value) return 'Customer service is connected in this conversation.'
+  return 'Customer service will follow up in this conversation.'
 })
 
 const serviceHasHumanReply = computed(() => serviceAssistantMessages.value.length > 0)
-const serviceHasCustomerMessage = computed(() => activeConversation.value?.messages.some((message) => message.role === 'user') || false)
-const showAiSelfHelpPrompt = computed(() => isServiceMode.value && serviceHasCustomerMessage.value && !serviceHasHumanReply.value)
 const latestServiceQuestion = computed(() => {
   const latest = [...(activeConversation.value?.messages || [])].reverse().find((message) => message.role === 'user' && message.content)
   return latest?.content || ''
@@ -178,6 +219,63 @@ const getAssistantAvatar = (message) => {
 
 const getAssistantInitials = (message) => {
   return message.assistantType === 'service' ? 'CS' : 'AI'
+}
+
+const getAssistantLabel = (message) => {
+  if (message.assistantType === 'service') return message.senderName || specialistName.value
+  return 'CargoSoon AI'
+}
+
+const isListSection = (lines) => lines.length > 1 && lines.every((line) => line.startsWith('- '))
+
+const buildAssistantBlocks = (message) => {
+  if (message.role !== 'assistant' || message.assistantType === 'service') {
+    return [{ type: 'paragraph', text: message.content }]
+  }
+
+  const sections = message.content
+    .split(/\n\s*\n/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+
+  return sections.map((section, index) => {
+    const lines = section.split('\n').map((line) => line.trim()).filter(Boolean)
+    const firstLine = lines[0] || ''
+    const restLines = lines.slice(1)
+
+    if (/^Reference price direction for/i.test(firstLine) && isListSection(restLines)) {
+      return {
+        type: 'quote-card',
+        title: firstLine,
+        items: restLines.map((line) => line.replace(/^- /, '')),
+        key: `quote-${index}`,
+      }
+    }
+
+    if (firstLine.endsWith(':') && isListSection(restLines)) {
+      return {
+        type: 'list-card',
+        title: firstLine.slice(0, -1),
+        items: restLines.map((line) => line.replace(/^- /, '')),
+        key: `list-${index}`,
+      }
+    }
+
+    if (isListSection(lines)) {
+      return {
+        type: 'list-card',
+        title: message.intent === 'freight_quote' ? 'Details needed' : 'Key points',
+        items: lines.map((line) => line.replace(/^- /, '')),
+        key: `list-${index}`,
+      }
+    }
+
+    return {
+      type: 'paragraph',
+      text: section,
+      key: `paragraph-${index}`,
+    }
+  })
 }
 
 const stripHtml = (value = '') => value.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()
@@ -232,6 +330,7 @@ const mapServiceMessage = (message, index) => {
     id: `service-${message.date_entered || index}-${message.is_me}-${message.msg_type}`,
     role: message.is_me === 1 ? 'user' : 'assistant',
     assistantType: message.is_me === 0 ? 'service' : '',
+    senderName: message.is_me === 0 ? (message.nickname || serviceManage.value.englishname || 'CargoSoon Specialist') : '',
     content: isImage || isFile ? '' : normalizeServiceMessageContent(message),
     attachments: attachment ? [attachment] : [],
     avatarUrl: message.is_me === 0 ? (message.head_img || serviceManage.value.image_url || '') : '',
@@ -308,11 +407,14 @@ const goHome = () => {
   router.push({ name: 'home' })
 }
 
-const openCustomerService = () => {
-  router.push({
+const openCustomerService = async () => {
+  servicePanelOpened.value = true
+  await router.push({
     name: 'chat',
     query: { mode: 'service' },
   })
+  await initCustomerService()
+  await requestCustomerServiceHandoff()
 }
 
 const openAiSelfService = () => {
@@ -576,7 +678,8 @@ const sendCustomerServiceAttachments = async (files) => {
   }
 }
 
-const deliverLiveCustomerServiceMessage = async (question, outgoingAttachments) => {
+const deliverLiveCustomerServiceMessage = async (question, outgoingAttachments, options = {}) => {
+  const { silent = false } = options
   const attachmentContext = buildAttachmentContext(outgoingAttachments)
   const outboundText = attachmentContext ? `${question}\n\nUploaded attachments:\n${attachmentContext}` : question
   const sent = sendCustomerServiceChatMsg(outboundText, serviceUserInfo.value)
@@ -585,19 +688,21 @@ const deliverLiveCustomerServiceMessage = async (question, outgoingAttachments) 
     return false
   }
 
-  pendingServiceMessages.value.push({
-    id: `pending-service-${nowId()}`,
-    role: 'user',
-    content: question,
-    rawContent: outboundText,
-    attachments: sanitizeAttachments(outgoingAttachments),
-    status: 'done',
-    createdAt: Date.now(),
-  })
+  if (!silent) {
+    pendingServiceMessages.value.push({
+      id: `pending-service-${nowId()}`,
+      role: 'user',
+      content: question,
+      rawContent: outboundText,
+      attachments: sanitizeAttachments(outgoingAttachments),
+      status: 'done',
+      createdAt: Date.now(),
+    })
+  }
 
   await scrollToBottom()
 
-  if (outgoingAttachments.length) {
+  if (!silent && outgoingAttachments.length) {
     sendCustomerServiceAttachments(outgoingAttachments).catch(() => {
       errorMessage.value = 'Message sent. Some attachments could not be uploaded, please resend them if needed.'
     })
@@ -606,29 +711,35 @@ const deliverLiveCustomerServiceMessage = async (question, outgoingAttachments) 
   return true
 }
 
-const queueCustomerServiceMessage = (question, outgoingAttachments) => {
+const queueCustomerServiceMessage = (question, outgoingAttachments, options = {}) => {
   queuedServiceMessages.value.push({
     id: nowId(),
     question,
     attachments: outgoingAttachments,
+    silent: !!options.silent,
   })
 }
 
-const sendLiveCustomerServiceMessage = async (question, outgoingAttachments) => {
+const sendLiveCustomerServiceMessage = async (question, outgoingAttachments, options = {}) => {
+  const { silent = false } = options
   if (!serviceUserInfo.value && !serviceConnecting.value) {
     initCustomerService()
   }
 
   if (!serviceConnected.value || !serviceUserInfo.value) {
-    queueCustomerServiceMessage(question, outgoingAttachments)
-    serviceNotice.value = 'CargoSoon AI has replied first. Customer service is connecting and will receive this message once the live chat is ready.'
+    queueCustomerServiceMessage(question, outgoingAttachments, { silent })
+    serviceNotice.value = silent
+      ? 'Customer service has been requested and will join this conversation shortly.'
+      : 'CargoSoon AI has replied first. Customer service is connecting and will receive this message once the live chat is ready.'
     return false
   }
 
-  const delivered = await deliverLiveCustomerServiceMessage(question, outgoingAttachments)
+  const delivered = await deliverLiveCustomerServiceMessage(question, outgoingAttachments, { silent })
   if (!delivered) {
-    queueCustomerServiceMessage(question, outgoingAttachments)
-    serviceNotice.value = 'CargoSoon AI has replied first. Customer service is reconnecting and will receive this message once connected.'
+    queueCustomerServiceMessage(question, outgoingAttachments, { silent })
+    serviceNotice.value = silent
+      ? 'Customer service has been requested and will join this conversation as soon as the live connection is ready.'
+      : 'CargoSoon AI has replied first. Customer service is reconnecting and will receive this message once connected.'
   }
 
   return delivered
@@ -641,13 +752,36 @@ const drainQueuedServiceMessages = async () => {
   queuedServiceMessages.value = []
 
   for (const item of nextQueue) {
-    const delivered = await deliverLiveCustomerServiceMessage(item.question, item.attachments)
+    const delivered = await deliverLiveCustomerServiceMessage(item.question, item.attachments, { silent: item.silent })
     if (!delivered) {
       queuedServiceMessages.value = [item, ...nextQueue.slice(nextQueue.indexOf(item) + 1)]
-      serviceNotice.value = 'CargoSoon AI has replied first. Customer service is reconnecting and will receive this message once connected.'
+      serviceNotice.value = item.silent
+        ? 'Customer service has been requested and will join this conversation as soon as the live connection is ready.'
+        : 'CargoSoon AI has replied first. Customer service is reconnecting and will receive this message once connected.'
       return
     }
   }
+}
+
+const requestCustomerServiceHandoff = async () => {
+  if (!activeConversation.value || activeConversation.value.serviceRequestedAt) {
+    if (serviceConnected.value) {
+      serviceNotice.value = 'Customer service is connected in this conversation.'
+    }
+    return
+  }
+
+  updateConversation((conversation) => {
+    conversation.serviceRequestedAt = Date.now()
+  })
+
+  serviceNotice.value = 'Customer service requested. A specialist can reply here directly.'
+
+  await sendLiveCustomerServiceMessage(
+    '[Customer requested live customer service. Please reply in this conversation.]',
+    [],
+    { silent: true },
+  )
 }
 
 const getSpeechRecognition = () => {
@@ -813,6 +947,7 @@ watch(() => route.query.q, (value) => {
 })
 
 watch(() => route.query.mode, () => {
+  servicePanelOpened.value = isServiceMode.value
   initCustomerService()
   loadConversations()
   inputValue.value = ''
@@ -917,11 +1052,6 @@ onBeforeUnmount(() => {
         <div>
           <h1>{{ pageTitle }}</h1>
           <p>{{ pageSubtitle }}</p>
-          <div v-if="isServiceMode" class="service-status">
-            <span :class="['service-status-dot', { connected: serviceConnected }]"></span>
-            <img v-if="serviceAvatarUrl" :src="serviceAvatarUrl" alt="">
-            <span>{{ serviceConnectionNotice }}</span>
-          </div>
         </div>
       </header>
 
@@ -931,6 +1061,29 @@ onBeforeUnmount(() => {
             <ChatDotRound aria-hidden="true" />
           </div>
           <h2>{{ emptyTitle }}</h2>
+          <div class="assistant-lanes">
+            <article class="assistant-lane">
+              <span class="assistant-lane-kicker">Instant reply</span>
+              <strong>CargoSoon AI</strong>
+              <p>Rates, tracking, booking guidance, warehouse questions, and 1688 sourcing suggestions.</p>
+            </article>
+            <article class="assistant-lane">
+              <span class="assistant-lane-kicker">Human follow-up</span>
+              <strong>{{ specialistName }}</strong>
+              <p>Final rate confirmation, shipment details, booking coordination, and customer service follow-up.</p>
+            </article>
+          </div>
+          <div class="conversation-rail">
+            <button
+              v-for="item in supportMenuItems"
+              :key="item.key"
+              type="button"
+              class="conversation-chip"
+              @click="useSuggestion(item.prompt)"
+            >
+              {{ item.label }}
+            </button>
+          </div>
           <div class="starter-grid">
             <button
               v-for="prompt in activeStarterPrompts"
@@ -967,7 +1120,24 @@ onBeforeUnmount(() => {
                 <span></span>
               </div>
               <template v-else>
-                <div class="message-content">{{ message.content }}</div>
+                <div v-if="message.role === 'assistant'" class="assistant-label">{{ getAssistantLabel(message) }}</div>
+                <div class="message-content">
+                  <template v-for="block in buildAssistantBlocks(message)" :key="block.key || block.text">
+                    <div v-if="block.type === 'paragraph'" class="message-paragraph">{{ block.text }}</div>
+                    <section v-else-if="block.type === 'list-card'" class="assistant-card">
+                      <strong>{{ block.title }}</strong>
+                      <ul>
+                        <li v-for="item in block.items" :key="item">{{ item }}</li>
+                      </ul>
+                    </section>
+                    <section v-else-if="block.type === 'quote-card'" class="assistant-card assistant-card-highlight">
+                      <strong>{{ block.title }}</strong>
+                      <ul>
+                        <li v-for="item in block.items" :key="item">{{ item }}</li>
+                      </ul>
+                    </section>
+                  </template>
+                </div>
 
                 <div v-if="message.attachments?.length" class="message-attachments">
                   <div
@@ -1017,12 +1187,6 @@ onBeforeUnmount(() => {
             </div>
           </article>
 
-          <div v-if="showAiSelfHelpPrompt" class="self-help-panel">
-            <div>
-              <strong>AI replied first. Customer service is reviewing.</strong>
-              <span>Keep chatting here; AI answers instantly and a CargoSoon specialist can follow up in the same conversation.</span>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -1058,6 +1222,11 @@ onBeforeUnmount(() => {
         >
 
         <div class="composer">
+          <div v-if="showServiceBanner" class="service-banner">
+            <span class="service-banner-dot" :class="{ connected: serviceConnected }"></span>
+            <span>{{ serviceBannerText }}</span>
+          </div>
+
           <div v-if="attachedFiles.length" class="composer-attachments">
             <div
               v-for="file in attachedFiles"
@@ -1119,15 +1288,25 @@ onBeforeUnmount(() => {
                 <Picture aria-hidden="true" />
               </button>
               <button
-                v-if="!isServiceMode"
                 type="button"
-                class="service-entry-btn"
-                title="Customer service"
+                :class="['tool-btn', 'service-tool-btn', { active: serviceConnected }]"
+                :title="serviceEntryLabel"
+                :aria-label="serviceEntryLabel"
                 @click="openCustomerService"
               >
                 <Headset aria-hidden="true" />
-                <span>Customer Service</span>
               </button>
+              <div class="composer-quick-actions composer-quick-actions-inline">
+                <button
+                  v-for="item in supportMenuItems"
+                  :key="item.key"
+                  type="button"
+                  class="composer-quick-chip composer-quick-chip-primary"
+                  @click="useSuggestion(item.prompt)"
+                >
+                  {{ item.label }}
+                </button>
+              </div>
             </div>
 
             <button
@@ -1325,64 +1504,60 @@ onBeforeUnmount(() => {
 
 .ai-header {
   flex: 0 0 auto;
-  padding: 26px clamp(24px, 6vw, 72px) 16px;
+  padding: 18px clamp(24px, 6vw, 72px) 12px;
   border-bottom: 1px solid #ececec;
 }
 
 .ai-header h1 {
   margin: 0;
   color: #0d0d0d;
-  font-size: clamp(22px, 2.5vw, 30px);
+  font-size: clamp(20px, 2.3vw, 28px);
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.15;
   letter-spacing: 0;
 }
 
 .ai-header p {
   max-width: 680px;
-  margin: 8px 0 0;
+  margin: 5px 0 0;
   color: #676767;
-  font-size: 15px;
-  line-height: 1.55;
+  font-size: 14px;
+  line-height: 1.45;
 }
 
-.service-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  margin-top: 10px;
-  padding: 4px 9px 4px 7px;
-  border: 1px solid #e5e5e5;
+.conversation-rail {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 22px;
+}
+
+.conversation-chip {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid #ece3da;
   border-radius: 999px;
-  background: #ffffff;
-  color: #676767;
+  background: #fffaf6;
+  color: #6f5746;
+  cursor: pointer;
+  font: inherit;
   font-size: 12px;
-  line-height: 1.4;
+  line-height: 1;
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
 }
 
-.service-status img {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.service-status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #c9c9c9;
-}
-
-.service-status-dot.connected {
-  background: #20b26b;
+.conversation-chip:hover {
+  border-color: #f1c5a6;
+  background: #fff2e8;
+  color: #b95818;
 }
 
 .message-list {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 28px clamp(18px, 6vw, 72px) 168px;
+  padding: 22px clamp(18px, 6vw, 72px) 240px;
 }
 
 .empty-state {
@@ -1417,6 +1592,47 @@ onBeforeUnmount(() => {
   letter-spacing: 0;
 }
 
+.assistant-lanes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 22px;
+}
+
+.assistant-lane {
+  padding: 16px 18px;
+  border: 1px solid #ece6de;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fffdfa 0%, #fff8f2 100%);
+  text-align: left;
+}
+
+.assistant-lane-kicker {
+  display: inline-flex;
+  margin-bottom: 10px;
+  color: #b2622d;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.assistant-lane strong {
+  display: block;
+  color: #161616;
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.assistant-lane p {
+  margin: 8px 0 0;
+  color: #6a635d;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .starter-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1446,7 +1662,7 @@ onBeforeUnmount(() => {
   max-width: 820px;
   margin: 0 auto;
   display: grid;
-  gap: 18px;
+  gap: 14px;
 }
 
 .message-row {
@@ -1460,13 +1676,13 @@ onBeforeUnmount(() => {
 
 .message-row.assistant {
   justify-content: flex-start;
-  gap: 12px;
+  gap: 10px;
 }
 
 .message-avatar {
   width: 28px;
   height: 28px;
-  margin-top: 2px;
+  margin-top: 1px;
   flex: 0 0 auto;
   display: flex;
   align-items: center;
@@ -1491,10 +1707,10 @@ onBeforeUnmount(() => {
 
 .message-bubble {
   max-width: min(720px, 88%);
-  padding: 12px 16px;
+  padding: 10px 14px;
   border-radius: 18px;
   font-size: 15px;
-  line-height: 1.7;
+  line-height: 1.6;
   white-space: pre-wrap;
 }
 
@@ -1515,6 +1731,51 @@ onBeforeUnmount(() => {
 
 .message-content {
   white-space: pre-wrap;
+  line-height: 1.62;
+}
+
+.message-paragraph + .message-paragraph {
+  margin-top: 10px;
+}
+
+.assistant-card {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border: 1px solid #ebe3da;
+  border-radius: 16px;
+  background: #fffdfa;
+}
+
+.assistant-card strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #1c1c1c;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.assistant-card ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #544a43;
+}
+
+.assistant-card li + li {
+  margin-top: 6px;
+}
+
+.assistant-card-highlight {
+  border-color: #f2d1b9;
+  background: linear-gradient(180deg, #fff8f2 0%, #fffdf9 100%);
+}
+
+.assistant-label {
+  margin-bottom: 4px;
+  color: #8b7667;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.3;
 }
 
 .message-attachments,
@@ -1651,47 +1912,6 @@ onBeforeUnmount(() => {
   font-size: 12px;
 }
 
-.self-help-panel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  margin: 2px 0 6px 40px;
-  padding: 12px 14px;
-  border: 1px solid #e5e5e5;
-  border-radius: 14px;
-  background: #fafafa;
-  color: #40414f;
-}
-
-.self-help-panel div {
-  display: grid;
-  gap: 2px;
-}
-
-.self-help-panel strong {
-  color: #0d0d0d;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.self-help-panel span {
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-.self-help-panel button {
-  min-height: 34px;
-  flex: 0 0 auto;
-  padding: 0 12px;
-  border: 0;
-  border-radius: 999px;
-  background: #0d0d0d;
-  color: #ffffff;
-  cursor: pointer;
-  font-size: 13px;
-}
-
 .composer-wrap {
   position: fixed;
   right: 0;
@@ -1706,6 +1926,77 @@ onBeforeUnmount(() => {
 .notice-line {
   max-width: 820px;
   margin: 0 auto;
+}
+
+.service-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 2px 0;
+  color: #7a6f66;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.service-banner-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #c4c4c4;
+  flex: 0 0 auto;
+}
+
+.service-banner-dot.connected {
+  background: #20b26b;
+}
+
+.composer-quick-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  overflow-x: auto;
+  padding-top: 0;
+  scrollbar-width: none;
+  min-width: 0;
+  align-items: center;
+}
+
+.composer-quick-actions::-webkit-scrollbar {
+  display: none;
+}
+
+.composer-quick-actions-inline {
+  flex: 1 1 auto;
+  margin-left: 2px;
+}
+
+.composer-quick-chip {
+  min-height: 28px;
+  padding: 0 11px;
+  border: 1px solid #ece3dc;
+  border-radius: 999px;
+  background: #fffaf7;
+  color: #8b5e3c;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  transition: border-color 0.16s ease, color 0.16s ease, background 0.16s ease;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.composer-quick-chip:hover {
+  border-color: #efc5a5;
+  background: #fff3eb;
+  color: #b95818;
+}
+
+.composer-quick-chip-primary {
+  background: #fff7f2;
+  border-color: #f3dbc9;
+  color: #b95818;
+  font-weight: 500;
 }
 
 .notice-line,
@@ -1745,22 +2036,22 @@ onBeforeUnmount(() => {
 }
 
 .composer {
-  min-height: 104px;
+  min-height: 128px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 10px 12px;
-  border: 1px solid #d9d9d9;
-  border-radius: 24px;
+  padding: 10px 14px 8px;
+  border: 1px solid #dddddd;
+  border-radius: 26px;
   background: #ffffff;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
 }
 
 .composer textarea {
   width: 100%;
   max-height: 140px;
-  min-height: 48px;
-  padding: 6px 2px;
+  min-height: 42px;
+  padding: 2px 0 0;
   border: 0;
   outline: 0;
   resize: none;
@@ -1780,34 +2071,37 @@ onBeforeUnmount(() => {
 
 .composer-footer {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
+  padding-top: 6px;
+  border-top: 1px solid #f1f1f1;
 }
 
 .composer-tools {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .tool-btn,
-.service-entry-btn,
 .remove-file-btn {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   background: transparent;
-  color: #676767;
+  color: #6b7280;
   transition: background 0.15s ease, color 0.15s ease;
 }
 
 .tool-btn:hover,
 .tool-btn.active {
-  background: #f4f4f4;
+  background: #f6f6f6;
   color: #0d0d0d;
 }
 
@@ -1816,29 +2110,21 @@ onBeforeUnmount(() => {
 }
 
 .tool-btn svg,
-.service-entry-btn svg,
 .remove-file-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
 }
 
-.service-entry-btn {
-  width: auto;
-  height: 34px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: transparent;
-  color: #676767;
-  font-size: 13px;
-  transition: background 0.15s ease, color 0.15s ease;
+.service-tool-btn {
+  color: #9f7355;
+  background: #fff6ef;
+  border: 1px solid #f2decf;
 }
 
-.service-entry-btn:hover {
-  background: #f4f4f4;
-  color: #0d0d0d;
+.service-tool-btn:hover,
+.service-tool-btn.active {
+  background: #ffe9da;
+  color: #b95818;
 }
 
 .composer-attachments {
@@ -1861,14 +2147,14 @@ onBeforeUnmount(() => {
 }
 
 .send-btn {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #0d0d0d;
+  background: #9ca3af;
   color: #ffffff;
   transition: background 0.18s ease, opacity 0.18s ease;
 }
@@ -1879,7 +2165,7 @@ onBeforeUnmount(() => {
 }
 
 .send-btn:not(:disabled):hover {
-  background: #2f2f2f;
+  background: #6b7280;
 }
 
 @keyframes typingPulse {
@@ -1950,8 +2236,12 @@ onBeforeUnmount(() => {
     padding: 20px 18px 14px;
   }
 
+  .conversation-rail {
+    margin-bottom: 18px;
+  }
+
   .message-list {
-    padding: 20px 14px 150px;
+    padding: 20px 14px 248px;
   }
 
   .composer-wrap {
@@ -1978,6 +2268,14 @@ onBeforeUnmount(() => {
     grid-template-columns: 1fr;
   }
 
+  .assistant-lanes {
+    grid-template-columns: 1fr;
+  }
+
+  .composer-quick-actions {
+    gap: 6px;
+  }
+
   .empty-state {
     margin-top: 4vh;
   }
@@ -1988,7 +2286,7 @@ onBeforeUnmount(() => {
   }
 
   .composer {
-    min-height: 64px;
+    min-height: 138px;
   }
 }
 </style>

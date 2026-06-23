@@ -1,7 +1,10 @@
 <script setup>
-import { nextTick, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Microphone, Paperclip, Picture, RefreshRight, Search } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import { ChatLineRound, Microphone, Paperclip, Picture, RefreshRight, Search } from '@element-plus/icons-vue'
+import { submitFeedbackTicket } from '@/services/adminRepository'
+import { getLocal } from '@/utils/common'
 
 const router = useRouter()
 
@@ -47,6 +50,36 @@ const promptSets = [
 
 const activePromptSetIndex = ref(0)
 const promptColumns = ref(promptSets[activePromptSetIndex.value])
+const feedbackDialogVisible = ref(false)
+const feedbackSubmitting = ref(false)
+const feedbackFormRef = ref(null)
+const feedbackForm = reactive({
+  customerName: '',
+  feedbackType: 'suggestion',
+  content: '',
+})
+const feedbackRules = {
+  customerName: [{ required: true, message: 'Please enter your name', trigger: 'blur' }],
+  content: [{ required: true, message: 'Please enter your feedback', trigger: 'blur' }],
+}
+const storedUserInfo = computed(() => {
+  const raw = getLocal('userInfo')
+  if (!raw) return null
+  try {
+    return JSON.parse(raw)
+  } catch {
+    return null
+  }
+})
+const storedGuestChatInfo = computed(() => {
+  const raw = getLocal('chat_info')
+  if (!raw) return null
+  try {
+    return JSON.parse(raw)
+  } catch {
+    return null
+  }
+})
 
 const askAI = (text) => {
   const q = (text ?? askInput.value).trim()
@@ -65,6 +98,42 @@ const openAssistant = () => {
   router.push({
     name: 'chat',
     query: { mode: 'ai' },
+  })
+}
+
+const openFeedbackDialog = () => {
+  feedbackForm.customerName = storedUserInfo.value
+    ? `${storedUserInfo.value.first_name || ''} ${storedUserInfo.value.last_name || ''}`.trim()
+    : ''
+  feedbackForm.feedbackType = 'suggestion'
+  feedbackForm.content = ''
+  feedbackDialogVisible.value = true
+}
+
+const submitFeedback = async () => {
+  const formEl = feedbackFormRef.value
+  if (!formEl) return
+
+  await formEl.validate(async (valid) => {
+    if (!valid) return
+
+    feedbackSubmitting.value = true
+    try {
+      submitFeedbackTicket({
+        userId: storedUserInfo.value?.id || storedGuestChatInfo.value?.chat_id || 'guest-user',
+        customerName: feedbackForm.customerName.trim(),
+        sourcePage: '/new/',
+        sourceModule: 'home-page',
+        feedbackType: feedbackForm.feedbackType,
+        content: feedbackForm.content.trim(),
+        priority: feedbackForm.feedbackType === 'bug' ? 'high' : 'medium',
+      })
+
+      feedbackDialogVisible.value = false
+      ElMessage.success('Feedback submitted successfully')
+    } finally {
+      feedbackSubmitting.value = false
+    }
   })
 }
 
@@ -221,6 +290,10 @@ onMounted(() => {
               <span>AI Assistant</span>
               Get freight rates, tracking updates, and booking guidance
             </button>
+            <button class="feedback-entry-btn" type="button" @click="openFeedbackDialog">
+              <ChatLineRound class="feedback-entry-icon" aria-hidden="true" />
+              Customer Feedback
+            </button>
           </div>
 
           <div class="prompt-board">
@@ -265,6 +338,58 @@ onMounted(() => {
         </div>
       </div>
     </section>
+
+    <el-dialog
+      v-model="feedbackDialogVisible"
+      width="min(92vw, 560px)"
+      title="Customer Feedback"
+      class="feedback-dialog"
+    >
+      <el-form
+        ref="feedbackFormRef"
+        :model="feedbackForm"
+        :rules="feedbackRules"
+        label-position="top"
+        class="feedback-form"
+      >
+        <el-form-item label="Your Name" prop="customerName">
+          <el-input v-model="feedbackForm.customerName" placeholder="Enter your name" />
+        </el-form-item>
+        <el-form-item label="Feedback Type" prop="feedbackType">
+          <el-select v-model="feedbackForm.feedbackType" placeholder="Select feedback type">
+            <el-option label="Suggestion" value="suggestion" />
+            <el-option label="UX Issue" value="ux issue" />
+            <el-option label="Price Issue" value="price issue" />
+            <el-option label="Bug" value="bug" />
+            <el-option label="Other" value="other" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Details" prop="content">
+          <el-input
+            v-model="feedbackForm.content"
+            type="textarea"
+            :rows="5"
+            placeholder="Tell us what can be improved or what issue you found"
+          />
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <div class="feedback-dialog-actions">
+          <button class="feedback-secondary-btn" type="button" @click="feedbackDialogVisible = false">
+            Cancel
+          </button>
+          <button
+            class="feedback-primary-btn"
+            type="button"
+            :disabled="feedbackSubmitting"
+            @click="submitFeedback"
+          >
+            Submit Feedback
+          </button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -445,6 +570,9 @@ onMounted(() => {
   margin-top: 30px;
   display: flex;
   justify-content: center;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .hero-promo-pill {
@@ -462,6 +590,72 @@ onMounted(() => {
 .hero-promo-pill span {
   color: #f26a1b;
   font-weight: 700;
+}
+
+.feedback-entry-btn,
+.feedback-primary-btn,
+.feedback-secondary-btn {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.feedback-entry-btn {
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #7a5742;
+  box-shadow: inset 0 0 0 1px rgba(242, 106, 27, 0.16);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: box-shadow 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.feedback-entry-btn:hover {
+  color: #f26a1b;
+  transform: translateY(-1px);
+  box-shadow: inset 0 0 0 1px rgba(242, 106, 27, 0.28), 0 10px 22px rgba(242, 106, 27, 0.08);
+}
+
+.feedback-entry-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.feedback-form :deep(.el-input__wrapper),
+.feedback-form :deep(.el-textarea__inner) {
+  box-shadow: 0 0 0 1px rgba(242, 106, 27, 0.12) inset;
+}
+
+.feedback-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.feedback-secondary-btn,
+.feedback-primary-btn {
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 12px;
+}
+
+.feedback-secondary-btn {
+  background: #f7f4f1;
+  color: #6d625a;
+}
+
+.feedback-primary-btn {
+  background: linear-gradient(135deg, #ff9340 0%, #f37a24 64%, #eb691a 100%);
+  color: #ffffff;
+  box-shadow: 0 12px 26px rgba(242, 106, 27, 0.18);
+}
+
+.feedback-primary-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .prompt-board {

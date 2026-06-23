@@ -1,6 +1,9 @@
+const appBase = import.meta.env?.BASE_URL || '/'
+const withBase = (path) => `${appBase.replace(/\/+$/, '')}${path}`
+
 const AI_STORAGE_HINTS = {
   booking: '/order/shippingOrder',
-  tracking: '/order/tracking',
+  tracking: withBase('/track'),
   sourcing: 'https://codropshipping.com/',
   warehouse: '/warehouse/SKUManagement',
 }
@@ -12,10 +15,11 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 const trimSlash = (value) => value.replace(/\/+$/, '')
 
 const getAiEndpoint = () => {
-  const aiUrl = import.meta.env.VITE_AI_API_URL
+  const env = import.meta.env || {}
+  const aiUrl = env.VITE_AI_API_URL
   if (aiUrl) return aiUrl
 
-  const apiBase = import.meta.env.VITE_API_BASE_URL
+  const apiBase = env.VITE_API_BASE_URL
   if (apiBase) return `${trimSlash(apiBase)}/ai/chat`
 
   return ''
@@ -33,6 +37,8 @@ const DESTINATION_RATE_PROFILES = [
     label: 'UK',
     sea: 'Sea DDP / Amazon FBA delivery: about USD 1.80-3.20/kg for 100kg+ cargo',
     air: 'Air DDP / express-style delivery: about USD 5.80-9.50/kg for small or urgent cargo',
+    seaRange: [1.8, 3.2],
+    airRange: [5.8, 9.5],
     transit: 'Typical transit: sea 35-45 days, air 7-12 days after departure',
   },
   {
@@ -40,6 +46,8 @@ const DESTINATION_RATE_PROFILES = [
     label: 'USA',
     sea: 'Sea DDP / Amazon FBA delivery: about USD 1.50-2.80/kg for 100kg+ cargo',
     air: 'Air DDP / express-style delivery: about USD 5.50-9.00/kg for small or urgent cargo',
+    seaRange: [1.5, 2.8],
+    airRange: [5.5, 9],
     transit: 'Typical transit: sea 25-40 days, air 6-12 days after departure',
   },
   {
@@ -47,6 +55,8 @@ const DESTINATION_RATE_PROFILES = [
     label: 'Europe',
     sea: 'Sea / rail DDP delivery: about USD 1.70-3.40/kg for 100kg+ cargo',
     air: 'Air DDP / express-style delivery: about USD 5.80-10.00/kg for small or urgent cargo',
+    seaRange: [1.7, 3.4],
+    airRange: [5.8, 10],
     transit: 'Typical transit: sea or rail 30-45 days, air 7-12 days after departure',
   },
   {
@@ -54,6 +64,8 @@ const DESTINATION_RATE_PROFILES = [
     label: 'Canada',
     sea: 'Sea DDP delivery: about USD 1.80-3.50/kg for 100kg+ cargo',
     air: 'Air DDP / express-style delivery: about USD 6.00-10.50/kg for small or urgent cargo',
+    seaRange: [1.8, 3.5],
+    airRange: [6, 10.5],
     transit: 'Typical transit: sea 30-45 days, air 7-12 days after departure',
   },
 ]
@@ -66,6 +78,101 @@ const getDestinationRateProfile = (message) => {
     air: 'Air DDP / express-style delivery: usually quoted per kg after cargo details are confirmed',
     transit: 'Transit time depends on origin, destination, customs, and delivery type',
   }
+}
+
+const extractWeightKg = (message) => {
+  const match = message.match(/\b(\d+(?:\.\d+)?)\s*(kg|kgs|kilogram|kilograms|lb|lbs|ton|tons)\b/i)
+  if (!match) return 0
+
+  const value = Number(match[1])
+  const unit = match[2].toLowerCase()
+  if (['lb', 'lbs'].includes(unit)) return value * 0.453592
+  if (['ton', 'tons'].includes(unit)) return value * 1000
+  return value
+}
+
+const detectRateMode = (message) => {
+  const text = lowerText(message)
+  if (/\bair\b|express/.test(text)) return 'air'
+  if (/\bsea\b|ocean|ddp|lcl|fcl/.test(text)) return 'sea'
+  return ''
+}
+
+const formatUsd = (value) => {
+  return `USD ${Math.round(value).toLocaleString('en-US')}`
+}
+
+const buildEstimatedTotalPrice = (message) => {
+  const profile = getDestinationRateProfile(message)
+  const weightKg = extractWeightKg(message)
+  const mode = detectRateMode(message)
+
+  if (!weightKg || !mode) return null
+
+  const range = mode === 'air' ? profile.airRange : profile.seaRange
+  if (!range) return null
+
+  const [minRate, maxRate] = range
+  const minTotal = weightKg * minRate
+  const maxTotal = weightKg * maxRate
+  const modeLabel = mode === 'air' ? 'air' : 'sea'
+
+  return {
+    weightKg: Math.round(weightKg),
+    mode,
+    modeLabel,
+    minTotal,
+    maxTotal,
+    text: `Estimated total price for ${Math.round(weightKg)}kg by ${modeLabel}: ${formatUsd(minTotal)}-${formatUsd(maxTotal)}.`,
+  }
+}
+
+const extractTransitByMode = (transitText, mode) => {
+  if (!transitText || !mode) return ''
+  if (mode === 'air') return transitText.match(/air\s+([^,.\n]+)/i)?.[1]?.trim() || ''
+  return transitText.match(/sea(?:\s+or\s+rail)?\s+([^,.\n]+)/i)?.[1]?.trim() || ''
+}
+
+const buildQuoteGuidance = (message) => {
+  const profile = getDestinationRateProfile(message)
+  const estimate = buildEstimatedTotalPrice(message)
+  const mode = estimate?.mode || detectRateMode(message)
+
+  if (!estimate || !mode) return ''
+
+  const bestOption = mode === 'air' ? 'Air DDP' : 'Sea DDP'
+  const bestReason = mode === 'air'
+    ? 'faster transit for urgent delivery'
+    : 'better landed cost for this shipment size'
+  const transitWindow = extractTransitByMode(profile.transit, mode)
+  const transitLine = transitWindow ? `Estimated transit time: ${transitWindow} after departure.` : ''
+
+  return [
+    'Quote direction:',
+    `- Best option: ${bestOption}`,
+    `- Estimated total: ${formatUsd(estimate.minTotal)}-${formatUsd(estimate.maxTotal)}`,
+    transitLine ? `- ${transitLine}` : '',
+    `- Why: ${bestReason}`,
+  ].filter(Boolean).join('\n')
+}
+
+const buildFinalQuoteChecklist = (message, missingItems) => {
+  const isAmazonFba = /\bfba\b|amazon fba/i.test(message)
+  const lines = ['Final quote requires:']
+
+  missingItems.forEach((item) => {
+    lines.push(`- ${item}`)
+  })
+
+  if (isAmazonFba) {
+    lines.push('- Amazon FBA warehouse code')
+    lines.push('- final delivery postcode if available')
+    lines.push('- carton count and carton dimensions / CBM')
+  } else {
+    lines.push('- final delivery postcode if door delivery is needed')
+  }
+
+  return lines.join('\n')
 }
 
 const getTrackingNumber = (text) => {
@@ -158,10 +265,41 @@ const extractLineValue = (message, label) => {
 }
 
 const extractRoute = (message) => {
-  const from = extractLineValue(message, 'from') || message.match(/\bfrom\s+([^,\n]+?)(?:\s+to\s+|,|$)/i)?.[1]?.trim() || ''
-  const to = extractLineValue(message, 'to') || message.match(/\bto\s+([^,\n]+?)(?:,|$)/i)?.[1]?.trim() || ''
+  const from = extractLineValue(message, 'from') || message.match(/\bfrom\s+([^,\n]+?)(?:\s+to\s+|,|\s+by\s+|$)/i)?.[1]?.trim() || ''
+  const to = extractLineValue(message, 'to') || message.match(/\bto\s+([^,\n]+?)(?:,|\s+by\s+|$)/i)?.[1]?.trim() || ''
 
   return { from, to }
+}
+
+const CARGO_PATTERNS = [
+  /amazon fba goods?/i,
+  /clothes|apparel|garment|textile/i,
+  /electronics?|electronic parts?/i,
+  /furniture/i,
+  /shoes?/i,
+  /bags?/i,
+  /fan|fans/i,
+  /desk|desks/i,
+  /battery|batteries/i,
+  /cosmetic|cosmetics/i,
+  /toy|toys/i,
+  /led(?:\s+lights?)?/i,
+  /machine|machines|machinery/i,
+]
+
+const extractCargoName = (message) => {
+  const labeledCargo = extractLineValue(message, 'product') || extractLineValue(message, 'cargo') || extractLineValue(message, 'goods')
+  if (labeledCargo) return labeledCargo
+
+  const productMatch = message.match(/\bproduct\s+is\s+([^,\n]+)/i)
+  if (productMatch) return productMatch[1].trim()
+
+  const directCargo = CARGO_PATTERNS.find((pattern) => pattern.test(message))
+  if (directCargo) return message.match(directCargo)?.[0] || ''
+
+  if (/\bfba\b|amazon fba/i.test(message)) return 'Amazon FBA goods, product not confirmed'
+
+  return ''
 }
 
 const buildQuoteSummary = (message) => {
@@ -170,8 +308,9 @@ const buildQuoteSummary = (message) => {
   const volume = extractLineValue(message, 'volume') || message.match(/\b\d+(?:\.\d+)?\s*(?:cbm|m3|cubic meters?)\b/i)?.[0] || ''
   const cartons = message.match(/\b\d+\s*(?:cartons|carton|ctns|pallets|pallet|boxes|box)\b/i)?.[0] || ''
   const container = message.match(/\b(?:20gp|40gp|40hq|lcl|fcl)\b/i)?.[0] || ''
-  const method = message.match(/\b(?:sea|ocean|air|express|ddp|ddu|door to door|port to port|fcl|lcl)\b/i)?.[0] || ''
-  const cargo = extractLineValue(message, 'product') || extractLineValue(message, 'cargo') || extractLineValue(message, 'goods') || (/\bfba\b|amazon fba/i.test(message) ? 'Amazon FBA goods, product not confirmed' : '')
+  const methodMatches = message.match(/\b(?:sea|ocean|air|express|ddp|ddu|door to door|port to port|fcl|lcl)\b/gi) || []
+  const method = methodMatches.length ? [...new Set(methodMatches.map((item) => item.toUpperCase()))].join(' / ') : ''
+  const cargo = extractCargoName(message)
 
   return [
     ['Origin', from || 'Not confirmed'],
@@ -187,12 +326,14 @@ const formatSummary = (rows) => rows.map(([label, value]) => `- ${label}: ${valu
 
 const formatReferenceRate = (message) => {
   const profile = getDestinationRateProfile(message)
+  const estimatedTotal = buildEstimatedTotalPrice(message)
 
   return [
     `Reference price direction for ${profile.label}:`,
     `- ${profile.sea}`,
     `- ${profile.air}`,
     `- ${profile.transit}`,
+    ...(estimatedTotal ? ['', estimatedTotal.text] : []),
     '',
     'This is a reference range, not a final quote. Final price depends on product name, chargeable weight, volume, cartons or pallets, pickup city in China, delivery postcode or Amazon FBA warehouse, and customs/tax requirements.',
   ].join('\n')
@@ -202,15 +343,19 @@ const buildMockResponse = (message) => {
   const intent = detectAiIntent(message)
   const missing = buildMissingInfoList(message)
   const trackingNumber = getTrackingNumber(message)
+  const summary = buildQuoteSummary(message)
+  const isAmazonFba = /\bfba\b|amazon fba/i.test(message)
+  const quoteGuidance = buildQuoteGuidance(message)
 
   if (intent === 'freight_quote') {
     const hasDestination = !missing.includes('destination country/city or Amazon FBA warehouse')
     const missingCore = missing.filter((item) => item !== 'preferred shipping method, such as sea, air, express, DDP, or port-to-port')
+    const finalQuoteChecklist = buildFinalQuoteChecklist(message, missingCore)
 
     if (!hasDestination) {
       return {
         intent,
-        content: `I can help prepare a freight quote, but I still need a few key details before giving a useful rate.\n\nPlease send:\n${missing.map((item) => `- ${item}`).join('\n')}\n\nOnce I have those details, I can organize the request for sea, air, express, DDP, or port-to-port options.`,
+        content: `I can help prepare a freight quote, but I still need a few key details before giving a useful rate.\n\nPlease send:\n${missing.map((item) => `- ${item}`).join('\n')}\n\nOnce I have those details, I can organize the request for sea, air, express, DDP, or port-to-port options.\n\n${isAmazonFba ? 'For Amazon FBA, please also include the FBA warehouse code, carton count, and carton dimensions / CBM.' : 'For door delivery, please also include the final delivery postcode.'}`,
         suggestions: ['100kg clothes from Shenzhen to Los Angeles by sea DDP', '3 pallets electronics from Ningbo to Dallas', '40HQ furniture from Qingdao to New York port'],
       }
     }
@@ -218,14 +363,14 @@ const buildMockResponse = (message) => {
     if (missingCore.length) {
       return {
         intent,
-        content: `${formatReferenceRate(message)}\n\nTo calculate the exact CargoSoon quote, please send:\n${missingCore.map((item) => `- ${item}`).join('\n')}\n\nIf this is Amazon FBA, please also send the FBA warehouse code or delivery postcode.`,
+        content: `Reference quote:\n${formatReferenceRate(message)}\n\n${finalQuoteChecklist}`,
         suggestions: ['100kg Amazon FBA goods to UK by sea DDP', '3 cartons electronics to UK FBA by air', 'Send final delivery postcode'],
       }
     }
 
     return {
       intent,
-      content: `Got it. Here is the quote request summary I will use:\n\n${formatSummary(buildQuoteSummary(message))}\n\n${formatReferenceRate(message)}\n\nI am checking the best available option now. If a live rate API is connected, this request can return the exact price, transit time, and route options automatically. CargoSoon customer service can also confirm the final rate in this chat.`,
+      content: `Got it. Here is the quote request summary I will use:\n\n${formatSummary(summary)}\n\n${quoteGuidance ? `${quoteGuidance}\n\n` : ''}Reference quote:\n${formatReferenceRate(message)}\n\nFinal quote status:\n- Current stage: reference quote only\n- Final quote can be confirmed after pickup city, detailed cargo info, package details, and delivery address / FBA warehouse are verified\n\nIf a live rate API is connected, this request can return the exact price, transit time, and route options automatically. CargoSoon customer service can also confirm the final rate in this chat.`,
       actions: [
         { label: 'Start Booking', href: AI_STORAGE_HINTS.booking },
       ],
@@ -236,7 +381,7 @@ const buildMockResponse = (message) => {
   if (intent === 'tracking') {
     return {
       intent,
-      content: `I recognized this as a tracking request${trackingNumber ? ` for ${trackingNumber}` : ''}.\n\nCurrent status: In transit\nLatest update: Export handling has been completed and the shipment is moving to the next transport milestone.\nNext step: I can continue checking location, ETA, and delivery exceptions once the live tracking API is connected.\n\nIf this is a container, B/L, or AWB number, please also share the carrier or order reference if you have it.`,
+      content: `I recognized this as a tracking request${trackingNumber ? ` for ${trackingNumber}` : ''}.\n\nCurrent status: In transit\nLatest update: Export handling has been completed and the shipment is moving to the next transport milestone.\nNext step: I can continue checking location, ETA, port movement, and delivery exceptions once the live tracking API is connected.\n\nIf this is a container, B/L, or AWB number, please also share the carrier or order reference if you have it.`,
       actions: [
         { label: 'Open Tracking', href: AI_STORAGE_HINTS.tracking },
       ],
@@ -361,7 +506,8 @@ export const sendCustomerServiceMessage = async ({ message, messages = [], conve
     throw new Error('Message is required')
   }
 
-  const apiBase = import.meta.env.VITE_API_BASE_URL
+  const env = import.meta.env || {}
+  const apiBase = env.VITE_API_BASE_URL
   const endpoint = apiBase ? `${trimSlash(apiBase)}/customer-service/chat` : ''
 
   if (endpoint) {

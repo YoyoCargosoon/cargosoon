@@ -1,16 +1,33 @@
 
-export function setLocal(name,obj){
-  window.localStorage.setItem(name,JSON.stringify(obj))
+const getStorage = () => {
+  if (typeof window === 'undefined') return null
+  try {
+    return window.localStorage || null
+  } catch {
+    return null
+  }
 }
 
-export function getLocal(name){
-  return window.localStorage.getItem(name)
+export function setLocal(name, obj) {
+  const storage = getStorage()
+  if (!storage) return
+  storage.setItem(name, JSON.stringify(obj))
 }
 
-export function clearLocal(name){
-  window.localStorage.clear()
+export function getLocal(name) {
+  const storage = getStorage()
+  if (!storage) return null
+  return storage.getItem(name)
 }
 
-export function removeLocal(name){
-  window.localStorage.removeItem (name)
+export function clearLocal() {
+  const storage = getStorage()
+  if (!storage) return
+  storage.clear()
+}
+
+export function removeLocal(name) {
+  const storage = getStorage()
+  if (!storage) return
+  storage.removeItem(name)
 }
