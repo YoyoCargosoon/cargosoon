@@ -17,7 +17,7 @@ const usesLandingNav = computed(() => isHome2.value || isTrackPage.value || isFr
 const sendToChat = inject('sendToChat', () => {})
 const isCoLogisticsHost = window.location.host === 'app.cargosoon.com'
 
-const activeIndex2 = ref('/new/')
+const activeIndex2 = ref('/')
 const input = ref('')
 const superLevel = ref('')
 const userName = ref('')
@@ -69,8 +69,8 @@ const handleSelect = (key) => {
     window.location.href = key
     return
   } else if (key == '0') {
-    activeIndex2.value = '/new/'
-    router.push('/new/')
+    activeIndex2.value = '/'
+    router.push('/')
   } else if (key == '/track') {
     router.push('/track')
   } else {
@@ -373,7 +373,7 @@ onBeforeUnmount(() => {
           </div>
         </el-menu-item>
 
-        <el-menu-item index="/new/">Home</el-menu-item>
+        <el-menu-item index="/">Home</el-menu-item>
         <el-sub-menu index="2">
           <template #title>Quote</template>
           <el-menu-item index="/main/pricelist">FCL/DDP freight</el-menu-item>

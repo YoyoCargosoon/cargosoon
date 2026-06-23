@@ -2,6 +2,14 @@ import { reactive } from 'vue'
 import { ADMIN_STORAGE_KEY, initialAdminState } from '@/mock/adminData'
 
 const deepClone = (value) => JSON.parse(JSON.stringify(value))
+const getStorage = () => {
+  if (typeof window === 'undefined') return null
+  try {
+    return window.localStorage || null
+  } catch {
+    return null
+  }
+}
 
 const pad = (value) => String(value).padStart(2, '0')
 
@@ -15,10 +23,15 @@ const formatDateTime = (date) => {
 }
 
 const createAdminState = () => {
-  const raw = window.localStorage.getItem(ADMIN_STORAGE_KEY)
+  const storage = getStorage()
+  if (!storage) {
+    return deepClone(initialAdminState)
+  }
+
+  const raw = storage.getItem(ADMIN_STORAGE_KEY)
   if (!raw) {
     const fresh = deepClone(initialAdminState)
-    window.localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(fresh))
+    storage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(fresh))
     return fresh
   }
 
@@ -26,7 +39,7 @@ const createAdminState = () => {
     return JSON.parse(raw)
   } catch {
     const fresh = deepClone(initialAdminState)
-    window.localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(fresh))
+    storage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(fresh))
     return fresh
   }
 }
@@ -36,7 +49,9 @@ const adminState = reactive(createAdminState())
 export const readAdminState = () => adminState
 
 export const writeAdminState = (state) => {
-  window.localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(state))
+  const storage = getStorage()
+  if (!storage) return
+  storage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(state))
 }
 
 export const mutateAdminState = (updater) => {

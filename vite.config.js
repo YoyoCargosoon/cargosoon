@@ -2,18 +2,16 @@ import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import vueDevTools from 'vite-plugin-vue-devtools'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import tailwindcss from '@tailwindcss/vite'
 
-// https://vite.dev/config/
 export default defineConfig({
-  base: '/new/',
+  base: '/',
+  appType: 'spa',
   plugins: [
     vue(),
-    // vueDevTools(),
     tailwindcss(),
     AutoImport({
       resolvers: [ElementPlusResolver()],
@@ -22,12 +20,45 @@ export default defineConfig({
       resolvers: [ElementPlusResolver()],
     }),
   ],
+  server: {
+    host: true,
+    port: 5173,
+    strictPort: true,
+    open: true,
+  },
+  preview: {
+    host: true,
+    port: 4173,
+    strictPort: true,
+  },
+  optimizeDeps: {
+    noDiscovery: true,
+  },
   build: {
-    modulePreload: false  // 禁用 modulepreload
+    modulePreload: false,
   },
   resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    },
+    alias: [
+      {
+        find: /^dayjs$/,
+        replacement: fileURLToPath(new URL('./node_modules/dayjs/esm/index.js', import.meta.url)),
+      },
+      {
+        find: /^dayjs\/plugin\/(.*)\.js$/,
+        replacement: fileURLToPath(
+          new URL('./node_modules/dayjs/esm/plugin/$1/index.js', import.meta.url),
+        ),
+      },
+      {
+        find: /^dayjs\/locale\/(.*)\.js$/,
+        replacement: fileURLToPath(
+          new URL('./node_modules/dayjs/esm/locale/$1.js', import.meta.url),
+        ),
+      },
+      {
+        find: '@',
+        replacement: fileURLToPath(new URL('./src', import.meta.url)),
+      },
+    ],
   },
 })

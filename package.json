@@ -5,6 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite --configLoader runner",
+    "dev:stable": "node scripts/dev-stable.mjs",
+    "dev:reset": "node scripts/dev-reset.mjs",
+    "dev:clean": "node ./scripts/dev-clean.mjs",
+    "dev:open": "cross-env VITE_OPEN_BROWSER=true vite --configLoader runner",
     "build": "vite build --configLoader runner",
     "build:test": "vite build --mode test --configLoader runner",
     "preview": "vite preview",
@@ -13,6 +17,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.3",
     "axios": "^1.8.4",
+    "dayjs": "^1.11.13",
     "element-plus": "^2.9.7",
     "github-markdown-css": "^5.8.1",
     "markdown-it": "^14.1.0",
@@ -25,6 +30,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.3",
+    "cross-env": "^10.0.0",
     "prettier": "3.5.3",
     "unplugin-auto-import": "^19.1.2",
     "unplugin-vue-components": "^28.5.0",

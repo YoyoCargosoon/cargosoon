@@ -4,8 +4,22 @@ import { ADMIN_SESSION_KEY } from '@/mock/adminData.js'
 import { adminMenus } from '@/mock/adminConfig.js'
 import { adminAuthService } from '@/services/adminAuthService'
 
+const getStorage = () => {
+  if (typeof window === 'undefined') return null
+  try {
+    return window.localStorage || null
+  } catch {
+    return null
+  }
+}
+
 const readSession = () => {
-  const raw = window.localStorage.getItem(ADMIN_SESSION_KEY)
+  const storage = getStorage()
+  if (!storage) {
+    return null
+  }
+
+  const raw = storage.getItem(ADMIN_SESSION_KEY)
   if (!raw) {
     return null
   }
@@ -18,11 +32,16 @@ const readSession = () => {
 }
 
 const writeSession = (session) => {
-  if (!session) {
-    window.localStorage.removeItem(ADMIN_SESSION_KEY)
+  const storage = getStorage()
+  if (!storage) {
     return
   }
-  window.localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(session))
+
+  if (!session) {
+    storage.removeItem(ADMIN_SESSION_KEY)
+    return
+  }
+  storage.setItem(ADMIN_SESSION_KEY, JSON.stringify(session))
 }
 
 export const useAdminStore = defineStore('admin', () => {

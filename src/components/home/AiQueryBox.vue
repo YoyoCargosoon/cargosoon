@@ -120,7 +120,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="ai-query col-span-2">
     <div>
-      <a href="/new/chat">
+      <a href="/chat">
         <div class="text-gray-600"><span class="text-blue-500">Smart</span> AI</div>
       </a>
       <div class="py-4 text-2xl font-semibold text-gray-700">Your Smart Logistics Assistant</div>

@@ -11,98 +11,17 @@
     />
     <meta property="og:image" content="https://app.cargosoon.com/ogImage.png" inertia>
     <script>
-      window.__CARGOSOON_BOOT_ERRORS__ = [];
-      window.addEventListener('error', function (event) {
-        window.__CARGOSOON_BOOT_ERRORS__.push({
-          type: 'error',
-          message: event.message || 'Unknown script error',
-          source: event.filename || '',
-          line: event.lineno || 0,
-          column: event.colno || 0,
-        });
-      });
-      window.addEventListener('unhandledrejection', function (event) {
-        var reason = event.reason;
-        window.__CARGOSOON_BOOT_ERRORS__.push({
-          type: 'unhandledrejection',
-          message: reason && reason.message ? reason.message : String(reason),
-        });
-      });
-    </script>
-    <script>
-      (function () {
-        var hasNativeStorage = false;
-        try {
-          if (window.localStorage) {
-            var probeKey = '__cargosoon_storage_probe__';
-            window.localStorage.setItem(probeKey, '1');
-            window.localStorage.removeItem(probeKey);
-            hasNativeStorage = true;
-          }
-        } catch (error) {}
-
-        if (hasNativeStorage) {
-          return;
-        }
-
-        var store = {};
-        var fallbackStorage = {
-          getItem: function (key) {
-            return Object.prototype.hasOwnProperty.call(store, key) ? store[key] : null;
-          },
-          setItem: function (key, value) {
-            store[key] = String(value);
-          },
-          removeItem: function (key) {
-            delete store[key];
-          },
-          clear: function () {
-            store = {};
-          },
-          key: function (index) {
-            return Object.keys(store)[index] || null;
-          },
-          get length() {
-            return Object.keys(store).length;
-          },
-        };
-
-        try {
-          Object.defineProperty(window, 'localStorage', {
-            configurable: true,
-            get: function () {
-              return fallbackStorage;
-            },
-          });
-        } catch (error) {
-          try {
-            window.localStorage = fallbackStorage;
-          } catch (assignError) {}
-        }
-      })();
-    </script>
-    <script>
       var _hmt = _hmt || [];
       (function() {
         var hm = document.createElement("script");
         hm.src = "https://hm.baidu.com/hm.js?391020a134a5f51a76d7d0803230d275";
-        var s = document.getElementsByTagName("script")[0]; 
+        var s = document.getElementsByTagName("script")[0];
         s.parentNode.insertBefore(hm, s);
       })();
     </script>
   </head>
   <body>
     <div id="app"></div>
-    <script type="module">
-      window.__CARGOSOON_MODULE_INLINE__ = true;
-      import('/src/main.js').catch((error) => {
-        window.__CARGOSOON_BOOT_ERRORS__ = window.__CARGOSOON_BOOT_ERRORS__ || [];
-        window.__CARGOSOON_BOOT_ERRORS__.push({
-          type: 'module-import',
-          message: error && error.message ? error.message : String(error),
-          stack: error && error.stack ? error.stack : '',
-        });
-      });
-    </script>
+    <script type="module" src="/src/main.js"></script>
   </body>
 </html>

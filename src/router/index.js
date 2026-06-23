@@ -3,9 +3,22 @@ import HomeView from '../views/home2/index.vue'
 import AdminLayout from '@/layout/admin.vue'
 import { useAdminStore } from '@/stores/admin'
 
+const legacyRedirect = (to) => {
+  const strippedPath = to.path.replace(/^\/new/, '') || '/'
+  return {
+    path: strippedPath,
+    query: to.query,
+    hash: to.hash,
+  }
+}
+
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes: [
+    {
+      path: '/new/:pathMatch(.*)*',
+      redirect: legacyRedirect,
+    },
     {
       path: '/',
       name: 'home',
@@ -120,6 +133,10 @@ const router = createRouter({
       component: () => import('../views/NotFound.vue'),
     },
   ],
+})
+
+router.afterEach((to) => {
+  document.title = to.meta?.title ? `${to.meta.title} | Cargosoon` : 'Cargosoon'
 })
 
 router.beforeEach(async (to) => {

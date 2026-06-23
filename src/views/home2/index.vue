@@ -122,7 +122,7 @@ const submitFeedback = async () => {
       submitFeedbackTicket({
         userId: storedUserInfo.value?.id || storedGuestChatInfo.value?.chat_id || 'guest-user',
         customerName: feedbackForm.customerName.trim(),
-        sourcePage: '/new/',
+        sourcePage: '/',
         sourceModule: 'home-page',
         feedbackType: feedbackForm.feedbackType,
         content: feedbackForm.content.trim(),

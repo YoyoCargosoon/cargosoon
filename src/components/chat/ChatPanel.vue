@@ -189,7 +189,7 @@ const sendMessage = (openAI) => {
   emit('user-send', msg.value)
   msg.value = ''
   if (manageAI.value) setBanEnter(true)
-  if (openAI === 1) window.open('/new/chat')
+  if (openAI === 1) window.open('/chat')
 }
 
 const listenKey = () => {
