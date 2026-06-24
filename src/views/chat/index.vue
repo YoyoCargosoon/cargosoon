@@ -142,8 +142,14 @@ const canSend = computed(() => {
 })
 const isServiceMode = computed(() => route.query.mode === 'service')
 const activeStorageKey = computed(() => AI_STORAGE_KEY)
-const pageTitle = computed(() => 'CargoSoon Assistant')
-const pageSubtitle = computed(() => 'Freight quotes, tracking, booking, warehouse, and 1688 sourcing support.')
+const pageTitle = computed(() => (
+  isServiceMode.value ? 'CargoSoon Customer Service' : 'CargoSoon Assistant'
+))
+const pageSubtitle = computed(() => (
+  isServiceMode.value
+    ? 'A CargoSoon specialist can reply here directly for final pricing, shipment checks, and booking follow-up.'
+    : 'Freight quotes, tracking, booking, warehouse, and 1688 sourcing support.'
+))
 const emptyTitle = computed(() => (
   isServiceMode.value
     ? 'Customer service is the priority here. AI can help while your specialist follows up.'
@@ -154,6 +160,20 @@ const activeSidebarShortcuts = computed(() => (isServiceMode.value ? serviceSide
 const recentTitle = computed(() => 'Recent Conversations')
 const composerPlaceholder = computed(() => (isServiceMode.value ? 'Message CargoSoon Customer Service or AI...' : 'Message CargoSoon AI or Customer Service...'))
 const serviceAvatarUrl = computed(() => serviceManage.value.image_url || '')
+const assignedServiceAgent = computed(() => {
+  const latestServiceReply = [...serviceAssistantMessages.value].reverse()[0]
+
+  return {
+    id: serviceManage.value.id || '',
+    name: latestServiceReply?.senderName || serviceManage.value.englishname || 'CargoSoon Specialist',
+    avatar: latestServiceReply?.avatarUrl || serviceManage.value.image_url || '',
+    whatsapp: serviceManage.value.whatsappp || '',
+    email: serviceManage.value.service_email || '',
+    onlineStatus: serviceManage.value.online_status || '',
+    onlineLabel: serviceManage.value.online_label || '',
+    onlineSource: serviceManage.value.online_source || '',
+  }
+})
 const servicePanelOpened = ref(route.query.mode === 'service')
 const serviceConnectionNotice = computed(() => {
   if (serviceConnectionError.value) return serviceConnectionError.value
@@ -165,7 +185,62 @@ const serviceEntryLabel = computed(() => {
   if (serviceConnected.value) return isServiceMode.value ? 'Customer Service Connected' : 'Open Customer Service'
   return 'Contact Customer Service'
 })
+const serviceCtaTitle = computed(() => (
+  serviceConnected.value ? 'Customer service is ready in this conversation' : 'Need a real customer service specialist?'
+))
+const serviceCtaDescription = computed(() => (
+  serviceConnected.value
+    ? 'Stay in this thread and continue with a CargoSoon specialist for final rates, shipment details, and booking follow-up.'
+    : 'Move this AI conversation to a real CargoSoon specialist for final pricing, shipment checks, and booking support.'
+))
 const specialistName = computed(() => serviceManage.value.englishname || 'CargoSoon Specialist')
+const serviceStatusMeta = computed(() => {
+  if (assignedServiceAgent.value.onlineStatus) {
+    if (assignedServiceAgent.value.onlineStatus === 'online') {
+      return {
+        label: assignedServiceAgent.value.onlineLabel || 'Online now',
+        tone: 'online',
+        description: `${assignedServiceAgent.value.name} is currently online and assigned to this conversation.`,
+      }
+    }
+
+    if (assignedServiceAgent.value.onlineStatus === 'busy') {
+      return {
+        label: assignedServiceAgent.value.onlineLabel || 'Busy',
+        tone: 'busy',
+        description: `${assignedServiceAgent.value.name} is assigned to this conversation and may reply with a short delay.`,
+      }
+    }
+
+    return {
+      label: assignedServiceAgent.value.onlineLabel || 'Offline',
+      tone: 'offline',
+      description: `${assignedServiceAgent.value.name} is assigned to this conversation, but is not currently online.`,
+    }
+  }
+
+  if (serviceConnected.value && assignedServiceAgent.value.name) {
+    return {
+      label: 'Online now',
+      tone: 'online',
+      description: `${assignedServiceAgent.value.name} is assigned to this conversation.`,
+    }
+  }
+
+  if (serviceConnecting.value) {
+    return {
+      label: 'Connecting',
+      tone: 'connecting',
+      description: 'We are connecting your conversation to the assigned CargoSoon specialist.',
+    }
+  }
+
+  return {
+    label: 'Waiting',
+    tone: 'waiting',
+    description: 'A CargoSoon specialist has been requested and will reply in this conversation.',
+  }
+})
 const supportMenuItems = computed(() => ([
   {
     key: 'freight_quote',
@@ -525,6 +600,27 @@ const appendMessage = (message) => {
   scrollToBottom()
 }
 
+const appendServiceStatusMessage = (content) => {
+  if (!content) return
+
+  const existing = activeConversation.value?.messages?.some((message) => {
+    return message.role === 'assistant' && message.assistantType === 'service' && message.content === content
+  })
+
+  if (existing) return
+
+  appendMessage({
+    id: nowId(),
+    role: 'assistant',
+    assistantType: 'service',
+    senderName: specialistName.value,
+    content,
+    attachments: [],
+    status: 'done',
+    createdAt: Date.now(),
+  })
+}
+
 const replaceMessage = (id, patch) => {
   updateConversation((conversation) => {
     const index = conversation.messages.findIndex((item) => item.id === id)
@@ -767,6 +863,7 @@ const requestCustomerServiceHandoff = async () => {
   if (!activeConversation.value || activeConversation.value.serviceRequestedAt) {
     if (serviceConnected.value) {
       serviceNotice.value = 'Customer service is connected in this conversation.'
+      appendServiceStatusMessage('Customer service is connected in this conversation. You can continue with a CargoSoon specialist here.')
     }
     return
   }
@@ -776,6 +873,7 @@ const requestCustomerServiceHandoff = async () => {
   })
 
   serviceNotice.value = 'Customer service requested. A specialist can reply here directly.'
+  appendServiceStatusMessage('Customer service requested. A CargoSoon specialist will reply in this conversation as soon as the live connection is ready.')
 
   await sendLiveCustomerServiceMessage(
     '[Customer requested live customer service. Please reply in this conversation.]',
@@ -850,6 +948,29 @@ const askAssistant = async (text) => {
     attachments: outgoingAttachments,
     createdAt: Date.now(),
   })
+
+  if (isServiceMode.value) {
+    loading.value = true
+
+    try {
+      const delivered = await sendLiveCustomerServiceMessage(question, outgoingAttachments)
+
+      serviceNotice.value = delivered
+        ? 'Your message has been sent to CargoSoon Customer Service.'
+        : 'Customer service is connecting. Your message will be delivered as soon as the live chat is ready.'
+
+      if (!delivered) {
+        appendServiceStatusMessage('Customer service is connecting. Your message has been queued and will be delivered once the live chat is ready.')
+      }
+    } catch (error) {
+      errorMessage.value = error.message || 'Customer service message failed. Please try again.'
+    } finally {
+      loading.value = false
+      scrollToBottom()
+    }
+
+    return
+  }
 
   sendLiveCustomerServiceMessage(question, outgoingAttachments).catch(() => {
     serviceNotice.value = 'CargoSoon AI has replied first. Customer service can follow up here once the live connection is ready.'
@@ -970,6 +1091,10 @@ watch(serviceChatList, () => {
 }, { deep: true })
 
 watch([serviceConnected, serviceUserInfo], () => {
+  if (serviceConnected.value) {
+    serviceNotice.value = 'Customer service is connected in this conversation.'
+    appendServiceStatusMessage('Customer service is connected in this conversation. You can continue with a CargoSoon specialist here.')
+  }
   drainQueuedServiceMessages()
 })
 
@@ -1033,18 +1158,6 @@ onBeforeUnmount(() => {
         <div v-else-if="!recentCollapsed" class="empty-history">No recent chats yet</div>
       </div>
 
-      <div class="sidebar-section shortcut-section">
-        <button
-          v-for="item in activeSidebarShortcuts"
-          :key="item.key"
-          class="shortcut-btn"
-          type="button"
-          @click="askAssistant(item.prompt)"
-        >
-          <ChatDotRound class="section-icon" aria-hidden="true" />
-          {{ item.label }}
-        </button>
-      </div>
     </aside>
 
     <main class="ai-main">
@@ -1061,34 +1174,12 @@ onBeforeUnmount(() => {
             <ChatDotRound aria-hidden="true" />
           </div>
           <h2>{{ emptyTitle }}</h2>
-          <div class="assistant-lanes">
-            <article class="assistant-lane">
-              <span class="assistant-lane-kicker">Instant reply</span>
-              <strong>CargoSoon AI</strong>
-              <p>Rates, tracking, booking guidance, warehouse questions, and 1688 sourcing suggestions.</p>
-            </article>
-            <article class="assistant-lane">
-              <span class="assistant-lane-kicker">Human follow-up</span>
-              <strong>{{ specialistName }}</strong>
-              <p>Final rate confirmation, shipment details, booking coordination, and customer service follow-up.</p>
-            </article>
-          </div>
-          <div class="conversation-rail">
-            <button
-              v-for="item in supportMenuItems"
-              :key="item.key"
-              type="button"
-              class="conversation-chip"
-              @click="useSuggestion(item.prompt)"
-            >
-              {{ item.label }}
-            </button>
-          </div>
-          <div class="starter-grid">
+          <div class="empty-suggestions">
             <button
               v-for="prompt in activeStarterPrompts"
               :key="prompt"
               type="button"
+              class="conversation-chip"
               @click="useSuggestion(prompt)"
             >
               {{ prompt }}
@@ -1160,8 +1251,6 @@ onBeforeUnmount(() => {
                   </div>
                 </div>
 
-                <div v-if="message.intent" class="intent-chip">{{ message.intent }}</div>
-
                 <div v-if="message.actions?.length" class="message-actions">
                   <button
                     v-for="action in message.actions"
@@ -1173,16 +1262,6 @@ onBeforeUnmount(() => {
                   </button>
                 </div>
 
-                <div v-if="message.suggestions?.length" class="suggestion-row">
-                  <button
-                    v-for="suggestion in message.suggestions"
-                    :key="suggestion"
-                    type="button"
-                    @click="useSuggestion(suggestion)"
-                  >
-                    {{ suggestion }}
-                  </button>
-                </div>
               </template>
             </div>
           </article>
@@ -1191,9 +1270,6 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="composer-wrap">
-        <div v-if="serviceNotice" class="notice-line">
-          {{ serviceNotice }}
-        </div>
         <div v-if="voiceError" class="notice-line">
           {{ voiceError }}
         </div>
@@ -1222,11 +1298,6 @@ onBeforeUnmount(() => {
         >
 
         <div class="composer">
-          <div v-if="showServiceBanner" class="service-banner">
-            <span class="service-banner-dot" :class="{ connected: serviceConnected }"></span>
-            <span>{{ serviceBannerText }}</span>
-          </div>
-
           <div v-if="attachedFiles.length" class="composer-attachments">
             <div
               v-for="file in attachedFiles"
@@ -1296,17 +1367,6 @@ onBeforeUnmount(() => {
               >
                 <Headset aria-hidden="true" />
               </button>
-              <div class="composer-quick-actions composer-quick-actions-inline">
-                <button
-                  v-for="item in supportMenuItems"
-                  :key="item.key"
-                  type="button"
-                  class="composer-quick-chip composer-quick-chip-primary"
-                  @click="useSuggestion(item.prompt)"
-                >
-                  {{ item.label }}
-                </button>
-              </div>
             </div>
 
             <button
@@ -1506,6 +1566,11 @@ onBeforeUnmount(() => {
   flex: 0 0 auto;
   padding: 18px clamp(24px, 6vw, 72px) 12px;
   border-bottom: 1px solid #ececec;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .ai-header h1 {
@@ -1523,6 +1588,140 @@ onBeforeUnmount(() => {
   color: #676767;
   font-size: 14px;
   line-height: 1.45;
+}
+
+.header-service-badge {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #fff7f2;
+  color: #8b5e3c;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px #f3dbc9;
+}
+
+.service-agent-card {
+  display: grid;
+  gap: 12px;
+  margin: 16px clamp(24px, 6vw, 72px) 0;
+  padding: 16px 18px;
+  border: 1px solid #efe2d5;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #fffdfb 0%, #fff7f1 100%);
+}
+
+.service-agent-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.service-agent-avatar {
+  width: 54px;
+  height: 54px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f26a1b;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  overflow: hidden;
+}
+
+.service-agent-avatar.has-image {
+  background: #f2f2f2;
+}
+
+.service-agent-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.service-agent-copy {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.service-agent-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.service-agent-row strong {
+  color: #1a1a1a;
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.service-agent-copy p {
+  margin: 0;
+  color: #6d6054;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.service-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.service-status-pill.online {
+  background: #edf9f1;
+  color: #167a49;
+  box-shadow: inset 0 0 0 1px #cbead7;
+}
+
+.service-status-pill.busy {
+  background: #fff8eb;
+  color: #ad6a08;
+  box-shadow: inset 0 0 0 1px #efd8ad;
+}
+
+.service-status-pill.offline {
+  background: #f5f5f5;
+  color: #6f6f6f;
+  box-shadow: inset 0 0 0 1px #dedede;
+}
+
+.service-status-pill.connecting,
+.service-status-pill.waiting {
+  background: #fff6ef;
+  color: #b15c1f;
+  box-shadow: inset 0 0 0 1px #f2d9c7;
+}
+
+.service-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: 0 0 auto;
+}
+
+.service-agent-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  color: #7a6b5d;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .conversation-rail {
@@ -1557,12 +1756,12 @@ onBeforeUnmount(() => {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 22px clamp(18px, 6vw, 72px) 240px;
+  padding: 18px clamp(18px, 6vw, 72px) 210px;
 }
 
 .empty-state {
-  max-width: 760px;
-  margin: 7vh auto 0;
+  max-width: 680px;
+  margin: 9vh auto 0;
   text-align: center;
 }
 
@@ -1584,12 +1783,20 @@ onBeforeUnmount(() => {
 }
 
 .empty-state h2 {
-  margin: 0 0 22px;
+  margin: 0;
   color: #1f2937;
-  font-size: 24px;
-  font-weight: 650;
+  font-size: 22px;
+  font-weight: 700;
   line-height: 1.3;
   letter-spacing: 0;
+}
+
+.empty-suggestions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
 }
 
 .assistant-lanes {
@@ -1597,6 +1804,113 @@ onBeforeUnmount(() => {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin: 0 0 22px;
+}
+
+.service-mode-panel {
+  max-width: 760px;
+  margin: 0 auto 18px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid #f1d8c6;
+  background: linear-gradient(180deg, #fff9f4 0%, #fff5ee 100%);
+  text-align: left;
+}
+
+.service-mode-panel strong {
+  display: block;
+  color: #1b1f27;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.service-mode-panel p {
+  margin: 8px 0 0;
+  color: #675f58;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.service-entry-card,
+.service-inline-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid #f1d8c6;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fff9f4 0%, #fff5ee 100%);
+}
+
+.service-entry-card {
+  max-width: 760px;
+  margin: 0 auto 18px;
+  padding: 16px 18px;
+  text-align: left;
+}
+
+.service-entry-copy,
+.service-inline-copy {
+  min-width: 0;
+}
+
+.service-entry-kicker {
+  display: inline-flex;
+  margin-bottom: 8px;
+  color: #b2622d;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.service-entry-copy strong {
+  display: block;
+  color: #1b1f27;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.service-entry-copy p {
+  margin: 8px 0 0;
+  color: #675f58;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.service-entry-btn,
+.service-inline-btn {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  white-space: nowrap;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+.service-entry-btn {
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff9340 0%, #f37a24 64%, #eb691a 100%);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 10px 22px rgba(242, 106, 27, 0.16);
+}
+
+.service-entry-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.service-entry-btn:hover,
+.service-inline-btn:hover {
+  transform: translateY(-1px);
 }
 
 .assistant-lane {
@@ -1893,13 +2207,13 @@ onBeforeUnmount(() => {
 }
 
 .message-actions button {
-  min-height: 34px;
+  min-height: 30px;
   padding: 0 12px;
   border-radius: 999px;
-  background: #0d0d0d;
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 600;
+  background: #f7f7f7;
+  color: #111827;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .suggestion-row button {
@@ -1928,16 +2242,6 @@ onBeforeUnmount(() => {
   margin: 0 auto;
 }
 
-.service-banner {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 2px 0;
-  color: #7a6f66;
-  font-size: 12px;
-  line-height: 1.35;
-}
-
 .service-banner-dot {
   width: 8px;
   height: 8px;
@@ -1950,54 +2254,6 @@ onBeforeUnmount(() => {
   background: #20b26b;
 }
 
-.composer-quick-actions {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 6px;
-  overflow-x: auto;
-  padding-top: 0;
-  scrollbar-width: none;
-  min-width: 0;
-  align-items: center;
-}
-
-.composer-quick-actions::-webkit-scrollbar {
-  display: none;
-}
-
-.composer-quick-actions-inline {
-  flex: 1 1 auto;
-  margin-left: 2px;
-}
-
-.composer-quick-chip {
-  min-height: 28px;
-  padding: 0 11px;
-  border: 1px solid #ece3dc;
-  border-radius: 999px;
-  background: #fffaf7;
-  color: #8b5e3c;
-  cursor: pointer;
-  font: inherit;
-  font-size: 12px;
-  line-height: 1;
-  transition: border-color 0.16s ease, color 0.16s ease, background 0.16s ease;
-  white-space: nowrap;
-  flex: 0 0 auto;
-}
-
-.composer-quick-chip:hover {
-  border-color: #efc5a5;
-  background: #fff3eb;
-  color: #b95818;
-}
-
-.composer-quick-chip-primary {
-  background: #fff7f2;
-  border-color: #f3dbc9;
-  color: #b95818;
-  font-weight: 500;
-}
 
 .notice-line,
 .error-line {
@@ -2270,6 +2526,18 @@ onBeforeUnmount(() => {
 
   .assistant-lanes {
     grid-template-columns: 1fr;
+  }
+
+  .service-entry-card,
+  .service-inline-entry {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .service-entry-btn,
+  .service-inline-btn {
+    width: 100%;
+    justify-content: center;
   }
 
   .composer-quick-actions {

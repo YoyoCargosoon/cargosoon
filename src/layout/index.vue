@@ -9,7 +9,6 @@ import { useLoadingStore } from '@/stores/loading'
 import router from '@/router/index.js'
 
 const route = useRoute()
-const isAdminRoute = computed(() => String(route.path || '').startsWith('/admin'))
 const isHome2 = computed(() => route.name === 'home2' || route.name === 'home')
 const isTrackPage = computed(() => route.name === 'track' || route.name === 'track-result')
 const isFreightPage = computed(() => route.name === 'fcl-ddp-freight')
@@ -198,12 +197,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="relative">
-    <template v-if="isAdminRoute">
-      <LoadingVue v-show="loadingStore.showLoading"></LoadingVue>
-      <router-view />
-    </template>
-
-    <template v-else-if="usesLandingNav">
+    <template v-if="usesLandingNav">
       <header class="landing-nav">
         <nav class="landing-links">
           <button
@@ -451,10 +445,8 @@ onBeforeUnmount(() => {
       </el-menu>
     </template>
 
-    <template v-if="!isAdminRoute">
-      <LoadingVue v-show="loadingStore.showLoading"></LoadingVue>
-      <router-view />
-    </template>
+    <LoadingVue v-show="loadingStore.showLoading"></LoadingVue>
+    <router-view />
   </div>
 </template>
 

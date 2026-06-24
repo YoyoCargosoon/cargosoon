@@ -27,7 +27,75 @@ export function useWebSocket() {
   const connected = ref(false)
   const nologinHello = ref([])
   const guessList = ref([]) // msg_type 15: suggested questions ("猜你想问")
-  const manage = ref({ id: '', image_url: '', englishname: '', whatsappp: '', service_email: '' })
+  const manage = ref({
+    id: '',
+    image_url: '',
+    englishname: '',
+    whatsappp: '',
+    service_email: '',
+    online_status: '',
+    online_label: '',
+    online_source: '',
+  })
+
+  const normalizeOnlineStatus = (row = {}) => {
+    const candidates = [
+      row.online_status,
+      row.is_online,
+      row.online,
+      row.status,
+      row.work_status,
+      row.service_status,
+      row.on_line,
+    ]
+
+    const matched = candidates.find((value) => value !== undefined && value !== null && value !== '')
+    if (matched === undefined) {
+      return {
+        online_status: '',
+        online_label: '',
+        online_source: '',
+      }
+    }
+
+    const raw = String(matched).trim()
+    const lower = raw.toLowerCase()
+
+    if (['1', 'true', 'online', 'available', 'active', 'working'].includes(lower)) {
+      return {
+        online_status: 'online',
+        online_label: 'Online now',
+        online_source: raw,
+      }
+    }
+
+    if (['0', 'false', 'offline', 'off', 'busy', 'away', 'break', 'rest'].includes(lower)) {
+      return {
+        online_status: lower === 'busy' ? 'busy' : 'offline',
+        online_label: lower === 'busy' ? 'Busy' : 'Offline',
+        online_source: raw,
+      }
+    }
+
+    return {
+      online_status: lower,
+      online_label: raw,
+      online_source: raw,
+    }
+  }
+
+  const normalizeManageRow = (row = {}) => {
+    const onlineMeta = normalizeOnlineStatus(row)
+
+    return {
+      id: row.id || '',
+      image_url: row.image_url || '',
+      englishname: row.englishname || '',
+      service_email: row.service_email || '',
+      whatsappp: row.whatsappp || '',
+      ...onlineMeta,
+    }
+  }
 
   let banEnter = false
   let aiEnter = false
@@ -110,14 +178,8 @@ export function useWebSocket() {
         noticeInfo.setNum(data.no_notice_read)
         if (data.mode === 2) manageAI.value = true
       }
-      if (data.type === 'no_login_init') {
-        manage.value = {
-          id: data.manage_row.id,
-          image_url: data.manage_row.image_url,
-          englishname: data.manage_row.englishname,
-          service_email: data.manage_row.service_email,
-          whatsappp: data.manage_row.whatsappp,
-        }
+      if (data.manage_row) {
+        manage.value = normalizeManageRow(data.manage_row)
       }
 
       const list = data.message_list

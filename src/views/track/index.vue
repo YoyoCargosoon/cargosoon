@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { Box, Document, Promotion, Search, Ship } from '@element-plus/icons-vue'
+import { Search } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 import { getLocal } from '@/utils/common'
 import { getGuestTrackingUsage } from '@/services/trackingService.js'
@@ -11,12 +11,7 @@ const trackingNumber = ref('')
 const inputError = ref('')
 const guestUsage = ref(getGuestTrackingUsage())
 
-const searchableTypes = [
-  { label: 'CargoSoon order', icon: Document },
-  { label: 'International express', icon: Promotion },
-  { label: 'Container number', icon: Box },
-  { label: 'Ocean B/L or Air AWB', icon: Ship },
-]
+const searchableTypes = ['CargoSoon order', 'Express', 'Container', 'B/L', 'AWB', 'Partner order']
 
 const exampleNumbers = ['CSO-DDP-SEA-1001', '1Z999AA10123456784', 'MSKU1234567', '3PL-ORDER-889900']
 
@@ -67,16 +62,13 @@ onMounted(refreshGuestUsage)
       <header class="track-hero">
         <div class="hero-copy">
           <span class="track-kicker">CargoSoon Tracking</span>
-          <h1>Track CargoSoon shipments and global logistics numbers</h1>
-          <p>
-            Search CargoSoon orders, international express, container numbers, ocean B/L, air AWB,
-            and logistics company order IDs in one place.
-          </p>
+          <h1>Track any shipment</h1>
+          <p>CargoSoon orders, express tracking, containers, B/L, AWB, and partner order IDs.</p>
         </div>
 
         <div class="hero-note">
           <strong>Not arranged by CargoSoon?</strong>
-          <span>You can still search the tracking number here.</span>
+          <span>You can still track it here.</span>
         </div>
       </header>
 
@@ -114,12 +106,10 @@ onMounted(refreshGuestUsage)
         </div>
       </form>
 
-      <section class="searchable-grid" aria-label="Supported tracking types">
-        <article v-for="item in searchableTypes" :key="item.label" class="searchable-card">
-          <component :is="item.icon" class="searchable-icon" aria-hidden="true" />
-          <strong>{{ item.label }}</strong>
-        </article>
-      </section>
+      <div class="searchable-strip" aria-label="Supported tracking types">
+        <span class="searchable-label">Supported</span>
+        <span v-for="item in searchableTypes" :key="item" class="searchable-chip">{{ item }}</span>
+      </div>
 
       <div v-if="!isAuthenticated" class="track-guest-panel">
         <div>
@@ -149,13 +139,13 @@ onMounted(refreshGuestUsage)
 .track-shell {
   width: min(100%, 1040px);
   margin: 0 auto;
-  padding: 56px 20px 54px;
+  padding: 44px 20px 48px;
 }
 
 .track-hero {
   display: grid;
-  gap: 20px;
-  margin-bottom: 22px;
+  gap: 16px;
+  margin-bottom: 18px;
 }
 
 .hero-copy {
@@ -175,21 +165,21 @@ onMounted(refreshGuestUsage)
 }
 
 .hero-copy h1 {
-  width: min(100%, 720px);
-  margin: 16px auto 12px;
+  width: min(100%, 680px);
+  margin: 12px auto 10px;
   color: #20242d;
-  font-size: 46px;
-  line-height: 1.06;
+  font-size: 40px;
+  line-height: 1.08;
   font-weight: 800;
   letter-spacing: 0;
 }
 
 .hero-copy p {
-  width: min(100%, 720px);
+  width: min(100%, 660px);
   margin: 0 auto;
   color: #687284;
-  font-size: 16px;
-  line-height: 1.55;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 .hero-note {
@@ -197,9 +187,9 @@ onMounted(refreshGuestUsage)
   align-items: center;
   justify-content: center;
   gap: 10px;
-  width: min(100%, 820px);
+  width: min(100%, 720px);
   margin: 0 auto;
-  padding: 12px 16px;
+  padding: 10px 14px;
   border: 1px solid #ffd8bf;
   border-radius: 8px;
   background: #fff8f2;
@@ -217,11 +207,11 @@ onMounted(refreshGuestUsage)
 }
 
 .track-search-panel {
-  padding: 20px;
+  padding: 18px;
   border: 1px solid rgba(242, 106, 27, 0.2);
   border-radius: 8px;
   background: #ffffff;
-  box-shadow: 0 18px 42px rgba(31, 36, 48, 0.08);
+  box-shadow: 0 14px 34px rgba(31, 36, 48, 0.07);
 }
 
 .track-search-panel label {
@@ -336,35 +326,30 @@ onMounted(refreshGuestUsage)
   color: #e45f14;
 }
 
-.searchable-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+.searchable-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
   margin-top: 16px;
 }
 
-.searchable-card {
-  display: flex;
+.searchable-label {
+  color: #8791a1;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.searchable-chip {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  min-height: 58px;
-  padding: 0 14px;
-  border: 1px solid #e8edf4;
-  border-radius: 8px;
+  height: 28px;
+  padding: 0 11px;
+  border: 1px solid #e5eaf1;
+  border-radius: 999px;
   background: #ffffff;
-}
-
-.searchable-icon {
-  width: 17px;
-  height: 17px;
-  color: #f26a1b;
-  flex: 0 0 auto;
-}
-
-.searchable-card strong {
-  color: #293241;
-  font-size: 13px;
-  line-height: 1.3;
+  color: #5f697a;
+  font-size: 12px;
   font-weight: 800;
 }
 
@@ -418,15 +403,9 @@ onMounted(refreshGuestUsage)
   color: #ffffff;
 }
 
-@media (max-width: 860px) {
-  .searchable-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 720px) {
   .track-shell {
-    padding: 42px 16px 36px;
+    padding: 36px 16px 34px;
   }
 
   .hero-copy h1 {
@@ -463,11 +442,11 @@ onMounted(refreshGuestUsage)
 
 @media (max-width: 520px) {
   .track-shell {
-    padding-top: 30px;
+    padding-top: 24px;
   }
 
   .hero-copy h1 {
-    font-size: 30px;
+    font-size: 28px;
   }
 
   .hero-copy p,
@@ -477,10 +456,6 @@ onMounted(refreshGuestUsage)
 
   .track-search-panel {
     padding: 14px;
-  }
-
-  .searchable-grid {
-    grid-template-columns: 1fr;
   }
 }
 </style>

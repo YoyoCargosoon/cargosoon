@@ -8,7 +8,8 @@ const router = useRouter()
 const isHome2 = computed(() => route.name === 'home2' || route.name === 'home')
 const isTrackPage = computed(() => route.name === 'track' || route.name === 'track-result')
 const isFreightPage = computed(() => route.name === 'fcl-ddp-freight')
-const usesLandingNav = computed(() => isHome2.value || isTrackPage.value || isFreightPage.value)
+const isChatPage = computed(() => route.name === 'chat')
+const usesLandingNav = computed(() => isHome2.value || isTrackPage.value || isFreightPage.value || isChatPage.value)
 
 const activeLandingKey = ref('')
 const openLandingMenu = ref('')
@@ -18,28 +19,32 @@ const goLogin = () => {
 }
 
 const goQuote = () => {
-  if (isHome2.value) {
-    const el = document.getElementById('ai-quote-box')
-    el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    return
-  }
   router.push({ name: 'fcl-ddp-freight' })
 }
 
 const openAssistantPage = () => {
-  const target = router.resolve({ name: 'chat', query: { mode: 'ai' } })
-
-  if (route.fullPath === target.fullPath) {
-    return
-  }
-
-  router.push(target).catch(() => {
-    window.location.href = target.href
+  router.push({
+    name: 'chat',
+    query: { mode: 'ai' },
+  }).catch(() => {
+    window.location.href = '/chat?mode=ai'
   })
 }
 
 const openTrackingPage = () => {
   router.push({ name: 'track' })
+}
+
+const openSourcingPage = () => {
+  router.push({
+    name: 'chat',
+    query: {
+      mode: 'ai',
+      q: 'I need 1688 sourcing help',
+    },
+  }).catch(() => {
+    window.location.href = '/chat?mode=ai&q=I%20need%201688%20sourcing%20help'
+  })
 }
 
 const handleExternalJump = (path) => {
@@ -56,8 +61,13 @@ const syncLandingNavState = () => {
     return
   }
 
-  if (route.name === 'track' || route.name === 'track-result' || route.name === 'fcl-ddp-freight') {
+  if (route.name === 'fcl-ddp-freight') {
     activeLandingKey.value = 'quote'
+    return
+  }
+
+  if (route.name === 'track' || route.name === 'track-result') {
+    activeLandingKey.value = 'tracking'
     return
   }
 
@@ -108,25 +118,46 @@ onBeforeUnmount(() => {
         AI Assistant
       </button>
 
+      <button
+        :class="{ 'is-active': activeLandingKey === 'quote' }"
+        @click="activateLanding('quote', goQuote)"
+      >
+        Quote
+      </button>
+
+      <button
+        :class="{ 'is-active': activeLandingKey === 'tracking' }"
+        @click="activateLanding('tracking', openTrackingPage)"
+      >
+        Tracking
+      </button>
+
       <div
         class="landing-dropdown"
-        :class="{ 'is-active': activeLandingKey === 'quote', 'is-open': openLandingMenu === 'quote' }"
+        :class="{ 'is-active': activeLandingKey === 'dropshipping', 'is-open': openLandingMenu === 'dropshipping' }"
       >
         <button
           type="button"
           class="landing-dropdown-trigger"
-          :class="{ 'is-active': activeLandingKey === 'quote' }"
-          @click.stop="toggleLandingMenu('quote')"
+          :class="{ 'is-active': activeLandingKey === 'dropshipping' }"
+          @click.stop="toggleLandingMenu('dropshipping')"
         >
-          Quote
+          DropShipping
           <span class="landing-dropdown-caret" aria-hidden="true"></span>
         </button>
         <div class="landing-dropdown-menu">
-          <button type="button" @click.stop="handleLandingItemClick('quote', goQuote)">FCL/DDP freight</button>
-          <button type="button" @click.stop="handleLandingItemClick('quote', () => handleExternalJump('/order/shippingOrder'))">Order</button>
-          <button type="button" @click.stop="handleLandingItemClick('quote', openTrackingPage)">Tracking</button>
+          <button type="button" @click.stop="handleLandingItemClick('dropshipping', goCodrop)">CoDropshipping</button>
+          <button type="button" @click.stop="handleLandingItemClick('dropshipping', () => handleExternalJump('/account/Shopify'))">Store</button>
+          <button type="button" @click.stop="handleLandingItemClick('dropshipping', () => handleExternalJump('/account/storeOrder'))">Store Order</button>
         </div>
       </div>
+
+      <button
+        :class="{ 'is-active': activeLandingKey === 'sourcing' }"
+        @click="activateLanding('sourcing', openSourcingPage)"
+      >
+        1688 Sourcing
+      </button>
 
       <div
         class="landing-dropdown"
@@ -150,29 +181,6 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <div
-        class="landing-dropdown"
-        :class="{ 'is-active': activeLandingKey === 'dropshipping', 'is-open': openLandingMenu === 'dropshipping' }"
-      >
-        <button
-          type="button"
-          class="landing-dropdown-trigger"
-          :class="{ 'is-active': activeLandingKey === 'dropshipping' }"
-          @click.stop="toggleLandingMenu('dropshipping')"
-        >
-          DropShipping
-          <span class="landing-dropdown-caret" aria-hidden="true"></span>
-        </button>
-        <div class="landing-dropdown-menu">
-          <button type="button" @click.stop="handleLandingItemClick('dropshipping', goCodrop)">CoDropshipping</button>
-          <button type="button" @click.stop="handleLandingItemClick('dropshipping', () => handleExternalJump('/account/Shopify'))">Store</button>
-          <button type="button" @click.stop="handleLandingItemClick('dropshipping', () => handleExternalJump('/account/storeOrder'))">Store Order</button>
-        </div>
-      </div>
-
-      <button :class="{ 'is-active': activeLandingKey === 'billing' }" @click="activateLanding('billing', () => handleExternalJump('/account/Bill'))">
-        Billing
-      </button>
       <button :class="{ 'is-active': activeLandingKey === 'about' }" @click="activateLanding('about', () => handleExternalJump('/aboutUs'))">
         About Us
       </button>

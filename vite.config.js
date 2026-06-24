@@ -1,5 +1,7 @@
 import { fileURLToPath, URL } from 'node:url'
 
+const srcPath = fileURLToPath(new URL('./src/', import.meta.url)).replace(/\\/g, '/')
+
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
@@ -56,8 +58,8 @@ export default defineConfig({
         ),
       },
       {
-        find: '@',
-        replacement: fileURLToPath(new URL('./src', import.meta.url)),
+        find: /^@\//,
+        replacement: `${srcPath}`,
       },
     ],
   },

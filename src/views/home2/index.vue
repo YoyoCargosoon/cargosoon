@@ -2,8 +2,8 @@
 import { computed, nextTick, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { ChatLineRound, Microphone, Paperclip, Picture, RefreshRight, Search } from '@element-plus/icons-vue'
-import { submitFeedbackTicket } from '@/services/adminRepository'
+import { Microphone, Paperclip, Picture, RefreshRight, Search } from '@element-plus/icons-vue'
+import { submitSiteFeedback } from '@/services/siteFeedbackService'
 import { getLocal } from '@/utils/common'
 
 const router = useRouter()
@@ -81,24 +81,22 @@ const storedGuestChatInfo = computed(() => {
   }
 })
 
+const jumpToAiChat = (text = '') => {
+  const query = { mode: 'ai' }
+  const q = String(text || '').trim()
+  if (q) query.q = q
+
+  router.push({
+    name: 'chat',
+    query,
+  })
+}
+
 const askAI = (text) => {
   const q = (text ?? askInput.value).trim()
   if (!q) return
-  router.push({
-    name: 'chat',
-    query: {
-      mode: 'ai',
-      q,
-    },
-  })
+  jumpToAiChat(q)
   askInput.value = ''
-}
-
-const openAssistant = () => {
-  router.push({
-    name: 'chat',
-    query: { mode: 'ai' },
-  })
 }
 
 const openFeedbackDialog = () => {
@@ -119,7 +117,7 @@ const submitFeedback = async () => {
 
     feedbackSubmitting.value = true
     try {
-      submitFeedbackTicket({
+      submitSiteFeedback({
         userId: storedUserInfo.value?.id || storedGuestChatInfo.value?.chat_id || 'guest-user',
         customerName: feedbackForm.customerName.trim(),
         sourcePage: '/',
@@ -222,6 +220,10 @@ onMounted(() => {
           <h1 class="sr-only">CargoSoon</h1>
         </div>
 
+        <p class="hero-subtitle">
+          Check shipping prices, track your shipment, and get help buying and shipping from China.
+        </p>
+
         <div id="ai-quote-box" class="search-shell">
           <div class="search-card">
             <textarea
@@ -283,17 +285,6 @@ onMounted(() => {
                 AI Search
               </button>
             </div>
-          </div>
-
-          <div class="hero-promo">
-            <button class="hero-promo-pill" @click="openAssistant">
-              <span>AI Assistant</span>
-              Get freight rates, tracking updates, and booking guidance
-            </button>
-            <button class="feedback-entry-btn" type="button" @click="openFeedbackDialog">
-              <ChatLineRound class="feedback-entry-icon" aria-hidden="true" />
-              Customer Feedback
-            </button>
           </div>
 
           <div class="prompt-board">
@@ -417,6 +408,15 @@ onMounted(() => {
 .hero-brand {
   display: flex;
   justify-content: center;
+}
+
+.hero-subtitle {
+  max-width: 760px;
+  margin: -6px auto 18px;
+  color: #7d766f;
+  font-size: 15px;
+  line-height: 1.55;
+  text-align: center;
 }
 
 .brand-art {
@@ -566,62 +566,12 @@ onMounted(() => {
   box-shadow: 0 14px 30px rgba(242, 106, 27, 0.24);
 }
 
-.hero-promo {
-  margin-top: 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.hero-promo-pill {
-  border: 0;
-  background: linear-gradient(180deg, #fff8f3 0%, #fff4ec 100%);
-  color: #1f2430;
-  font-size: 14px;
-  line-height: 1.4;
-  padding: 12px 20px;
-  border-radius: 999px;
-  cursor: pointer;
-  box-shadow: inset 0 0 0 1px rgba(242, 106, 27, 0.1);
-}
-
-.hero-promo-pill span {
-  color: #f26a1b;
-  font-weight: 700;
-}
-
 .feedback-entry-btn,
 .feedback-primary-btn,
 .feedback-secondary-btn {
   border: 0;
   cursor: pointer;
   font: inherit;
-}
-
-.feedback-entry-btn {
-  min-height: 44px;
-  padding: 0 18px;
-  border-radius: 999px;
-  background: #ffffff;
-  color: #7a5742;
-  box-shadow: inset 0 0 0 1px rgba(242, 106, 27, 0.16);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  transition: box-shadow 0.18s ease, color 0.18s ease, transform 0.18s ease;
-}
-
-.feedback-entry-btn:hover {
-  color: #f26a1b;
-  transform: translateY(-1px);
-  box-shadow: inset 0 0 0 1px rgba(242, 106, 27, 0.28), 0 10px 22px rgba(242, 106, 27, 0.08);
-}
-
-.feedback-entry-icon {
-  width: 16px;
-  height: 16px;
 }
 
 .feedback-form :deep(.el-input__wrapper),
@@ -852,6 +802,14 @@ onMounted(() => {
     min-height: 108px;
   }
 
+  .hero-subtitle {
+    max-width: 680px;
+    margin: -10px auto 16px;
+    padding: 0 10px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
   .search-card {
     padding: 10px 12px;
     border-radius: 16px;
@@ -879,10 +837,6 @@ onMounted(() => {
   .prompt-board {
     width: min(100%, 620px);
     margin-top: 26px;
-  }
-
-  .hero-promo {
-    margin-top: 18px;
   }
 
   .prompt-board-title {
@@ -933,10 +887,6 @@ onMounted(() => {
     min-height: 82px;
     font-size: 15px;
     line-height: 1.32;
-  }
-
-  .hero-promo {
-    margin-top: 22px;
   }
 
   .prompt-board {

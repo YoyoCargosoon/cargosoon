@@ -1,4 +1,47 @@
-import { mutateAdminState, readAdminState } from '@/services/adminRepository'
+const PRICE_ITEMS = [
+  {
+    supplierName: 'YTHQ Logistics',
+    standardChannelName: 'US West Matson Fast',
+    routeType: 'fcl',
+    origin: 'Shenzhen',
+    destination: 'Los Angeles',
+    currency: 'USD',
+    basePrice: 3280,
+    taxPrice: 0,
+    remoteAreaFee: 0,
+    otherSurchargeLabel: 'Peak season',
+    otherSurchargeAmount: 120,
+    transitDays: '18-22 days',
+  },
+  {
+    supplierName: 'RN Freight',
+    standardChannelName: 'US West Matson Fast',
+    routeType: 'fcl',
+    origin: 'Ningbo',
+    destination: 'New York',
+    currency: 'USD',
+    basePrice: 4620,
+    taxPrice: 0,
+    remoteAreaFee: 0,
+    otherSurchargeLabel: 'Port congestion',
+    otherSurchargeAmount: 160,
+    transitDays: '24-31 days',
+  },
+  {
+    supplierName: 'YTHQ Logistics',
+    standardChannelName: 'US DDP Standard Truck',
+    routeType: 'ddp',
+    origin: 'Guangzhou',
+    destination: 'Dallas',
+    currency: 'USD',
+    basePrice: 6.4,
+    taxPrice: 0.8,
+    remoteAreaFee: 0.6,
+    otherSurchargeLabel: 'Fuel',
+    otherSurchargeAmount: 0.3,
+    transitDays: '16-22 days',
+  },
+]
 
 const normalize = (value) => String(value || '').trim().toLowerCase()
 
@@ -15,12 +58,11 @@ const createTimestamp = () => {
 }
 
 export const quoteByUnifiedEngine = (params) => {
-  const state = readAdminState()
   const routeType = normalize(params.serviceType || params.quoteType)
   const origin = normalize(params.origin)
   const destination = normalize(params.destination)
 
-  const matches = state.priceItems.filter((item) => {
+  const matches = PRICE_ITEMS.filter((item) => {
     const sameType = normalize(item.routeType) === routeType
     const sameOrigin = !origin || normalize(item.origin).includes(origin)
     const sameDestination = !destination || normalize(item.destination).includes(destination)
@@ -60,35 +102,6 @@ export const quoteByUnifiedEngine = (params) => {
     matchStatus: 'matched',
     createdAt,
   }))
-
-  mutateAdminState((draft) => {
-    draft.quoteRequests.unshift(requestRecord)
-    if (resultRecords.length) {
-      draft.quoteResults.unshift(...resultRecords)
-    }
-    draft.businessEvents.unshift({
-      id: `be-${Date.now()}`,
-      eventType: 'quote_requested',
-      entityType: 'quote_request',
-      entityId: requestId,
-      userId: requestRecord.userId,
-      source: requestRecord.sourceEntry,
-      eventTime: createdAt,
-      syncStatus: 'synced',
-    })
-    draft.userEvents.unshift({
-      id: `evt-${Date.now()}`,
-      userId: requestRecord.userId,
-      customerName: requestRecord.customerName,
-      eventName: 'quote_search',
-      pagePath: requestRecord.sourceEntry === 'ai' ? '/chat' : '/fcl-ddp-freight',
-      durationSeconds: 0,
-      countryCode: requestRecord.countryCode,
-      createdAt,
-    })
-    draft.stats.quotesToday += 1
-    return draft
-  })
 
   return {
     requestRecord,
