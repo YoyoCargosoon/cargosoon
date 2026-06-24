@@ -27,7 +27,15 @@ const goQuote = () => {
 }
 
 const openAssistantPage = () => {
-  router.push({ name: 'chat', query: { mode: 'ai' } })
+  const target = router.resolve({ name: 'chat', query: { mode: 'ai' } })
+
+  if (route.fullPath === target.fullPath) {
+    return
+  }
+
+  router.push(target).catch(() => {
+    window.location.href = target.href
+  })
 }
 
 const openTrackingPage = () => {
