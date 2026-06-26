@@ -1,3 +1,5 @@
+import { queryCargoSoonInternalApi } from '@/services/trackingService.js'
+
 const appBase = import.meta.env?.BASE_URL || '/'
 const withBase = (path) => `${appBase.replace(/\/+$/, '')}${path}`
 
@@ -13,9 +15,35 @@ const MOCK_DELAY = 650
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const trimSlash = (value) => value.replace(/\/+$/, '')
+const FASTGPT_CHAT_STORAGE_KEY = 'cargosoon_fastgpt_chat_map'
+
+const getBrowserStorage = () => {
+  if (typeof window === 'undefined') return null
+  try {
+    return window.localStorage || null
+  } catch {
+    return null
+  }
+}
+
+const getFastGptConfig = () => {
+  const env = import.meta.env || {}
+  const endpoint = env.VITE_FASTGPT_API_URL || env.VITE_AI_API_URL
+  const token = env.VITE_FASTGPT_TOKEN || ''
+  const appId = env.VITE_FASTGPT_APP_ID || ''
+
+  if (!endpoint || !token || !appId) return null
+
+  return {
+    endpoint,
+    token,
+    appId,
+  }
+}
 
 const getAiEndpoint = () => {
   const env = import.meta.env || {}
+  if (env.VITE_FASTGPT_API_URL && env.VITE_FASTGPT_TOKEN && env.VITE_FASTGPT_APP_ID) return ''
   const aiUrl = env.VITE_AI_API_URL
   if (aiUrl) return aiUrl
 
@@ -28,6 +56,7 @@ const getAiEndpoint = () => {
 const normalizeText = (text = '') => text.trim()
 
 const lowerText = (text = '') => text.toLowerCase()
+const generateId = (prefix = 'id') => `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
 
 const hasAny = (text, terms) => terms.some((term) => text.includes(term))
 
@@ -339,6 +368,153 @@ const formatReferenceRate = (message) => {
   ].join('\n')
 }
 
+const getFastGptChatId = (conversationId = '') => {
+  const storage = getBrowserStorage()
+  const key = conversationId || 'default'
+
+  if (!storage) return generateId('chat')
+
+  try {
+    const cache = JSON.parse(storage.getItem(FASTGPT_CHAT_STORAGE_KEY) || '{}')
+    if (cache[key]) return cache[key]
+
+    const chatId = generateId('chat')
+    cache[key] = chatId
+    storage.setItem(FASTGPT_CHAT_STORAGE_KEY, JSON.stringify(cache))
+    return chatId
+  } catch {
+    return generateId('chat')
+  }
+}
+
+const mapConversationMessages = (messages = []) => {
+  return messages
+    .filter((item) => item?.role === 'user' || item?.role === 'assistant')
+    .map((item) => ({
+      role: item.role === 'assistant' ? 'assistant' : 'user',
+      content: String(item.content || '').trim(),
+    }))
+    .filter((item) => item.content)
+    .slice(-12)
+}
+
+const extractFastGptContent = (payload) => {
+  if (!payload) return ''
+
+  if (typeof payload === 'string') return payload
+  if (payload.content) return payload.content
+  if (payload.message?.content) return payload.message.content
+  if (payload.reply) return payload.reply
+  if (payload.answer) return payload.answer
+
+  if (Array.isArray(payload.choices)) {
+    for (const choice of payload.choices) {
+      const content = choice?.message?.content || choice?.delta?.content
+      if (content) return content
+    }
+  }
+
+  if (Array.isArray(payload.messages)) {
+    const lastAssistant = [...payload.messages].reverse().find((item) => item?.role === 'assistant' && item?.content)
+    if (lastAssistant) return lastAssistant.content
+  }
+
+  return ''
+}
+
+const extractFastGptDelta = (payload) => {
+  if (!payload) return ''
+
+  if (typeof payload === 'string') return payload
+
+  if (Array.isArray(payload.choices)) {
+    for (const choice of payload.choices) {
+      const content = choice?.delta?.content || choice?.message?.content
+      if (content) return content
+    }
+  }
+
+  return payload?.content || payload?.message?.content || ''
+}
+
+const readFastGptStream = async (response, onChunk) => {
+  const reader = response.body?.getReader?.()
+  if (!reader) {
+    const data = await response.json()
+    return extractFastGptContent(data)
+  }
+
+  const decoder = new TextDecoder('utf-8')
+  let buffer = ''
+  let fullContent = ''
+
+  const flushEvent = (eventText) => {
+    const lines = eventText
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.startsWith('data:'))
+
+    for (const line of lines) {
+      const raw = line.replace(/^data:\s*/, '')
+      if (!raw || raw === '[DONE]') continue
+
+      try {
+        const payload = JSON.parse(raw)
+        const delta = extractFastGptDelta(payload)
+        if (!delta) continue
+        fullContent += delta
+        onChunk?.(fullContent, delta)
+      } catch {
+        // ignore malformed SSE chunks
+      }
+    }
+  }
+
+  while (true) {
+    const { done, value } = await reader.read()
+    buffer += decoder.decode(value || new Uint8Array(), { stream: !done })
+
+    let separatorIndex = buffer.indexOf('\n\n')
+    while (separatorIndex !== -1) {
+      const eventText = buffer.slice(0, separatorIndex)
+      buffer = buffer.slice(separatorIndex + 2)
+      flushEvent(eventText)
+      separatorIndex = buffer.indexOf('\n\n')
+    }
+
+    if (done) break
+  }
+
+  if (buffer.trim()) {
+    flushEvent(buffer)
+  }
+
+  return fullContent.trim()
+}
+
+const buildTrackingReplyFromLiveResult = (trackingNumber, result) => {
+  if (!result) {
+    return {
+      intent: 'tracking',
+      content: `I recognized this as a tracking request for ${trackingNumber}.\n\nWe could not find a live shipment record yet. Please double-check the tracking number, or send the CargoSoon order number / B/L / AWB if you have it.`,
+      actions: [{ label: 'Open Tracking', href: AI_STORAGE_HINTS.tracking }],
+      suggestions: ['Check ETA', 'Track another number', 'Send my CargoSoon order number'],
+      source: 'tracking-api',
+    }
+  }
+
+  const latestEvent = result.events?.[0]
+  const route = [result.origin, result.destination].filter(Boolean).join(' to ')
+
+  return {
+    intent: 'tracking',
+    content: `Tracking summary:\n- Tracking number: ${result.displayNumber || trackingNumber}\n- Current status: ${result.status || 'In transit'}\n- Route: ${route || 'In transit'}\n- ETA: ${result.eta || 'Not available'}\n\nLatest update:\n- ${latestEvent?.status || 'Shipment record found'}${latestEvent?.timestamp ? ` (${latestEvent.timestamp})` : ''}\n\nDelivery details:\n- Product: ${result.cargoInfo?.commodity || '-'}\n- Weight: ${result.cargoInfo?.grossWeight || '-'}\n- Destination: ${result.delivery?.address || result.destination || '-'}`,
+    actions: [{ label: 'Open Tracking', href: AI_STORAGE_HINTS.tracking }],
+    suggestions: ['Check latest milestone', 'Explain this tracking status', 'Track another shipment'],
+    source: 'tracking-api',
+  }
+}
+
 const buildMockResponse = (message) => {
   const intent = detectAiIntent(message)
   const missing = buildMissingInfoList(message)
@@ -454,10 +630,68 @@ const normalizeApiResponse = (data, message) => {
   }
 }
 
-export const sendAiMessage = async ({ message, messages = [], conversationId = '' }) => {
+export const sendAiMessage = async ({ message, messages = [], conversationId = '', onChunk }) => {
   const cleanMessage = normalizeText(message)
   if (!cleanMessage) {
     throw new Error('Message is required')
+  }
+
+  const intent = detectAiIntent(cleanMessage)
+  const trackingNumber = getTrackingNumber(cleanMessage)
+
+  if (intent === 'tracking' && trackingNumber) {
+    const liveTrackingResult = await queryCargoSoonInternalApi({ trackingNumber })
+    return buildTrackingReplyFromLiveResult(trackingNumber, liveTrackingResult)
+  }
+
+  const fastGptConfig = getFastGptConfig()
+  if (fastGptConfig) {
+    try {
+      const response = await fetch(fastGptConfig.endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${fastGptConfig.token}`,
+        },
+        body: JSON.stringify({
+          appId: fastGptConfig.appId,
+          chatId: getFastGptChatId(conversationId),
+          stream: true,
+          detail: false,
+          responseChatItemId: generateId('resp'),
+          messages: [...mapConversationMessages(messages), { role: 'user', content: cleanMessage }],
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`FastGPT request failed with status ${response.status}`)
+      }
+
+      const contentType = response.headers.get('content-type') || ''
+      const content = contentType.includes('text/event-stream')
+        ? await readFastGptStream(response, onChunk)
+        : extractFastGptContent(await response.json())
+
+      if (!content) {
+        throw new Error('FastGPT response is empty')
+      }
+
+      return {
+        intent,
+        content,
+        actions: [],
+        suggestions: [],
+        source: 'fastgpt',
+      }
+    } catch (error) {
+      const fallback = buildMockResponse(cleanMessage)
+      return {
+        ...fallback,
+        source: 'mock',
+        fallback: true,
+        serviceError: error.message || 'FastGPT service unavailable',
+      }
+    }
   }
 
   const endpoint = getAiEndpoint()

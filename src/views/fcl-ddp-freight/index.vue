@@ -1,5 +1,6 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
+import { ElMessage } from 'element-plus'
 import { Search, Promotion, Van, Box, Present, Warning } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 import { quoteByUnifiedEngine } from '@/services/quoteEngine'
@@ -16,23 +17,6 @@ const topTabs = [
 const activeTopTab = ref('quote')
 
 const serviceTabs = [
-  {
-    key: 'ocean',
-    label: 'Ocean FCL',
-    summary: 'Direct port-to-port container pricing with fast container-type matching and route lookup.',
-    icon: Box,
-    modes: [{ key: 'port_to_port', label: 'Port to Port' }],
-    fields: ['origin', 'destination', 'container', 'weight', 'volume', 'cargo'],
-    hotRoutes: [
-      'Yantian - Los Angeles - United States',
-      'Ningbo - New York - United States',
-      'Shanghai - Rotterdam - Netherlands',
-      'Qingdao - Hamburg - Germany',
-    ],
-    quoteType: 'FCL',
-    serviceType: 'fcl',
-    module: 'quote-ocean-fcl',
-  },
   {
     key: 'ddp',
     label: 'DDP',
@@ -72,6 +56,23 @@ const serviceTabs = [
     quoteType: 'FBA_DDP',
     serviceType: 'ddp',
     module: 'quote-fba',
+  },
+  {
+    key: 'ocean',
+    label: 'Ocean FCL',
+    summary: 'Direct port-to-port container pricing with fast container-type matching and route lookup.',
+    icon: Box,
+    modes: [{ key: 'port_to_port', label: 'Port to Port' }],
+    fields: ['origin', 'destination', 'container', 'weight', 'volume', 'cargo'],
+    hotRoutes: [
+      'Yantian - Los Angeles - United States',
+      'Ningbo - New York - United States',
+      'Shanghai - Rotterdam - Netherlands',
+      'Qingdao - Hamburg - Germany',
+    ],
+    quoteType: 'FCL',
+    serviceType: 'fcl',
+    module: 'quote-ocean-fcl',
   },
   {
     key: 'dangerous',
@@ -117,7 +118,7 @@ const serviceFieldOverrides = {
     to: { label: 'To', placeholder: 'Select destination country', type: 'select' },
     zipCode: { label: 'ZIP Code', placeholder: 'Enter ZIP / postal code' },
     cargo: { label: 'Cargo Name', placeholder: 'Enter product name' },
-    weight: { label: 'Weight', placeholder: 'Enter shipment weight, e.g. 980 KG' },
+    weight: { label: 'Weight *', placeholder: 'Required, e.g. 980 KG' },
     volume: { label: 'Volume', placeholder: 'Enter shipment volume, e.g. 4.5 CBM' },
     pieces: { label: 'Pieces', placeholder: 'Enter carton count, e.g. 120 CTNS' },
   },
@@ -168,8 +169,9 @@ const trackingForm = reactive({
 const resultList = ref([])
 const hasSearched = ref(false)
 const isLoading = ref(false)
-const activeServiceKey = ref('ocean')
-const activeModeKey = ref('port_to_port')
+const activeServiceKey = ref('ddp')
+const activeModeKey = ref('sea_ddp')
+const ddpWeightNeedsAttention = ref(false)
 
 const activeService = computed(() => {
   return serviceTabs.find((item) => item.key === activeServiceKey.value) || serviceTabs[0]
@@ -244,6 +246,17 @@ const setService = (key) => {
 }
 
 const searchQuote = async () => {
+  if (activeServiceKey.value === 'ddp' && !String(form.weight || '').trim()) {
+    ddpWeightNeedsAttention.value = true
+    hasSearched.value = false
+    resultList.value = []
+    ElMessage.warning('Weight is required for DDP pricing.')
+    window.setTimeout(() => {
+      ddpWeightNeedsAttention.value = false
+    }, 1200)
+    return
+  }
+
   hasSearched.value = true
   isLoading.value = true
 
@@ -283,16 +296,29 @@ const searchQuote = async () => {
     route: item?.originLabel && item?.destinationLabel ? `${item.originLabel} -> ${item.destinationLabel}` : `${form.origin || 'China'} - ${destination || 'Destination'}`,
     service: activeModeLabel.value ? `${activeService.value.label} / ${activeModeLabel.value}` : activeService.value.label,
     price: item?.finalPrice ? `${item.currency} ${item.finalPrice}${item.priceUnit ? ` / ${item.priceUnit}` : ''}` : 'Manual Quote',
-    totalPriceLabel: item?.finalPrice ? `${item.currency} ${item.finalPrice}${item.priceUnit ? ` / ${item.priceUnit}` : ''}` : 'Manual Quote',
+    totalPriceLabel: item?.finalPrice ? `${item.currency} ${item.finalPrice}` : 'Manual Quote',
     transit: item?.transitDays || 'Pending review',
     transitLabel: item?.transitDays || 'Pending review',
     note: item?.pricingDetail || 'This shipment can be routed for a manual quote confirmation.',
     supplier: item?.supplierName || 'Cargosoon Pricing Team',
     channel: item?.channelName || item?.standardChannelName || activeModeLabel.value || 'DDP Channel',
     range: item?.bandLabel || (form.weight ? `Requested ${form.weight}` : 'Weight confirmation required'),
+    enteredWeightLabel: item?.weightKg != null ? `${item.weightKg} KG` : form.weight || 'TBD',
+    unitPriceLabel:
+      item?.unitPrice != null ? `${item.currency} ${item.unitPrice} / KG` : item?.price || 'Pending review',
+    quoteAccuracyLabel:
+      activeServiceKey.value === 'ddp'
+        ? form.zipCode
+          ? 'ZIP matched pricing rule'
+          : 'Estimated price, add ZIP for a more exact quote'
+        : '',
     pricingSummary:
       activeServiceKey.value === 'ddp'
-        ? [`Destination: ${form.to || 'TBD'}`, form.zipCode ? `ZIP: ${form.zipCode}` : 'ZIP: TBD', form.weight ? `Weight: ${form.weight}` : null]
+        ? [
+            `Destination: ${form.to || 'TBD'}`,
+            form.zipCode ? `ZIP: ${form.zipCode}` : 'ZIP: TBD',
+            item?.weightKg != null ? `Entered Weight: ${item.weightKg} KG` : null,
+          ]
             .filter(Boolean)
             .join('  |  ')
         : item?.pricingDetail || '',
@@ -355,11 +381,11 @@ const goToTracking = () => {
 
           <div class="service-hero" :class="{ 'service-hero-ddp': isDdpService }">
             <div class="service-hero-copy">
-              <span class="service-eyebrow">Instant Freight Tools</span>
+              <span v-if="!isDdpService" class="service-eyebrow">Instant Freight Tools</span>
               <h2>{{ activeService.label }}</h2>
               <p>{{ activeServiceSummary }}</p>
             </div>
-            <div class="service-hero-badge">
+            <div v-if="!isDdpService" class="service-hero-badge">
               <span>Live Search</span>
               <strong>{{ activeModeLabel || 'Quote Search' }}</strong>
             </div>
@@ -386,6 +412,7 @@ const goToTracking = () => {
                       v-for="field in row"
                       :key="field.key"
                       class="field-box ddp-field-box"
+                      :class="{ 'field-box-required-missing': field.key === 'weight' && ddpWeightNeedsAttention }"
                     >
                       <span>{{ field.label }}</span>
                       <el-select
@@ -511,54 +538,71 @@ const goToTracking = () => {
             </div>
 
             <div v-else-if="!hasSearched" class="empty-state">
-              <strong>Enter shipment details to start</strong>
-              <p>
-                This layout is built for fast quote entry. Users can search by port, address,
-                Amazon warehouse, weight, and cargo name.
-              </p>
+              <strong>Start with origin, destination, and shipment details</strong>
+              <p>Select China origin, destination country, and shipment weight to generate a DDP quote.</p>
             </div>
 
             <div v-else class="result-list" :class="{ 'ddp-result-list': isDdpService }">
-              <article v-for="item in resultList" :key="item.id" class="result-card">
-                <div class="result-head" :class="{ 'ddp-result-head': isDdpService }">
-                  <div class="result-title-block">
-                    <strong>{{ item.route }}</strong>
-                    <p>{{ item.service }}</p>
+              <article v-for="item in resultList" :key="item.id" class="result-card" :class="{ 'ddp-quote-card': isDdpService }">
+                <template v-if="isDdpService">
+                  <div class="ddp-quote-sheet">
+                    <div class="ddp-quote-table">
+                      <div class="ddp-quote-column">
+                        <label>Transit Time</label>
+                        <strong>{{ item.transitLabel }}</strong>
+                      </div>
+                      <div class="ddp-quote-column">
+                        <label>Channel</label>
+                        <strong>{{ item.channel }}</strong>
+                      </div>
+                      <div class="ddp-quote-column">
+                        <label>Entered Weight</label>
+                        <strong>{{ item.enteredWeightLabel }}</strong>
+                      </div>
+                      <div class="ddp-quote-column">
+                        <label>Matched Range</label>
+                        <strong>{{ item.range }}</strong>
+                      </div>
+                      <div class="ddp-quote-column">
+                        <label>Unit Price</label>
+                        <strong>{{ item.unitPriceLabel }}</strong>
+                      </div>
+                      <div class="ddp-quote-column">
+                        <label>Supplier</label>
+                        <strong>{{ item.supplier }}</strong>
+                      </div>
+                    </div>
+
+                    <div class="result-price-block ddp-price-panel">
+                      <small>Total Price</small>
+                      <span>{{ item.totalPriceLabel }}</span>
+                    </div>
                   </div>
-                  <div class="result-price-block">
-                    <small>Total Price</small>
-                    <span>{{ item.totalPriceLabel }}</span>
+                  <details class="ddp-notes">
+                    <summary>View details</summary>
+                    <div class="ddp-notes-body">
+                      <span class="ddp-accuracy-chip">{{ item.quoteAccuracyLabel }}</span>
+                      <p class="result-summary">{{ item.pricingSummary }}</p>
+                      <div class="ddp-notes-copy">
+                        <label>Notes</label>
+                        <small>{{ item.note }}</small>
+                      </div>
+                    </div>
+                  </details>
+                </template>
+                <template v-else>
+                  <div class="result-head">
+                    <div class="result-title-block">
+                      <strong>{{ item.route }}</strong>
+                      <p>{{ item.service }}</p>
+                    </div>
+                    <div class="result-price-block">
+                      <small>Total Price</small>
+                      <span>{{ item.totalPriceLabel }}</span>
+                    </div>
                   </div>
-                </div>
-                <div class="result-meta" :class="{ 'ddp-result-meta': isDdpService }">
-                  <span>{{ item.transitLabel }}</span>
-                  <span>{{ item.supplier }}</span>
-                  <span v-if="isDdpService">{{ activeModeLabel || 'DDP' }}</span>
-                </div>
-                <div v-if="isDdpService" class="ddp-quote-grid">
-                  <div class="ddp-quote-cell">
-                    <label>Total Price</label>
-                    <strong>{{ item.totalPriceLabel }}</strong>
-                  </div>
-                  <div class="ddp-quote-cell">
-                    <label>Transit Time</label>
-                    <strong>{{ item.transitLabel }}</strong>
-                  </div>
-                  <div class="ddp-quote-cell">
-                    <label>Channel</label>
-                    <strong>{{ item.channel }}</strong>
-                  </div>
-                  <div class="ddp-quote-cell">
-                    <label>Range</label>
-                    <strong>{{ item.range }}</strong>
-                  </div>
-                </div>
-                <p v-if="isDdpService" class="result-summary">{{ item.pricingSummary }}</p>
-                <div v-if="isDdpService" class="ddp-notes">
-                  <label>Notes</label>
                   <small>{{ item.note }}</small>
-                </div>
-                <small v-else>{{ item.note }}</small>
+                </template>
               </article>
             </div>
           </div>
@@ -715,8 +759,8 @@ const goToTracking = () => {
 
 .quote-card {
   margin-top: -1px;
-  padding: 18px 18px 12px;
-  border-radius: 18px;
+  padding: 14px 16px 12px;
+  border-radius: 24px;
   border: 2px solid rgba(113, 177, 255, 0.62);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(240, 246, 255, 0.94) 100%);
   box-shadow:
@@ -726,30 +770,36 @@ const goToTracking = () => {
 
 .service-tabs {
   display: flex;
-  gap: 30px;
+  gap: 8px;
   flex-wrap: wrap;
-  padding: 8px 12px 2px;
+  padding: 6px 10px 10px;
+  border-bottom: 1px solid rgba(164, 192, 230, 0.42);
 }
 
 .service-tab {
-  padding: 0;
-  background: transparent;
-  color: #20314d;
-  font-size: 16px;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.66);
+  box-shadow: inset 0 0 0 1px rgba(189, 209, 236, 0.72);
+  color: #324966;
+  font-size: 15px;
   font-weight: 800;
   position: relative;
 }
 
 .service-tab.is-active {
   color: #f07813;
+  background: linear-gradient(180deg, #fff8ef 0%, #ffe8cf 100%);
+  box-shadow: inset 0 0 0 1px rgba(240, 120, 19, 0.22);
 }
 
 .service-tab.is-active::after {
   content: '';
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -12px;
+  left: 14px;
+  right: 14px;
+  bottom: -11px;
   height: 3px;
   border-radius: 999px;
   background: #f07813;
@@ -764,7 +814,7 @@ const goToTracking = () => {
 }
 
 .service-hero-ddp {
-  padding-bottom: 8px;
+  padding: 10px 10px 4px;
 }
 
 .service-hero-copy h2 {
@@ -781,6 +831,19 @@ const goToTracking = () => {
   color: #6881a3;
   font-size: 14px;
   line-height: 1.65;
+}
+
+.service-hero-ddp .service-hero-copy h2 {
+  margin-top: 0;
+  margin-bottom: 4px;
+  font-size: 32px;
+}
+
+.service-hero-ddp .service-hero-copy p {
+  max-width: 820px;
+  color: #5d7698;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .service-eyebrow {
@@ -825,7 +888,11 @@ const goToTracking = () => {
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
-  padding: 4px 12px 14px;
+  padding: 2px 10px 12px;
+}
+
+.service-hero-ddp + .mode-switch {
+  padding-top: 2px;
 }
 
 .mode-option {
@@ -847,8 +914,8 @@ const goToTracking = () => {
 }
 
 .quote-workbench {
-  padding: 6px 12px 0;
-  border-radius: 20px;
+  padding: 6px 10px 0;
+  border-radius: 22px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(242, 247, 255, 0.98) 100%);
   box-shadow:
@@ -858,17 +925,17 @@ const goToTracking = () => {
 
 .ddp-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 240px;
-  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 16px;
   align-items: start;
-  padding: 4px 10px 10px;
+  padding: 4px 8px 8px;
 }
 
 .ddp-form-card {
   display: grid;
-  gap: 12px;
-  padding: 14px;
-  border-radius: 18px;
+  gap: 14px;
+  padding: 16px 16px 14px;
+  border-radius: 20px;
   background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
   box-shadow: inset 0 0 0 1px rgba(174, 198, 228, 0.22);
 }
@@ -945,6 +1012,18 @@ const goToTracking = () => {
   box-shadow: 0 0 0 3px rgba(244, 154, 58, 0.12);
 }
 
+.field-box-required-missing input {
+  border-color: rgba(217, 115, 21, 0.55);
+  box-shadow: 0 0 0 3px rgba(240, 120, 19, 0.08);
+  animation: ddpWeightShake 0.48s ease;
+}
+
+.field-box-required-missing :deep(.smart-select .el-select__wrapper) {
+  border-color: rgba(217, 115, 21, 0.55);
+  box-shadow: 0 0 0 3px rgba(240, 120, 19, 0.08);
+  animation: ddpWeightShake 0.48s ease;
+}
+
 .field-box :deep(.smart-select) {
   width: 100%;
 }
@@ -991,11 +1070,12 @@ const goToTracking = () => {
   position: sticky;
   top: 18px;
   background: linear-gradient(180deg, #eef5ff 0%, #e6effc 100%);
+  padding: 18px;
 }
 
 .action-card-title {
   color: #1d3352;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 900;
 }
 
@@ -1003,7 +1083,7 @@ const goToTracking = () => {
   margin: 0;
   color: #7086a7;
   font-size: 12px;
-  line-height: 1.6;
+  line-height: 1.55;
 }
 
 .search-btn {
@@ -1020,6 +1100,25 @@ const goToTracking = () => {
   align-items: center;
   justify-content: center;
   gap: 8px;
+}
+
+@keyframes ddpWeightShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
 }
 
 .inquiry-link {
@@ -1057,7 +1156,7 @@ const goToTracking = () => {
 }
 
 .result-area {
-  padding: 18px 12px 0;
+  padding: 16px 10px 0;
 }
 
 .result-area-ddp {
@@ -1074,7 +1173,8 @@ const goToTracking = () => {
 }
 
 .empty-state {
-  padding: 22px;
+  padding: 24px 22px;
+  border-radius: 20px;
 }
 
 .empty-state strong,
@@ -1173,7 +1273,7 @@ const goToTracking = () => {
 }
 
 .result-summary {
-  margin: 14px 0 0;
+  margin: 10px 0 0;
   color: #536d8d;
   font-size: 13px;
   line-height: 1.7;
@@ -1187,31 +1287,49 @@ const goToTracking = () => {
   border-radius: 18px;
 }
 
-.ddp-result-head {
+.ddp-quote-card {
+  padding: 18px 20px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  box-shadow:
+    0 12px 28px rgba(157, 182, 219, 0.1),
+    inset 0 0 0 1px rgba(221, 234, 248, 0.9);
+}
+
+.ddp-quote-sheet {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 14px;
   align-items: stretch;
 }
 
-.ddp-result-meta span {
-  background: linear-gradient(180deg, #eef5ff 0%, #e7f0fb 100%);
-}
-
-.ddp-quote-grid {
-  margin-top: 16px;
+.ddp-quote-table {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0;
+  border: 1px solid #e0ebf8;
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #f8fbff 0%, #eef5fd 100%);
 }
 
-.ddp-quote-cell {
-  padding: 14px 14px 12px;
-  border-radius: 14px;
-  background: linear-gradient(180deg, #f8fbff 0%, #edf4fd 100%);
-  box-shadow: inset 0 0 0 1px rgba(168, 193, 226, 0.28);
+.ddp-quote-column {
+  padding: 16px 18px;
   display: grid;
-  gap: 6px;
+  gap: 8px;
+  position: relative;
 }
 
-.ddp-quote-cell label,
+.ddp-quote-column:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 14px;
+  right: 0;
+  bottom: 14px;
+  width: 1px;
+  background: rgba(179, 201, 230, 0.8);
+}
+
+.ddp-quote-column label,
 .ddp-notes label {
   color: #7c90ad;
   font-size: 11px;
@@ -1220,22 +1338,83 @@ const goToTracking = () => {
   text-transform: uppercase;
 }
 
-.ddp-quote-cell strong {
+.ddp-quote-column strong {
   color: #1d3352;
   font-size: 15px;
   line-height: 1.45;
 }
 
+.ddp-price-panel {
+  min-width: 0;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fff8ef 0%, #ffe7ca 100%);
+  padding: 18px 18px 16px;
+  display: grid;
+  align-content: end;
+  justify-items: end;
+  gap: 6px;
+  box-shadow: inset 0 0 0 1px rgba(240, 120, 19, 0.12);
+}
+
+.ddp-price-panel small {
+  margin: 0;
+  color: #9b7a56;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ddp-price-panel span {
+  color: #e87510;
+  font-size: 34px;
+  line-height: 1.05;
+  font-weight: 900;
+}
+
 .ddp-notes {
-  margin-top: 16px;
-  padding: 14px 16px;
+  margin-top: 14px;
   border-radius: 14px;
   background: linear-gradient(180deg, #fffdf9 0%, #fff6ea 100%);
   box-shadow: inset 0 0 0 1px rgba(240, 120, 19, 0.12);
 }
 
+.ddp-notes summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  color: #d97315;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.ddp-notes summary::-webkit-details-marker {
+  display: none;
+}
+
+.ddp-notes-body {
+  padding: 0 16px 14px;
+}
+
+.ddp-notes-copy {
+  margin-top: 10px;
+}
+
 .ddp-notes small {
   margin-top: 8px;
+}
+
+.ddp-accuracy-chip {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff6eb 0%, #ffedd8 100%);
+  color: #d97315;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .secondary-wrap {
@@ -1361,8 +1540,7 @@ const goToTracking = () => {
     grid-column: 1 / -1;
   }
 
-  .result-head,
-  .ddp-result-head {
+  .result-head {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -1372,8 +1550,24 @@ const goToTracking = () => {
     text-align: left;
   }
 
-  .ddp-quote-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .ddp-quote-sheet {
+    grid-template-columns: 1fr;
+  }
+
+  .ddp-price-panel {
+    justify-items: start;
+  }
+
+  .service-tabs {
+    gap: 10px;
+  }
+
+  .ddp-quote-table {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .ddp-quote-column:nth-child(3)::after {
+    display: none;
   }
 }
 
@@ -1412,8 +1606,12 @@ const goToTracking = () => {
     grid-template-columns: 1fr;
   }
 
-  .ddp-quote-grid {
+  .ddp-quote-table {
     grid-template-columns: 1fr;
+  }
+
+  .ddp-quote-column::after {
+    display: none;
   }
 }
 
@@ -1431,6 +1629,15 @@ const goToTracking = () => {
   .service-hero,
   .service-tabs {
     gap: 18px;
+  }
+
+  .service-tabs {
+    padding-bottom: 12px;
+  }
+
+  .service-tab {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .action-block {

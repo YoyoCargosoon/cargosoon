@@ -5,7 +5,7 @@ import { ArrowDownBold, Headset } from '@element-plus/icons-vue'
 import { getLocal } from '@/utils/common'
 
 const router = useRouter()
-const collapsed = ref(false)
+const collapsed = ref(true)
 const serviceAvatar = ref('')
 
 const loadServiceAvatar = () => {
@@ -54,8 +54,8 @@ onMounted(() => {
       v-if="collapsed"
       type="button"
       class="service-pill-mini"
-      aria-label="Open customer service"
-      @click="openCustomerService"
+      aria-label="Show customer service"
+      @click="toggleCollapsed"
     >
       <span class="mini-dot"></span>
       <Headset class="mini-icon" aria-hidden="true" />

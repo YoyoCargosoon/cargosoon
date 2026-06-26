@@ -17,7 +17,7 @@ import {
   RefreshRight,
 } from '@element-plus/icons-vue'
 import { UAParser } from 'ua-parser-js'
-import { sendAiMessage } from '@/api/ai'
+import { detectAiIntent, sendAiMessage } from '@/api/ai'
 import { getNoLoginId } from '@/api/user'
 import { useWebSocket } from '@/composables/useWebSocket'
 import { getLocal, removeLocal, setLocal } from '@/utils/common'
@@ -997,6 +997,16 @@ const askAssistant = async (text) => {
       messages: activeMessages.value.filter((item) => item.status !== 'loading'),
       conversationId: activeConversationId.value,
       attachments: sanitizeAttachments(outgoingAttachments),
+      onChunk: (fullContent) => {
+        replaceMessage(assistantId, {
+          content: fullContent,
+          intent: detectAiIntent(question),
+          actions: [],
+          suggestions: [],
+          source: 'fastgpt',
+          status: 'loading',
+        })
+      },
     }
     const reply = await sendAiMessage(requestPayload)
 

@@ -34,6 +34,74 @@ const isBrowser = () => typeof window !== 'undefined' && Boolean(window.localSto
 export const normalizeTrackingNumber = (value) => value.trim().toUpperCase().replace(/\s+/g, '')
 
 const mockDelay = () => new Promise((resolve) => setTimeout(resolve, 520))
+const trimSlash = (value = '') => value.replace(/\/+$/, '')
+const env = import.meta.env || {}
+const TRACKING_API_URL = env.VITE_TRACKING_API_URL || 'https://co-logistics.cn/api/customer/api/tracking/search'
+
+const buildTrackingEvents = (data = {}) => {
+  const rawEvents = Array.isArray(data.msg) ? data.msg : Array.isArray(data.track_info) ? data.track_info : []
+
+  return rawEvents
+    .map((item, index) => {
+      const message = typeof item === 'string' ? item : item?.msg || item?.content || item?.status || ''
+      const timestamp = item?.created_data || item?.created_at || item?.time || ''
+      if (!message) return null
+
+      return {
+        id: `live-track-${timestamp || index}`,
+        status: message,
+        location: data.city || data.area || data.country || data.end || '',
+        timestamp,
+        detail: '',
+      }
+    })
+    .filter(Boolean)
+}
+
+const mapLiveTrackingResult = (data = {}, trackingNumber = '') => {
+  const events = buildTrackingEvents(data)
+  const latestStatus = events[0]?.status || 'In transit'
+  const destination = [data.country, data.area, data.city].filter(Boolean).join(', ') || data.end || '-'
+  const route = [data.start || 'China', destination].filter(Boolean)
+
+  return {
+    source: 'cargosoon_order',
+    numberType: 'shipment_number',
+    displayNumber: data.tracking_no || trackingNumber,
+    shipmentNumber: data.tail_no?.[0] || data.tracking_no || trackingNumber,
+    customerReference: '',
+    origin: data.start || 'China',
+    destination,
+    route,
+    status: latestStatus.toLowerCase().includes('delivered') ? 'delivered' : latestStatus,
+    eta: data.eta || '',
+    updatedAt: events[0]?.timestamp || data.ata || data.atd || data.put_time || '',
+    events,
+    orderInfo: {
+      trackingNo: data.tracking_no || trackingNumber,
+      productName: data.product_name || '-',
+      destination,
+    },
+    cargoInfo: {
+      commodity: data.product_name || '-',
+      grossWeight: data.weight ? `${data.weight} kg` : '-',
+      volume: data.volume ? `${data.volume} CBM` : '-',
+      cartons: data.goods_number || '-',
+    },
+    delivery: {
+      address: data.address_one || '-',
+      fbaCode: data.fba_code || '-',
+      eta: data.eta || '-',
+      ata: data.ata || '-',
+    },
+    customs: {
+      etd: data.etd || '-',
+      atd: data.atd || '-',
+      logisticsCompany: data.logistics_companies || '-',
+    },
+    documents: [],
+  }
+}
 
 const readGuestSearchCount = () => {
   if (!isBrowser()) return 0
@@ -150,6 +218,27 @@ export const searchTracking = async ({ trackingNumber, isAuthenticated = false }
 }
 
 export const queryCargoSoonInternalApi = async ({ trackingNumber }) => {
+  const normalized = normalizeTrackingNumber(trackingNumber)
+
+  try {
+    const endpoint = `${trimSlash(TRACKING_API_URL)}?tracking_no=${encodeURIComponent(normalized)}`
+    const response = await fetch(endpoint, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+      },
+    })
+
+    if (response.ok) {
+      const data = await response.json()
+      if (data?.code === 0 && data?.data?.tracking_no) {
+        return mapLiveTrackingResult(data.data, normalized)
+      }
+    }
+  } catch {
+    // fall through to local mock records
+  }
+
   const record = cargoSoonTrackingRecords.find((item) => matchesRecord(item, trackingNumber))
   return record ? cloneResult(record) : null
 }

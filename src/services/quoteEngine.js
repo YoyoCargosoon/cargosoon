@@ -104,6 +104,12 @@ const extractWeightKg = (value) => {
   return match ? Number(match[1]) : null
 }
 
+const formatTransitLabel = (value) => {
+  const text = String(value || '').trim()
+  if (!text) return 'Pending review'
+  return /day/i.test(text) ? text : `${text} days`
+}
+
 const createTimestamp = () => {
   const now = new Date()
   const pad = (value) => String(value).padStart(2, '0')
@@ -428,24 +434,33 @@ export const quoteByUnifiedEngine = (params) => {
     }
   })
 
-  const ddpResults = ddpMatches.map((item, index) => ({
-    id: `quote-ddp-result-${Date.now()}-${index + 1}`,
-    quoteRequestId: requestId,
-    supplierName: item.source_file.replace('.xlsx', ''),
-    standardChannelName: `${item.channel_name || item.service_mode} / ${item.band_label}`,
-    finalPrice: item.price,
-    currency: item.currency,
-    transitDays: item.transit || 'Based on selected channel',
-    pricingDetail: `${item.market} / ${item.zone} / ${item.service_mode} / ${item.band_label}`,
-    matchStatus: 'matched',
-    createdAt,
-    originLabel: params.origin || 'China',
-    destinationLabel: params.destination || item.market,
-    market: item.market,
-    zone: item.zone,
-    bandLabel: item.band_label,
-    channelName: item.channel_name || item.service_mode,
-  }))
+  const ddpResults = ddpMatches.map((item, index) => {
+    const unitPrice = Number(item.price || 0)
+    const totalPrice = weightKg != null ? Number((unitPrice * weightKg).toFixed(2)) : unitPrice
+
+    return {
+      id: `quote-ddp-result-${Date.now()}-${index + 1}`,
+      quoteRequestId: requestId,
+      supplierName: item.source_file.replace('.xlsx', ''),
+      standardChannelName: `${item.channel_name || item.service_mode} / ${item.band_label}`,
+      finalPrice: totalPrice,
+      currency: item.currency,
+      transitDays: formatTransitLabel(item.transit || 'Based on selected channel'),
+      pricingDetail: `${item.market} / ${item.zone} / ${item.service_mode} / ${item.band_label}`,
+      matchStatus: 'matched',
+      createdAt,
+      originLabel: params.origin || 'China',
+      destinationLabel: params.destination || item.market,
+      market: item.market,
+      zone: item.zone,
+      bandLabel: item.band_label,
+      channelName: item.channel_name || item.service_mode,
+      unitPrice,
+      totalPrice,
+      weightKg: weightKg ?? null,
+      priceUnit: 'KG',
+    }
+  })
 
   return {
     requestRecord,
