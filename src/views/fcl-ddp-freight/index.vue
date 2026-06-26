@@ -1,299 +1,322 @@
 <script setup>
-import { computed, reactive, ref } from 'vue'
-import { ArrowRight, Box, Search, Setting, Van, Present } from '@element-plus/icons-vue'
+import { computed, reactive, ref, watch } from 'vue'
+import { Search, Promotion, Van, Box, Present, Warning } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 import { quoteByUnifiedEngine } from '@/services/quoteEngine'
-import { getLocal } from '@/utils/common'
+import { getFbaWarehouseOptions, getFbaWarehouseRecord, quoteOptionCatalog } from '@/data/quoteOptionCatalog'
 
 const router = useRouter()
 
-const COUNTRY_PROFILES = {
-  US: {
-    countryCode: 'US',
-    marketLabel: 'United States',
-    recommendationTitle: 'Recommended for your US account',
-    recommendationNote: 'US accounts usually prioritize Sea DDP, Amazon FBA replenishment, and West Coast delivery paths.',
-    pricingTier: 'North America tier',
-    pinnedRoutes: [
-      { title: 'China to USA Sea DDP', note: 'Recommended for US accounts with regular replenishment cycles.' },
-      { title: 'Amazon FBA to Los Angeles', note: 'Priority flow for Amazon sellers shipping into US West warehouses.' },
-      { title: 'LCL to New York', note: 'Useful for lower-volume freight when a full container is not required.' },
-    ],
-    quickActions: ['sea_ddp', 'fba_ddp', 'lcl'],
-  },
-  UK: {
-    countryCode: 'UK',
-    marketLabel: 'United Kingdom',
-    recommendationTitle: 'Recommended for your UK account',
-    recommendationNote: 'UK accounts often compare LCL, Sea DDP, and Amazon FBA delivery into local fulfilment routes.',
-    pricingTier: 'UK / Europe tier',
-    pinnedRoutes: [
-      { title: 'China to UK Sea DDP', note: 'A common quote path for lower-cost door delivery into the UK market.' },
-      { title: 'Amazon FBA to Birmingham', note: 'Useful for Amazon replenishment into UK fulfilment centres.' },
-      { title: 'LCL to Felixstowe', note: 'Best for lower-volume sea freight without a full container booking.' },
-    ],
-    quickActions: ['sea_ddp', 'fba_sea', 'lcl'],
-  },
-  DE: {
-    countryCode: 'DE',
-    marketLabel: 'Germany',
-    recommendationTitle: 'Recommended for your Germany account',
-    recommendationNote: 'Germany-focused accounts often use Rail DDP, Sea DDP, and Amazon FBA replenishment into Europe.',
-    pricingTier: 'EU rail / sea tier',
-    pinnedRoutes: [
-      { title: 'China to Germany Rail DDP', note: 'Balanced cost and timing for inland Europe delivery.' },
-      { title: 'China to Hamburg Sea DDP', note: 'Useful for larger freight moving into Germany by sea.' },
-      { title: 'Amazon FBA to Leipzig', note: 'Recommended for Amazon inventory into Germany and surrounding EU markets.' },
-    ],
-    quickActions: ['rail_ddp', 'sea_ddp', 'fba_air'],
-  },
-}
-
-const DEFAULT_COUNTRY_PROFILE = COUNTRY_PROFILES.US
-
-const quoteTypes = [
-  { key: 'fcl', label: 'FCL', helper: 'Full container load', service: 'fcl', quoteType: 'FCL', module: 'fcl-page', containerType: '40HQ' },
-  { key: 'lcl', label: 'LCL', helper: 'Less than container load', service: 'fcl', quoteType: 'LCL', module: 'lcl-page', containerType: 'LCL Shared Space' },
-  { key: 'air_ddp', label: 'Air DDP', helper: 'Fast door delivery', service: 'ddp', quoteType: 'AIR_DDP', module: 'air-ddp-page', containerType: 'Air Cargo' },
-  { key: 'sea_ddp', label: 'Sea DDP', helper: 'Cost-effective door delivery', service: 'ddp', quoteType: 'SEA_DDP', module: 'sea-ddp-page', containerType: 'Sea DDP' },
-  { key: 'rail_ddp', label: 'Rail DDP', helper: 'Balanced speed and budget', service: 'ddp', quoteType: 'RAIL_DDP', module: 'rail-ddp-page', containerType: 'Rail DDP' },
-  { key: 'truck_ddp', label: 'Truck DDP', helper: 'Regional ground solution', service: 'ddp', quoteType: 'TRUCK_DDP', module: 'truck-ddp-page', containerType: 'Truck DDP' },
-  { key: 'fba_sea', label: 'FBA Sea', helper: 'Planned Amazon replenishment', service: 'ddp', quoteType: 'FBA_SEA', module: 'fba-sea-page', containerType: 'Amazon FBA Sea' },
-  { key: 'fba_air', label: 'FBA Air', helper: 'Urgent FBA restock', service: 'ddp', quoteType: 'FBA_AIR', module: 'fba-air-page', containerType: 'Amazon FBA Air' },
-  { key: 'fba_ddp', label: 'FBA DDP', helper: 'Door-to-Amazon delivery', service: 'ddp', quoteType: 'FBA_DDP', module: 'fba-ddp-page', containerType: 'Amazon FBA DDP' },
+const topTabs = [
+  { key: 'quote', label: 'Quote & Booking' },
+  { key: 'schedule', label: 'Sailing Schedule' },
+  { key: 'tracking', label: 'Cargo Tracking' },
 ]
 
-const quoteGroups = [
+const activeTopTab = ref('quote')
+
+const serviceTabs = [
   {
-    key: 'fcl-lcl',
-    title: 'FCL / LCL',
-    summary: 'For containerized sea freight, whether you need a full container or shared container space.',
+    key: 'ocean',
+    label: 'Ocean FCL',
+    summary: 'Direct port-to-port container pricing with fast container-type matching and route lookup.',
     icon: Box,
-    accent: 'navy',
-    items: ['fcl', 'lcl'],
+    modes: [{ key: 'port_to_port', label: 'Port to Port' }],
+    fields: ['origin', 'destination', 'container', 'weight', 'volume', 'cargo'],
+    hotRoutes: [
+      'Yantian - Los Angeles - United States',
+      'Ningbo - New York - United States',
+      'Shanghai - Rotterdam - Netherlands',
+      'Qingdao - Hamburg - Germany',
+    ],
+    quoteType: 'FCL',
+    serviceType: 'fcl',
+    module: 'quote-ocean-fcl',
   },
   {
     key: 'ddp',
-    title: 'DDP Shipping',
-    summary: 'Door-to-door shipping with customs and delivery support across air, sea, rail, and truck channels.',
+    label: 'DDP',
+    summary: 'Direct DDP pricing by China origin, destination country, ZIP code, cargo name, weight, volume, and carton count.',
     icon: Van,
-    accent: 'orange',
-    items: ['air_ddp', 'sea_ddp', 'rail_ddp', 'truck_ddp'],
+    modes: [
+      { key: 'sea_ddp', label: 'Sea DDP' },
+      { key: 'air_ddp', label: 'Air DDP' },
+      { key: 'rail_ddp', label: 'Rail DDP' },
+      { key: 'road_ddp', label: 'Road Freight' },
+      { key: 'truck_ddp', label: 'Truck Linehaul' },
+    ],
+    fields: ['origin', 'to', 'zipCode', 'cargo', 'weight', 'volume', 'pieces'],
+    hotRoutes: [
+      'SHENZHEN - DALLAS DOOR DELIVERY',
+      'GUANGZHOU - TORONTO DDP',
+      'YIWU - BERLIN RAIL DDP',
+      'DONGGUAN - PARIS AIR DDP',
+    ],
+    quoteType: 'SEA_DDP',
+    serviceType: 'ddp',
+    module: 'quote-ddp',
   },
   {
     key: 'fba',
-    title: 'Amazon FBA',
-    summary: 'Purpose-built quote flows for Amazon sellers shipping inventory from China to FBA warehouses.',
+    label: 'FBA Delivery',
+    summary: 'Amazon warehouse delivery search by warehouse code, address, cargo type, and shipment weight.',
     icon: Present,
-    accent: 'blue',
-    items: ['fba_sea', 'fba_air', 'fba_ddp'],
+    modes: [],
+    fields: ['warehouse', 'address', 'cargo', 'weight', 'pieces'],
+    hotRoutes: [
+      'ONT8 / LAX9 / SBD1',
+      'BHX4 / MAN1 / EMA1',
+      'DTM2 / FRA7 / LEJ1',
+      'YYZ7 / YVR2 / YOW3',
+    ],
+    quoteType: 'FBA_DDP',
+    serviceType: 'ddp',
+    module: 'quote-fba',
+  },
+  {
+    key: 'dangerous',
+    label: 'Dangerous Goods',
+    summary: 'Hazardous cargo inquiry for DG ocean and DG air routes with manual confirmation support.',
+    icon: Warning,
+    modes: [
+      { key: 'dg_ocean', label: 'DG Ocean' },
+      { key: 'dg_air', label: 'DG Air' },
+    ],
+    fields: ['origin', 'destination', 'cargo', 'unno', 'weight', 'pieces'],
+    hotRoutes: [
+      'SHANGHAI - LOS ANGELES DG',
+      'NINGBO - HAMBURG DG',
+      'SHENZHEN - NEW YORK DG',
+      'GUANGZHOU - TORONTO DG',
+    ],
+    quoteType: 'AIR_DDP',
+    serviceType: 'ddp',
+    module: 'quote-dg',
   },
 ]
 
-const scenarioCards = [
-  {
-    key: 'fba',
-    title: 'Ship to Amazon FBA',
-    description: 'Ideal for sellers who need sea, air, or DDP delivery into Amazon warehouses.',
-    quoteKey: 'fba_ddp',
-  },
-  {
-    key: 'door-to-door',
-    title: 'Door-to-Door DDP',
-    description: 'Best when you want customs support and final delivery handled together.',
-    quoteKey: 'sea_ddp',
-  },
-  {
-    key: 'full-container',
-    title: 'Full Container Shipping',
-    description: 'Use FCL when your shipment volume is large enough for dedicated container space.',
-    quoteKey: 'fcl',
-  },
-  {
-    key: 'small-cargo',
-    title: 'Small Cargo / LCL',
-    description: 'Use shared container space for lower-volume shipments that do not need a full container.',
-    quoteKey: 'lcl',
-  },
-  {
-    key: 'urgent-air',
-    title: 'Urgent Air Shipment',
-    description: 'Fast-moving quote path for urgent freight or stock recovery.',
-    quoteKey: 'air_ddp',
-  },
-  {
-    key: 'sourcing',
-    title: '1688 Purchase + Shipping',
-    description: 'For supplier coordination, inspection, consolidation, and export delivery from China.',
-    quoteKey: 'fba_ddp',
-  },
-]
+const fieldLabels = {
+  origin: { label: 'Origin', placeholder: 'Port - City - China', type: 'select' },
+  destination: { label: 'Destination', placeholder: 'Port - City - Country', type: 'select' },
+  address: { label: 'Address / Country', placeholder: 'Select country or type delivery address', type: 'select' },
+  to: { label: 'To', placeholder: 'Select destination country', type: 'select' },
+  zipCode: { label: 'ZIP Code', placeholder: 'Enter ZIP / postal code' },
+  cargo: { label: 'Cargo Name', placeholder: 'Optional product name' },
+  container: { label: 'Container', placeholder: 'Select container type', type: 'select' },
+  weight: { label: 'Weight', placeholder: 'Optional, e.g. 980 KG' },
+  volume: { label: 'Volume', placeholder: 'Optional, e.g. 4.5 CBM' },
+  pieces: { label: 'Pieces', placeholder: 'e.g. 120 CTNS' },
+  market: { label: 'Amazon Market', placeholder: 'Auto-filled from warehouse code', type: 'readonly' },
+  warehouse: { label: 'FBA Warehouse Code', placeholder: 'Type warehouse code, e.g. ONT8 (US)', type: 'select' },
+  unno: { label: 'UN Number', placeholder: 'e.g. UN3481' },
+}
 
-const quoteForm = reactive({
-  quoteKey: 'fcl',
+const serviceFieldOverrides = {
+  ddp: {
+    origin: { label: 'China Origin', placeholder: 'Select China origin city', type: 'select' },
+    to: { label: 'To', placeholder: 'Select destination country', type: 'select' },
+    zipCode: { label: 'ZIP Code', placeholder: 'Enter ZIP / postal code' },
+    cargo: { label: 'Cargo Name', placeholder: 'Enter product name' },
+    weight: { label: 'Weight', placeholder: 'Enter shipment weight, e.g. 980 KG' },
+    volume: { label: 'Volume', placeholder: 'Enter shipment volume, e.g. 4.5 CBM' },
+    pieces: { label: 'Pieces', placeholder: 'Enter carton count, e.g. 120 CTNS' },
+  },
+}
+
+const originOptions = quoteOptionCatalog.origins
+const ddpOriginOptions = quoteOptionCatalog.ddpChinaOrigins
+const destinationPortOptions = quoteOptionCatalog.destinationPorts
+const ddpCountryOptions = quoteOptionCatalog.ddpCountries
+const containerOptions = quoteOptionCatalog.containerTypes
+const amazonMarketOptions = quoteOptionCatalog.amazonMarkets
+const fbaWarehouseOptions = computed(() => getFbaWarehouseOptions(form.market))
+
+const fieldOptionsMap = {
+  origin: originOptions,
+  destination: destinationPortOptions,
+  address: ddpCountryOptions,
+  to: ddpCountryOptions,
+  container: containerOptions,
+  market: amazonMarketOptions,
+}
+
+const form = reactive({
   origin: '',
   destination: '',
+  address: '',
+  to: '',
+  zipCode: '',
   cargo: '',
+  container: '',
+  weight: '',
   volume: '',
+  pieces: '',
+  market: '',
+  warehouse: '',
+  unno: '',
 })
 
-const selectedQuote = computed(() => {
-  return quoteTypes.find((item) => item.key === quoteForm.quoteKey) || quoteTypes[0]
+const scheduleForm = reactive({
+  origin: '',
+  destination: '',
 })
 
-const resultItems = ref([])
-const isLoading = ref(false)
+const trackingForm = reactive({
+  number: '',
+})
+
+const resultList = ref([])
 const hasSearched = ref(false)
+const isLoading = ref(false)
+const activeServiceKey = ref('ocean')
+const activeModeKey = ref('port_to_port')
 
-const parseLocalJson = (key) => {
-  const raw = getLocal(key)
-  if (!raw) return null
-  try {
-    return JSON.parse(raw)
-  } catch {
-    return null
-  }
-}
+const activeService = computed(() => {
+  return serviceTabs.find((item) => item.key === activeServiceKey.value) || serviceTabs[0]
+})
 
-const storedUserInfo = computed(() => parseLocalJson('userInfo'))
-const storedGuestChatInfo = computed(() => parseLocalJson('chat_info'))
-const isAuthenticated = computed(() => Boolean(getLocal('TOKEN')))
-
-const inferCountryCode = () => {
-  const userInfo = storedUserInfo.value || {}
-  const guestInfo = storedGuestChatInfo.value || {}
-  const candidates = [
-    userInfo.countryCode,
-    userInfo.country_code,
-    userInfo.country,
-    userInfo.market,
-    guestInfo.countryCode,
-    guestInfo.country_code,
-    guestInfo.country,
-    guestInfo.market,
+const activeModes = computed(() => activeService.value.modes)
+const activeModeLabel = computed(() => activeModes.value.find((mode) => mode.key === activeModeKey.value)?.label || '')
+const activeServiceSummary = computed(() => activeService.value.summary || '')
+const isDdpService = computed(() => activeServiceKey.value === 'ddp')
+const ddpFieldRows = computed(() => {
+  if (!isDdpService.value) return []
+  const fieldMap = new Map(visibleFields.value.map((field) => [field.key, field]))
+  return [
+    ['origin', 'to', 'zipCode'],
+    ['cargo', 'weight', 'volume', 'pieces'],
   ]
+    .map((row) => row.map((key) => fieldMap.get(key)).filter(Boolean))
+    .filter((row) => row.length)
+})
+const visibleFields = computed(() => {
+  return activeService.value.fields.map((key) => {
+    const baseField = fieldLabels[key] || {}
+    const overrideField = serviceFieldOverrides[activeServiceKey.value]?.[key] || {}
+    const mergedField = {
+      key,
+      ...baseField,
+      ...overrideField,
+    }
 
-  const matched = candidates
-    .map((value) => String(value || '').trim().toUpperCase())
-    .find((value) => value && COUNTRY_PROFILES[value])
+    return {
+      ...mergedField,
+      type: activeServiceKey.value === 'fba' && key === 'address' ? 'readonly' : mergedField.type,
+      options:
+        key === 'warehouse'
+          ? fbaWarehouseOptions.value
+          : activeServiceKey.value === 'ddp' && key === 'origin'
+            ? ddpOriginOptions
+            : fieldOptionsMap[key] || [],
+    }
+  })
+})
 
-  return matched || DEFAULT_COUNTRY_PROFILE.countryCode
+watch(
+  () => form.warehouse,
+  (warehouseCode) => {
+    const matched = getFbaWarehouseRecord(warehouseCode)
+    form.market = matched?.market || ''
+    if (matched) {
+      form.address = `${matched.country} | ${matched.address}`
+    }
+  },
+)
+
+const scheduleSamples = [
+  { route: 'YANTIAN - LOS ANGELES', service: 'Matson Express', eta: '13-16 days', cutoff: 'Wed cutoff' },
+  { route: 'NINGBO - NEW YORK', service: 'US East Weekly', eta: '26-31 days', cutoff: 'Sat cutoff' },
+  { route: 'SHANGHAI - HAMBURG', service: 'EU Direct', eta: '31-36 days', cutoff: 'Tue cutoff' },
+]
+
+const trackingSamples = [
+  { status: 'Picked Up', time: '2026-06-21 10:40', note: 'Cargo collected from supplier.' },
+  { status: 'Loaded', time: '2026-06-22 18:10', note: 'Cargo loaded and prepared for linehaul.' },
+  { status: 'Departed', time: '2026-06-24 09:20', note: 'Shipment departed from origin.' },
+  { status: 'In Transit', time: '2026-06-25 16:30', note: 'Shipment is moving to the destination.' },
+]
+
+const setService = (key) => {
+  activeServiceKey.value = key
+  activeModeKey.value = serviceTabs.find((item) => item.key === key)?.modes[0]?.key || ''
+  resultList.value = []
+  hasSearched.value = false
 }
 
-const accountCountryCode = computed(() => inferCountryCode())
-const activeCountryProfile = computed(() => COUNTRY_PROFILES[accountCountryCode.value] || DEFAULT_COUNTRY_PROFILE)
-
-const activeAccountLabel = computed(() => {
-  const userInfo = storedUserInfo.value || {}
-  const firstName = String(userInfo.first_name || '').trim()
-  const lastName = String(userInfo.last_name || '').trim()
-  const companyName = String(userInfo.company_name || userInfo.company || '').trim()
-
-  if (companyName) return companyName
-  const fullName = `${firstName} ${lastName}`.trim()
-  if (fullName) return fullName
-  if (isAuthenticated.value && userInfo.id) return `Customer ${userInfo.id}`
-  if (!isAuthenticated.value && storedGuestChatInfo.value?.chat_id) return `Guest ${storedGuestChatInfo.value.chat_id}`
-  return 'Guest visitor'
-})
-
-const activeUserId = computed(() => {
-  const userInfo = storedUserInfo.value || {}
-  const guestInfo = storedGuestChatInfo.value || {}
-  return userInfo.id || guestInfo.chat_id || 'CUS-PORTAL'
-})
-
-const activeCustomerName = computed(() => {
-  return activeAccountLabel.value
-})
-
-const personalizedRoutes = computed(() => activeCountryProfile.value.pinnedRoutes)
-const personalizedQuickTypes = computed(() => {
-  return activeCountryProfile.value.quickActions
-    .map((key) => quoteTypes.find((item) => item.key === key))
-    .filter(Boolean)
-})
-
-const accountPricingTitle = computed(() => {
-  return isAuthenticated.value
-    ? activeCountryProfile.value.recommendationTitle
-    : 'Preview of account-specific pricing'
-})
-
-const accountPricingDescription = computed(() => {
-  return isAuthenticated.value
-    ? `${activeCountryProfile.value.recommendationNote} Pricing tier: ${activeCountryProfile.value.pricingTier}.`
-    : 'After login, this area can switch from public quote guidance to country-specific rates, preferred routes, and customer-level pricing recommendations.'
-})
-
-const accountStatusLabel = computed(() => {
-  return isAuthenticated.value ? 'Logged-in account' : 'Guest view'
-})
-
-const setQuoteType = (quoteKey) => {
-  quoteForm.quoteKey = quoteKey
-}
-
-const toResults = (records) => {
-  return records.map((item) => ({
-    id: item.id,
-    route: `${quoteForm.origin || 'Any origin'} -> ${quoteForm.destination || 'Any destination'}`,
-    service: selectedQuote.value.label,
-    transit: item.transitDays,
-    note: `${item.supplierName} / ${item.standardChannelName} / ${item.pricingDetail}`,
-    finalPrice: `${item.currency} ${item.finalPrice}`,
-  }))
-}
-
-const searchQuotes = async () => {
+const searchQuote = async () => {
   hasSearched.value = true
   isLoading.value = true
 
-  await new Promise((resolve) => window.setTimeout(resolve, 650))
+  await new Promise((resolve) => window.setTimeout(resolve, 400))
+
+  const destination =
+    activeServiceKey.value === 'ddp'
+      ? [form.to, form.zipCode].filter(Boolean).join(' ')
+      : form.destination || form.address || form.warehouse
+  const quoteType =
+    activeModeKey.value === 'air_ddp' || activeModeKey.value === 'dg_air'
+      ? 'AIR_DDP'
+      : activeService.value.quoteType
 
   const { resultRecords } = quoteByUnifiedEngine({
-    serviceType: selectedQuote.value.service,
-    quoteType: selectedQuote.value.quoteType,
-    sourceEntry: 'quote_hub',
-    sourceModule: selectedQuote.value.module,
-    userId: activeUserId.value,
-    customerName: activeCustomerName.value,
-    countryCode: activeCountryProfile.value.countryCode,
-    origin: quoteForm.origin,
-    destination: quoteForm.destination,
-    cargoType: quoteForm.cargo,
-    weightVolume: quoteForm.volume,
-    containerType: selectedQuote.value.containerType,
-    queryText: `${quoteForm.origin} ${quoteForm.destination} ${quoteForm.cargo}`.trim(),
+    serviceType: activeService.value.serviceType,
+    quoteType,
+    serviceModeKey: activeModeKey.value,
+    sourceEntry: 'quote_home',
+    sourceModule: activeService.value.module,
+    userId: 'QUOTE-PAGE',
+    customerName: 'Website visitor',
+    countryCode: 'US',
+    origin: form.origin,
+    destination,
+    cargoType: form.cargo,
+    weightVolume: [form.weight, form.volume, form.pieces].filter(Boolean).join(' / '),
+    containerType: form.container,
+    warehouseCode: form.warehouse,
+    market: form.to || form.market,
+    zipCode: form.zipCode,
+    queryText: [form.cargo, form.unno].filter(Boolean).join(' '),
   })
 
-  resultItems.value = toResults(resultRecords)
+  resultList.value = (resultRecords.length ? resultRecords : [null]).map((item, index) => ({
+    id: item?.id || `manual-${index}`,
+    route: item?.originLabel && item?.destinationLabel ? `${item.originLabel} -> ${item.destinationLabel}` : `${form.origin || 'China'} - ${destination || 'Destination'}`,
+    service: activeModeLabel.value ? `${activeService.value.label} / ${activeModeLabel.value}` : activeService.value.label,
+    price: item?.finalPrice ? `${item.currency} ${item.finalPrice}${item.priceUnit ? ` / ${item.priceUnit}` : ''}` : 'Manual Quote',
+    totalPriceLabel: item?.finalPrice ? `${item.currency} ${item.finalPrice}${item.priceUnit ? ` / ${item.priceUnit}` : ''}` : 'Manual Quote',
+    transit: item?.transitDays || 'Pending review',
+    transitLabel: item?.transitDays || 'Pending review',
+    note: item?.pricingDetail || 'This shipment can be routed for a manual quote confirmation.',
+    supplier: item?.supplierName || 'Cargosoon Pricing Team',
+    channel: item?.channelName || item?.standardChannelName || activeModeLabel.value || 'DDP Channel',
+    range: item?.bandLabel || (form.weight ? `Requested ${form.weight}` : 'Weight confirmation required'),
+    pricingSummary:
+      activeServiceKey.value === 'ddp'
+        ? [`Destination: ${form.to || 'TBD'}`, form.zipCode ? `ZIP: ${form.zipCode}` : 'ZIP: TBD', form.weight ? `Weight: ${form.weight}` : null]
+            .filter(Boolean)
+            .join('  |  ')
+        : item?.pricingDetail || '',
+  }))
+
   isLoading.value = false
 }
 
-const goToQuoteChat = (presetTopic = '') => {
-  const query = {
-    mode: 'service',
-  }
-
-  if (presetTopic) {
-    query.topic = presetTopic
-  } else {
-    query.topic = selectedQuote.value.key
-  }
-
-  router.push({
-    name: 'chat',
-    query,
-  })
-}
-
-const openAssistant = () => {
+const goToChat = () => {
+  const topic = activeModeKey.value ? `${activeServiceKey.value}-${activeModeKey.value}` : activeServiceKey.value
   router.push({
     name: 'chat',
     query: {
-      mode: 'ai',
-      q: `Help me choose the right quote type for ${quoteForm.destination || 'my shipment'}`,
+      mode: 'service',
+      topic,
+    },
+  })
+}
+
+const goToTracking = () => {
+  router.push({
+    name: 'track',
+    query: {
+      keyword: trackingForm.number,
     },
   })
 }
@@ -302,227 +325,335 @@ const openAssistant = () => {
 <template>
   <div class="quote-page">
     <section class="quote-shell">
-      <header class="quote-hero">
-        <span class="quote-kicker">Quote Hub</span>
-        <h1>Freight Pricing, In One Place</h1>
-        <p>
-          Check FCL, LCL, DDP, and Amazon FBA pricing paths from a single quote workspace.
-        </p>
-      </header>
-
-      <section class="hero-grid">
-        <article class="quote-query-card">
-          <div class="panel-heading panel-heading-tight">
-            <div>
-              <span class="panel-label">Unified Search</span>
-              <h2>Search by shipment type</h2>
-            </div>
-            <p>Pick a quote type, then add the basic shipment details.</p>
-          </div>
-
-          <div class="quote-type-grid">
-            <button
-              v-for="item in quoteTypes"
-              :key="item.key"
-              type="button"
-              class="quote-type-chip"
-              :class="{ 'is-active': quoteForm.quoteKey === item.key }"
-              @click="setQuoteType(item.key)"
-            >
-              <strong>{{ item.label }}</strong>
-              <small>{{ item.helper }}</small>
-            </button>
-          </div>
-
-          <div class="query-form">
-            <label>
-              Origin
-              <input
-                v-model="quoteForm.origin"
-                type="text"
-                placeholder="e.g. Shenzhen"
-              />
-            </label>
-            <label>
-              Destination
-              <input
-                v-model="quoteForm.destination"
-                type="text"
-                placeholder="e.g. Los Angeles"
-              />
-            </label>
-            <label>
-              Cargo
-              <input
-                v-model="quoteForm.cargo"
-                type="text"
-                placeholder="e.g. furniture, electronics"
-              />
-            </label>
-            <label>
-              Weight / Volume
-              <input
-                v-model="quoteForm.volume"
-                type="text"
-                placeholder="e.g. 320kg or 1 x 40HQ"
-              />
-            </label>
-          </div>
-
-          <div class="panel-actions">
-            <button type="button" class="search-btn" @click="searchQuotes">
-              <Search class="btn-icon" aria-hidden="true" />
-              Search Quote
-            </button>
-            <button type="button" class="assistant-btn" @click="openAssistant">
-              <Setting class="btn-icon" aria-hidden="true" />
-              Start AI Quote
-            </button>
-            <button type="button" class="quote-btn" @click="goToQuoteChat()">
-              Customer Service
-              <ArrowRight class="btn-icon" aria-hidden="true" />
-            </button>
-          </div>
-        </article>
-
-        <article class="quote-results-card">
-          <div class="panel-heading panel-heading-tight">
-            <div>
-              <span class="panel-label">Search Results</span>
-              <h2>{{ selectedQuote.label }} results</h2>
-            </div>
-            <p>Current results are routed through the shared quote engine and can later be replaced with live account pricing.</p>
-          </div>
-
-          <div v-if="isLoading" class="state-card">
-            <strong>Loading results...</strong>
-            <p>Preparing matching quote samples for {{ selectedQuote.label }}.</p>
-          </div>
-
-          <div v-else-if="!hasSearched" class="state-card">
-            <strong>No search yet</strong>
-            <p>Choose a quote type and fill any known shipment details to preview available pricing directions.</p>
-          </div>
-
-          <div v-else-if="!resultItems.length" class="state-card">
-            <strong>No mock matches for this input</strong>
-            <p>Try origin, destination, cargo, or weight details to load the current placeholder result set.</p>
-          </div>
-
-          <div v-else class="results-list">
-            <article v-for="item in resultItems" :key="item.id" class="result-card">
-              <div class="result-badge">{{ item.service }}</div>
-              <h3>{{ item.route }}</h3>
-              <p>{{ item.note }}</p>
-              <div class="result-meta">
-                <span>{{ item.finalPrice }} | Transit: {{ item.transit }}</span>
-                <button type="button" class="inline-quote-btn" @click="goToQuoteChat(selectedQuote.key)">
-                  Continue Quote
-                </button>
-              </div>
-            </article>
-          </div>
-        </article>
-      </section>
-
-      <section class="quote-groups">
-        <article
-          v-for="group in quoteGroups"
-          :key="group.key"
-          class="quote-group-card"
-          :class="`accent-${group.accent}`"
+      <div class="hero-tabs">
+        <button
+          v-for="tab in topTabs"
+          :key="tab.key"
+          type="button"
+          class="hero-tab"
+          :class="{ 'is-active': activeTopTab === tab.key }"
+          @click="activeTopTab = tab.key"
         >
-          <div class="quote-group-head">
-            <component :is="group.icon" class="group-icon" aria-hidden="true" />
-            <div>
-              <h2>{{ group.title }}</h2>
-              <p>{{ group.summary }}</p>
-            </div>
-          </div>
+          {{ tab.label }}
+        </button>
+      </div>
 
-          <div class="group-item-grid">
+      <section class="quote-card">
+        <template v-if="activeTopTab === 'quote'">
+          <div class="service-tabs">
             <button
-              v-for="itemKey in group.items"
-              :key="itemKey"
+              v-for="service in serviceTabs"
+              :key="service.key"
               type="button"
-              class="group-item-chip"
-              @click="setQuoteType(itemKey)"
+              class="service-tab"
+              :class="{ 'is-active': activeServiceKey === service.key }"
+              @click="setService(service.key)"
             >
-              <strong>{{ quoteTypes.find((item) => item.key === itemKey)?.label }}</strong>
-              <small>{{ quoteTypes.find((item) => item.key === itemKey)?.helper }}</small>
+              {{ service.label }}
             </button>
           </div>
-        </article>
-      </section>
 
-      <section class="scenario-section">
-        <div class="section-heading">
-          <span class="panel-label">Quick Start</span>
-          <h2>Common shipping needs</h2>
-          <p>Start from a business scenario instead of a logistics term.</p>
-        </div>
-
-        <div class="scenario-grid">
-          <article
-            v-for="scenario in scenarioCards"
-            :key="scenario.key"
-            class="scenario-card"
-          >
-            <h3>{{ scenario.title }}</h3>
-            <p>{{ scenario.description }}</p>
-            <button type="button" class="scenario-btn" @click="setQuoteType(scenario.quoteKey)">
-              Use this flow
-            </button>
-          </article>
-        </div>
-      </section>
-
-      <section class="account-section">
-        <article class="account-card">
-          <div class="section-heading section-heading-left">
-            <span class="panel-label">Account Pricing</span>
-            <h2>{{ accountPricingTitle }}</h2>
-            <p>{{ accountPricingDescription }}</p>
-          </div>
-
-          <div class="account-summary-bar">
-            <div class="account-summary-item">
-              <small>Status</small>
-              <strong>{{ accountStatusLabel }}</strong>
+          <div class="service-hero" :class="{ 'service-hero-ddp': isDdpService }">
+            <div class="service-hero-copy">
+              <span class="service-eyebrow">Instant Freight Tools</span>
+              <h2>{{ activeService.label }}</h2>
+              <p>{{ activeServiceSummary }}</p>
             </div>
-            <div class="account-summary-item">
-              <small>Account</small>
-              <strong>{{ activeCustomerName }}</strong>
-            </div>
-            <div class="account-summary-item">
-              <small>Market</small>
-              <strong>{{ activeCountryProfile.marketLabel }}</strong>
-            </div>
-            <div class="account-summary-item">
-              <small>Pricing Tier</small>
-              <strong>{{ activeCountryProfile.pricingTier }}</strong>
+            <div class="service-hero-badge">
+              <span>Live Search</span>
+              <strong>{{ activeModeLabel || 'Quote Search' }}</strong>
             </div>
           </div>
 
-          <div class="account-action-row">
-            <button
-              v-for="item in personalizedQuickTypes"
-              :key="item.key"
-              type="button"
-              class="account-action-chip"
-              @click="setQuoteType(item.key)"
+          <div v-if="activeModes.length" class="mode-switch">
+            <label
+              v-for="mode in activeModes"
+              :key="mode.key"
+              class="mode-option"
+              :class="{ 'is-active': activeModeKey === mode.key }"
             >
-              {{ item.label }}
-            </button>
+              <input v-model="activeModeKey" type="radio" :value="mode.key" />
+              <span>{{ mode.label }}</span>
+            </label>
           </div>
 
-          <div class="account-route-list">
-            <article v-for="route in personalizedRoutes" :key="route.title" class="account-route-card">
-              <strong>{{ route.title }}</strong>
-              <p>{{ route.note }}</p>
-            </article>
+          <div class="quote-workbench">
+            <template v-if="isDdpService">
+              <div class="ddp-layout">
+                <div class="ddp-form-card">
+                  <div v-for="(row, rowIndex) in ddpFieldRows" :key="`ddp-row-${rowIndex}`" class="ddp-field-row">
+                    <div
+                      v-for="field in row"
+                      :key="field.key"
+                      class="field-box ddp-field-box"
+                    >
+                      <span>{{ field.label }}</span>
+                      <el-select
+                        v-if="field.type === 'select'"
+                        v-model="form[field.key]"
+                        class="smart-select"
+                        filterable
+                        allow-create
+                        default-first-option
+                        :reserve-keyword="false"
+                        :placeholder="field.placeholder"
+                      >
+                        <el-option
+                          v-for="option in field.options"
+                          :key="option.value || option"
+                          :label="option.label || option"
+                          :value="option.value || option"
+                        />
+                      </el-select>
+                      <input
+                        v-else
+                        v-model="form[field.key]"
+                        type="text"
+                        :placeholder="field.placeholder"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="action-block ddp-action-block">
+                  <div class="action-card ddp-action-card">
+                    <span class="action-card-title">DDP Instant Quote</span>
+                    <button type="button" class="search-btn" @click="searchQuote">
+                      <Search class="btn-icon" aria-hidden="true" />
+                      Search Rate
+                    </button>
+                    <button type="button" class="inquiry-link" @click="goToChat">
+                      Request Quote
+                    </button>
+                    <p class="action-note">Use destination country and ZIP code to match the most relevant DDP zone and weight band.</p>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <template v-else>
+              <div class="search-strip">
+                <div class="search-fields">
+                  <div
+                    v-for="field in visibleFields"
+                    :key="field.key"
+                    class="field-box"
+                    :class="{
+                      'field-box-wide': activeServiceKey === 'ocean' && (field.key === 'origin' || field.key === 'destination'),
+                    }"
+                  >
+                    <span>{{ field.label }}</span>
+                    <el-select
+                      v-if="field.type === 'select'"
+                      v-model="form[field.key]"
+                      class="smart-select"
+                      filterable
+                      allow-create
+                      default-first-option
+                      :reserve-keyword="false"
+                      :placeholder="field.placeholder"
+                    >
+                      <el-option
+                        v-for="option in field.options"
+                        :key="option.value || option"
+                        :label="option.label || option"
+                        :value="option.value || option"
+                      />
+                    </el-select>
+                    <input
+                      v-else-if="field.type === 'readonly'"
+                      :value="form[field.key]"
+                      type="text"
+                      :placeholder="field.placeholder"
+                      readonly
+                    />
+                    <input
+                      v-else
+                      v-model="form[field.key]"
+                      type="text"
+                      :placeholder="field.placeholder"
+                    />
+                  </div>
+                </div>
+
+                <div class="action-block">
+                  <div class="action-card">
+                    <button type="button" class="search-btn" @click="searchQuote">
+                      <Search class="btn-icon" aria-hidden="true" />
+                      Search Rate
+                    </button>
+                    <button type="button" class="inquiry-link" @click="goToChat">
+                      Request Quote
+                    </button>
+                    <p class="action-note">Search direct pricing first, then switch to manual support if the route needs confirmation.</p>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <div v-if="!isDdpService" class="hot-lines">
+              <span class="hot-label">Hot Routes</span>
+              <button
+                v-for="route in activeService.hotRoutes"
+                :key="route"
+                type="button"
+                class="hot-chip"
+              >
+                {{ route }}
+              </button>
+            </div>
           </div>
-        </article>
+
+          <div class="result-area" :class="{ 'result-area-ddp': isDdpService }">
+            <div v-if="isLoading" class="empty-state">
+              <strong>Matching available pricing...</strong>
+              <p>We are checking the best route options for your shipment.</p>
+            </div>
+
+            <div v-else-if="!hasSearched" class="empty-state">
+              <strong>Enter shipment details to start</strong>
+              <p>
+                This layout is built for fast quote entry. Users can search by port, address,
+                Amazon warehouse, weight, and cargo name.
+              </p>
+            </div>
+
+            <div v-else class="result-list" :class="{ 'ddp-result-list': isDdpService }">
+              <article v-for="item in resultList" :key="item.id" class="result-card">
+                <div class="result-head" :class="{ 'ddp-result-head': isDdpService }">
+                  <div class="result-title-block">
+                    <strong>{{ item.route }}</strong>
+                    <p>{{ item.service }}</p>
+                  </div>
+                  <div class="result-price-block">
+                    <small>Total Price</small>
+                    <span>{{ item.totalPriceLabel }}</span>
+                  </div>
+                </div>
+                <div class="result-meta" :class="{ 'ddp-result-meta': isDdpService }">
+                  <span>{{ item.transitLabel }}</span>
+                  <span>{{ item.supplier }}</span>
+                  <span v-if="isDdpService">{{ activeModeLabel || 'DDP' }}</span>
+                </div>
+                <div v-if="isDdpService" class="ddp-quote-grid">
+                  <div class="ddp-quote-cell">
+                    <label>Total Price</label>
+                    <strong>{{ item.totalPriceLabel }}</strong>
+                  </div>
+                  <div class="ddp-quote-cell">
+                    <label>Transit Time</label>
+                    <strong>{{ item.transitLabel }}</strong>
+                  </div>
+                  <div class="ddp-quote-cell">
+                    <label>Channel</label>
+                    <strong>{{ item.channel }}</strong>
+                  </div>
+                  <div class="ddp-quote-cell">
+                    <label>Range</label>
+                    <strong>{{ item.range }}</strong>
+                  </div>
+                </div>
+                <p v-if="isDdpService" class="result-summary">{{ item.pricingSummary }}</p>
+                <div v-if="isDdpService" class="ddp-notes">
+                  <label>Notes</label>
+                  <small>{{ item.note }}</small>
+                </div>
+                <small v-else>{{ item.note }}</small>
+              </article>
+            </div>
+          </div>
+        </template>
+
+        <template v-else-if="activeTopTab === 'schedule'">
+          <div class="secondary-wrap">
+            <div class="secondary-search">
+              <div class="field-box">
+                <span>Origin</span>
+                <el-select
+                  v-model="scheduleForm.origin"
+                  class="smart-select"
+                  filterable
+                  allow-create
+                  default-first-option
+                  :reserve-keyword="false"
+                  placeholder="Select or type origin port"
+                >
+                  <el-option v-for="option in originOptions" :key="option" :label="option" :value="option" />
+                </el-select>
+              </div>
+              <div class="field-box">
+                <span>Destination</span>
+                <el-select
+                  v-model="scheduleForm.destination"
+                  class="smart-select"
+                  filterable
+                  allow-create
+                  default-first-option
+                  :reserve-keyword="false"
+                  placeholder="Select or type destination port"
+                >
+                  <el-option
+                    v-for="option in destinationPortOptions"
+                    :key="option"
+                    :label="option"
+                    :value="option"
+                  />
+                </el-select>
+              </div>
+              <button type="button" class="search-btn secondary-btn">
+                <Promotion class="btn-icon" aria-hidden="true" />
+                Search Schedule
+              </button>
+            </div>
+
+            <div class="sample-list">
+              <article v-for="item in scheduleSamples" :key="item.route" class="sample-card">
+                <strong>{{ item.route }}</strong>
+                <p>{{ item.service }}</p>
+                <div class="result-meta">
+                  <span>{{ item.eta }}</span>
+                  <span>{{ item.cutoff }}</span>
+                </div>
+              </article>
+            </div>
+          </div>
+        </template>
+
+        <template v-else>
+          <div class="secondary-wrap">
+            <div class="secondary-search tracking-search">
+              <div class="field-box wide">
+                <span>Tracking Number / Container / B/L No.</span>
+                <input v-model="trackingForm.number" type="text" placeholder="Enter shipment number" />
+              </div>
+              <button type="button" class="search-btn secondary-btn" @click="goToTracking">
+                <Search class="btn-icon" aria-hidden="true" />
+                Track Cargo
+              </button>
+            </div>
+
+            <div class="sample-list">
+              <article v-for="item in trackingSamples" :key="item.time" class="sample-card">
+                <strong>{{ item.status }}</strong>
+                <p>{{ item.time }}</p>
+                <small>{{ item.note }}</small>
+              </article>
+            </div>
+          </div>
+        </template>
+
+        <div v-if="!isDdpService" class="footer-bar">
+          <div class="footer-note">
+            <span class="new-tag">NEW</span>
+            <p>
+              Quote page layout updated for direct rate search, sailing schedule lookup, and cargo tracking.
+            </p>
+          </div>
+          <div class="footer-stat">
+            <span>Quote Requests Served</span>
+            <strong>2,137,913</strong>
+          </div>
+        </div>
       </section>
     </section>
   </div>
@@ -532,112 +663,28 @@ const openAssistant = () => {
 .quote-page {
   min-height: calc(100vh - 60px);
   background:
-    linear-gradient(180deg, #fffaf7 0%, #ffffff 220px, #f7f9fc 100%);
-  color: #1f2430;
+    linear-gradient(180deg, rgba(220, 236, 255, 0.92) 0%, rgba(236, 244, 255, 0.96) 12%, #f8fbff 100%);
+  color: #20314d;
 }
 
 .quote-shell {
-  width: min(1140px, calc(100% - 40px));
+  width: min(1180px, calc(100% - 24px));
   margin: 0 auto;
-  padding: 42px 0 72px;
+  padding: 36px 0 64px;
 }
 
-.quote-hero {
-  text-align: center;
-  margin-bottom: 26px;
-}
-
-.quote-kicker,
-.panel-label,
-.result-badge {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 0 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.quote-kicker,
-.panel-label {
-  background: #fff3ea;
-  color: #f26a1b;
-}
-
-.quote-hero h1 {
-  margin: 16px 0 10px;
-  color: #1d2533;
-  font-size: clamp(34px, 4.7vw, 50px);
-  line-height: 1.06;
-  font-weight: 800;
-}
-
-.quote-hero p {
-  width: min(100%, 700px);
-  margin: 0 auto;
-  color: #667286;
-  font-size: 15px;
-  line-height: 1.55;
-}
-
-.hero-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
-  gap: 18px;
-}
-
-.quote-query-card,
-.quote-results-card,
-.quote-group-card,
-.account-card {
-  padding: 24px;
-  border: 1px solid rgba(17, 47, 102, 0.07);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 14px 32px rgba(22, 39, 71, 0.06);
-}
-
-.panel-heading,
-.section-heading {
-  display: grid;
-  gap: 8px;
-}
-
-.panel-heading-tight {
-  margin-bottom: 18px;
-}
-
-.panel-heading h2,
-.section-heading h2 {
-  margin: 10px 0 0;
-  color: #1d2533;
-  font-size: 24px;
-  font-weight: 800;
-}
-
-.panel-heading p,
-.section-heading p {
-  margin: 0;
-  color: #687284;
-  font-size: 14px;
-  line-height: 1.55;
-}
-
-.quote-type-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.hero-tabs {
+  display: flex;
   gap: 10px;
-  margin-bottom: 18px;
+  align-items: flex-end;
+  padding-left: 10px;
 }
 
-.quote-type-chip,
-.group-item-chip,
+.hero-tab,
+.service-tab,
 .search-btn,
-.assistant-btn,
-.quote-btn,
-.inline-quote-btn,
-.scenario-btn {
+.hot-chip,
+.inquiry-link {
   border: 0;
   cursor: pointer;
   font: inherit;
@@ -645,122 +692,628 @@ const openAssistant = () => {
     transform 0.18s ease,
     box-shadow 0.18s ease,
     background 0.18s ease,
-    color 0.18s ease,
-    border-color 0.18s ease;
+    color 0.18s ease;
 }
 
-.quote-type-chip,
-.group-item-chip {
-  min-height: 72px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: #ffffff;
-  box-shadow: inset 0 0 0 1px #e7ebf2;
-  display: grid;
-  gap: 4px;
-  text-align: left;
-}
-
-.quote-type-chip strong,
-.group-item-chip strong {
-  color: #1e293b;
-  font-size: 14px;
+.hero-tab {
+  min-width: 160px;
+  height: 62px;
+  padding: 0 18px;
+  border-radius: 16px 16px 0 0;
+  background: linear-gradient(180deg, #ffffff 0%, #eef4ff 100%);
+  box-shadow: inset 0 0 0 1px rgba(111, 154, 221, 0.42);
+  color: #3d506f;
+  font-size: 17px;
   font-weight: 800;
 }
 
-.quote-type-chip small,
-.group-item-chip small {
-  color: #667286;
-  font-size: 12px;
-  line-height: 1.45;
+.hero-tab.is-active {
+  background: linear-gradient(180deg, #fff6ee 0%, #ffe4c7 100%);
+  box-shadow: inset 0 0 0 2px #f48a20;
+  color: #d86b00;
 }
 
-.quote-type-chip.is-active {
-  background: linear-gradient(180deg, #fff8f3 0%, #fff3ea 100%);
-  box-shadow: inset 0 0 0 1px rgba(242, 106, 27, 0.22), 0 8px 18px rgba(242, 106, 27, 0.09);
+.quote-card {
+  margin-top: -1px;
+  padding: 18px 18px 12px;
+  border-radius: 18px;
+  border: 2px solid rgba(113, 177, 255, 0.62);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(240, 246, 255, 0.94) 100%);
+  box-shadow:
+    0 16px 38px rgba(110, 154, 214, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.8);
 }
 
-.query-form {
+.service-tabs {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  padding: 8px 12px 2px;
+}
+
+.service-tab {
+  padding: 0;
+  background: transparent;
+  color: #20314d;
+  font-size: 16px;
+  font-weight: 800;
+  position: relative;
+}
+
+.service-tab.is-active {
+  color: #f07813;
+}
+
+.service-tab.is-active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -12px;
+  height: 3px;
+  border-radius: 999px;
+  background: #f07813;
+}
+
+.service-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 12px 12px;
+}
+
+.service-hero-ddp {
+  padding-bottom: 8px;
+}
+
+.service-hero-copy h2 {
+  margin: 4px 0 8px;
+  color: #1c3152;
+  font-size: 28px;
+  line-height: 1.04;
+  font-weight: 900;
+}
+
+.service-hero-copy p {
+  max-width: 720px;
+  margin: 0;
+  color: #6881a3;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.service-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(240, 120, 19, 0.1);
+  color: #e07713;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.service-hero-badge {
+  min-width: 168px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fff9f3 0%, #ffe7cb 100%);
+  box-shadow: inset 0 0 0 1px rgba(240, 120, 19, 0.16);
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  gap: 5px;
 }
 
-.query-form label {
-  display: grid;
+.service-hero-badge span {
+  color: #9d7c56;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.service-hero-badge strong {
+  color: #1f3350;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.mode-switch {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 4px 12px 14px;
+}
+
+.mode-option {
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
-  color: #344054;
-  font-size: 13px;
+  color: #4f6485;
+  font-size: 14px;
   font-weight: 700;
 }
 
-.query-form input {
+.mode-option input {
+  margin: 0;
+  accent-color: #f07813;
+}
+
+.mode-option.is-active span {
+  color: #f07813;
+}
+
+.quote-workbench {
+  padding: 6px 12px 0;
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(242, 247, 255, 0.98) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(159, 190, 230, 0.24),
+    0 10px 30px rgba(153, 182, 220, 0.14);
+}
+
+.ddp-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 18px;
+  align-items: start;
+  padding: 4px 10px 10px;
+}
+
+.ddp-form-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+  box-shadow: inset 0 0 0 1px rgba(174, 198, 228, 0.22);
+}
+
+.ddp-field-row {
+  display: grid;
+  gap: 14px;
+}
+
+.ddp-field-row:first-child {
+  grid-template-columns: 1.1fr 1fr 0.9fr;
+}
+
+.ddp-field-row:last-child {
+  grid-template-columns: 1.25fr 0.9fr 0.9fr 0.9fr;
+}
+
+.ddp-field-box {
+  min-width: 0;
+}
+
+.search-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 18px;
+  align-items: start;
+  padding: 10px 10px 0;
+}
+
+.search-fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.field-box {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.field-box-wide {
+  grid-column: span 2;
+}
+
+.field-box-ddp-wide {
+  grid-column: span 2;
+}
+
+.field-box span {
+  color: #6d82a1;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.field-box input {
   width: 100%;
   min-width: 0;
-  height: 46px;
-  padding: 0 14px;
-  border: 1px solid #dde4ee;
-  border-radius: 12px;
+  height: 58px;
+  padding: 0 16px;
+  border: 1px solid #d7e2f0;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  color: #21324d;
+  font-size: 15px;
   outline: 0;
-  color: #20242d;
-  font-size: 14px;
-  background: #ffffff;
   transition:
     border-color 0.18s ease,
     box-shadow 0.18s ease;
 }
 
-.query-form input:focus {
-  border-color: #f26a1b;
-  box-shadow: 0 0 0 3px rgba(242, 106, 27, 0.12);
+.field-box input:focus {
+  border-color: #f49a3a;
+  box-shadow: 0 0 0 3px rgba(244, 154, 58, 0.12);
 }
 
-.panel-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 18px;
-  flex-wrap: wrap;
+.field-box :deep(.smart-select) {
+  width: 100%;
 }
 
-.search-btn,
-.assistant-btn,
-.quote-btn {
+.field-box :deep(.smart-select .el-select__wrapper) {
+  min-height: 58px;
+  border-radius: 14px;
+  box-shadow: none;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  border: 1px solid #d7e2f0;
+  padding: 0 16px;
+}
+
+.field-box :deep(.smart-select .el-select__wrapper.is-focused) {
+  border-color: #f49a3a;
+  box-shadow: 0 0 0 3px rgba(244, 154, 58, 0.12);
+}
+
+.field-box :deep(.smart-select .el-select__placeholder),
+.field-box :deep(.smart-select .el-select__selected-item),
+.field-box :deep(.smart-select .el-select__input) {
+  color: #21324d;
+  font-size: 15px;
+}
+
+.action-block {
+  padding-top: 22px;
+}
+
+.action-card {
+  padding: 16px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #f4f8ff 0%, #edf4ff 100%);
+  box-shadow: inset 0 0 0 1px rgba(160, 188, 226, 0.32);
+  display: grid;
+  gap: 12px;
+}
+
+.ddp-action-block {
+  padding-top: 0;
+}
+
+.ddp-action-card {
+  position: sticky;
+  top: 18px;
+  background: linear-gradient(180deg, #eef5ff 0%, #e6effc 100%);
+}
+
+.action-card-title {
+  color: #1d3352;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.action-note {
+  margin: 0;
+  color: #7086a7;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.search-btn {
+  width: 100%;
+  height: 58px;
+  padding: 0 18px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ff9f3f 0%, #f07813 100%);
+  box-shadow: 0 10px 24px rgba(240, 120, 19, 0.26);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 800;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-width: 148px;
-  height: 46px;
-  padding: 0 18px;
+}
+
+.inquiry-link {
+  min-height: 44px;
   border-radius: 12px;
-  font-size: 14px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: inset 0 0 0 1px rgba(240, 120, 19, 0.16);
+  color: #f07813;
+  font-size: 15px;
   font-weight: 800;
 }
 
-.search-btn {
-  background: #112f66;
+.hot-lines {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 18px 10px 18px;
+}
+
+.hot-label {
+  color: #6c809d;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.hot-chip {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #eef4fd 0%, #e1ebf9 100%);
+  color: #48627f;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.result-area {
+  padding: 18px 12px 0;
+}
+
+.result-area-ddp {
+  padding-top: 14px;
+}
+
+.empty-state,
+.result-card,
+.sample-card {
+  border-radius: 16px;
+  border: 1px solid #deebf8;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(249, 252, 255, 0.96) 100%);
+  box-shadow: 0 10px 24px rgba(157, 182, 219, 0.1);
+}
+
+.empty-state {
+  padding: 22px;
+}
+
+.empty-state strong,
+.result-card strong,
+.sample-card strong {
+  color: #233554;
+}
+
+.empty-state p,
+.result-card p,
+.sample-card p,
+.sample-card small {
+  margin: 8px 0 0;
+  color: #6c809d;
+  line-height: 1.6;
+}
+
+.result-list,
+.sample-list {
+  display: grid;
+  gap: 12px;
+}
+
+.result-card,
+.sample-card {
+  padding: 18px;
+}
+
+.result-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.result-title-block {
+  display: grid;
+  gap: 6px;
+}
+
+.result-title-block p {
+  margin: 0;
+  color: #667e9d;
+  font-size: 14px;
+}
+
+.result-price-block {
+  min-width: 180px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fff8f1 0%, #ffedd9 100%);
+  text-align: right;
+  display: grid;
+  gap: 4px;
+}
+
+.result-price-block small {
+  margin: 0;
+  color: #9b7a56;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.result-head span {
+  color: #f07813;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.result-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.result-meta span {
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #f6f9fd;
+  color: #59708f;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+}
+
+.result-card small {
+  display: block;
+  margin-top: 12px;
+  color: #6c809d;
+  line-height: 1.55;
+}
+
+.result-summary {
+  margin: 14px 0 0;
+  color: #536d8d;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.ddp-result-list {
+  gap: 14px;
+}
+
+.ddp-result-list .result-card {
+  border-radius: 18px;
+}
+
+.ddp-result-head {
+  align-items: stretch;
+}
+
+.ddp-result-meta span {
+  background: linear-gradient(180deg, #eef5ff 0%, #e7f0fb 100%);
+}
+
+.ddp-quote-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ddp-quote-cell {
+  padding: 14px 14px 12px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #f8fbff 0%, #edf4fd 100%);
+  box-shadow: inset 0 0 0 1px rgba(168, 193, 226, 0.28);
+  display: grid;
+  gap: 6px;
+}
+
+.ddp-quote-cell label,
+.ddp-notes label {
+  color: #7c90ad;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ddp-quote-cell strong {
+  color: #1d3352;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.ddp-notes {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fffdf9 0%, #fff6ea 100%);
+  box-shadow: inset 0 0 0 1px rgba(240, 120, 19, 0.12);
+}
+
+.ddp-notes small {
+  margin-top: 8px;
+}
+
+.secondary-wrap {
+  padding: 14px 12px 0;
+}
+
+.secondary-search {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+  gap: 14px;
+  align-items: end;
+  padding: 8px 10px 14px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(242, 247, 255, 0.98) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(159, 190, 230, 0.24),
+    0 10px 30px rgba(153, 182, 220, 0.14);
+}
+
+.tracking-search {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.wide {
+  grid-column: auto;
+}
+
+.secondary-btn {
+  min-width: 160px;
+}
+
+.footer-bar {
+  margin-top: 18px;
+  padding: 18px 12px 4px;
+  border-top: 1px solid rgba(155, 184, 225, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footer-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.new-tag {
+  min-width: 38px;
+  height: 20px;
+  border-radius: 999px;
+  background: #ff7b31;
   color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.assistant-btn {
-  background: #fff3ea;
-  color: #d9651e;
+.footer-note p,
+.footer-stat span {
+  margin: 0;
+  color: #7185a1;
+  font-size: 13px;
 }
 
-.quote-btn {
-  background: #f26a1b;
-  color: #ffffff;
-  box-shadow: 0 10px 22px rgba(242, 106, 27, 0.16);
+.footer-stat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.search-btn:hover,
-.assistant-btn:hover,
-.quote-btn:hover,
-.inline-quote-btn:hover,
-.scenario-btn:hover,
-.quote-type-chip:hover,
-.group-item-chip:hover {
-  transform: translateY(-1px);
+.footer-stat strong {
+  color: #f07813;
+  font-size: 22px;
+  font-weight: 900;
 }
 
 .btn-icon {
@@ -768,276 +1321,126 @@ const openAssistant = () => {
   height: 16px;
 }
 
-.state-card,
-.result-card,
-.scenario-card,
-.account-route-card {
-  border: 1px solid #e8edf4;
-  border-radius: 16px;
-  background: #fbfcfe;
-}
-
-.state-card {
-  padding: 22px 18px;
-}
-
-.state-card strong,
-.result-card h3,
-.scenario-card h3,
-.account-route-card strong {
-  color: #20242d;
-}
-
-.state-card p,
-.result-card p,
-.scenario-card p,
-.account-route-card p {
-  margin: 8px 0 0;
-  color: #6b7688;
-  line-height: 1.6;
-}
-
-.results-list {
-  display: grid;
-  gap: 14px;
-}
-
-.result-card {
-  padding: 18px;
-}
-
-.result-badge {
-  background: rgba(17, 47, 102, 0.08);
-  color: #112f66;
-}
-
-.result-card h3 {
-  margin: 12px 0 0;
-  font-size: 20px;
-  font-weight: 800;
-}
-
-.result-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 14px;
-  flex-wrap: wrap;
-  color: #112f66;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.inline-quote-btn,
-.scenario-btn {
-  min-width: 126px;
-  height: 38px;
-  padding: 0 14px;
-  border-radius: 999px;
-  background: #fff3ea;
-  color: #e45f14;
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.quote-groups,
-.scenario-section,
-.account-section {
-  margin-top: 22px;
-}
-
-.quote-groups {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.quote-group-head {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  margin-bottom: 18px;
-}
-
-.group-icon {
-  width: 22px;
-  height: 22px;
-  margin-top: 3px;
-  flex: 0 0 auto;
-}
-
-.quote-group-head h2 {
-  margin: 0;
-  color: #20242d;
-  font-size: 20px;
-  font-weight: 800;
-}
-
-.quote-group-head p {
-  margin: 8px 0 0;
-  color: #667286;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.group-item-grid {
-  display: grid;
-  gap: 10px;
-}
-
-.accent-navy .group-icon {
-  color: #112f66;
-}
-
-.accent-orange .group-icon {
-  color: #f26a1b;
-}
-
-.accent-blue .group-icon {
-  color: #2c6bed;
-}
-
-.scenario-grid {
-  margin-top: 18px;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.scenario-card {
-  padding: 18px;
-}
-
-.scenario-card h3 {
-  margin: 0;
-  font-size: 17px;
-  font-weight: 800;
-}
-
-.scenario-btn {
-  margin-top: 16px;
-}
-
-.section-heading-left {
-  text-align: left;
-}
-
-.account-route-list {
-  margin-top: 18px;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.account-summary-bar {
-  margin-top: 18px;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.account-summary-item {
-  padding: 14px 16px;
-  border: 1px solid #e8edf4;
-  border-radius: 14px;
-  background: #ffffff;
-  display: grid;
-  gap: 4px;
-}
-
-.account-summary-item small {
-  color: #8a93a3;
-  font-size: 12px;
-  line-height: 1.2;
-}
-
-.account-summary-item strong {
-  color: #1f2937;
-  font-size: 14px;
-  line-height: 1.35;
-}
-
-.account-action-row {
-  margin-top: 14px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.account-action-chip {
-  min-height: 34px;
-  padding: 0 12px;
-  border: 1px solid #f2decf;
-  border-radius: 999px;
-  background: #fff8f3;
-  color: #cb641f;
-  cursor: pointer;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 700;
-  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
-}
-
-.account-action-chip:hover {
+.hero-tab:hover,
+.service-tab:hover,
+.search-btn:hover,
+.hot-chip:hover,
+.inquiry-link:hover {
   transform: translateY(-1px);
-  background: #fff3ea;
-  border-color: #efc9ab;
 }
 
-.account-route-card {
-  padding: 16px;
-}
-
-@media (max-width: 1100px) {
-  .hero-grid,
-  .quote-groups,
-  .scenario-grid,
-  .account-route-list,
-  .account-summary-bar {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 820px) {
-  .quote-shell {
-    width: min(100% - 24px, 1180px);
-    padding-top: 34px;
-  }
-
-  .quote-type-grid,
-  .query-form {
+@media (max-width: 1080px) {
+  .ddp-layout {
     grid-template-columns: 1fr;
   }
 
-  .panel-actions {
+  .ddp-action-card {
+    position: static;
+  }
+
+  .service-hero {
     flex-direction: column;
   }
 
-  .search-btn,
-  .assistant-btn,
-  .quote-btn {
+  .search-strip,
+  .secondary-search,
+  .tracking-search {
+    grid-template-columns: 1fr;
+  }
+
+  .action-block {
+    padding-top: 0;
+  }
+
+  .action-card {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+
+  .action-note {
+    grid-column: 1 / -1;
+  }
+
+  .result-head,
+  .ddp-result-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .result-price-block {
     width: 100%;
+    text-align: left;
+  }
+
+  .ddp-quote-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 520px) {
-  .quote-query-card,
-  .quote-results-card,
-  .quote-group-card,
-  .account-card {
-    padding: 18px;
-    border-radius: 18px;
+@media (max-width: 840px) {
+  .search-fields {
+    grid-template-columns: 1fr;
   }
 
-  .quote-hero p,
-  .panel-heading p,
-  .section-heading p,
-  .state-card p,
-  .result-card p,
-  .scenario-card p,
-  .account-route-card p {
-    font-size: 14px;
+  .field-box-wide {
+    grid-column: auto;
+  }
+
+  .field-box-ddp-wide {
+    grid-column: auto;
+  }
+
+  .ddp-field-row:first-child,
+  .ddp-field-row:last-child {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-tabs {
+    flex-wrap: wrap;
+    padding-left: 0;
+  }
+
+  .hero-tab {
+    flex: 1 1 180px;
+  }
+
+  .service-hero-copy h2 {
+    font-size: 24px;
+  }
+
+  .action-card {
+    grid-template-columns: 1fr;
+  }
+
+  .ddp-quote-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .quote-shell {
+    width: min(100% - 16px, 1180px);
+    padding-top: 22px;
+  }
+
+  .quote-card {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .service-hero,
+  .service-tabs {
+    gap: 18px;
+  }
+
+  .action-block {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-btn,
+  .secondary-btn {
+    width: 100%;
   }
 }
 </style>

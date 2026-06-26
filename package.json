@@ -11,6 +11,9 @@
     "dev:open": "cross-env VITE_OPEN_BROWSER=true vite --configLoader runner",
     "build": "vite build --configLoader runner",
     "build:test": "vite build --mode test --configLoader runner",
+    "pricing:amazon-warehouses": "C:\\Users\\YOYO\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe scripts/generate-amazon-warehouse-catalog.py",
+    "pricing:ddp-rates": "C:\\Users\\YOYO\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe scripts/generate-ddp-rate-catalog.py",
+    "pricing:fcl-rates": "C:\\Users\\YOYO\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe scripts/generate-fcl-rate-catalog.py",
     "preview": "vite preview",
     "format": "prettier --write src/"
   },

@@ -1,0 +1,94 @@
+{
+  "updated_at": "2026-06-26",
+  "description": "Public-source FCL local charge catalog for China origin ports. Records can be expanded as public charge sources are verified.",
+  "records": [
+    {
+      "origin_port": "Yantian",
+      "origin_city": "Shenzhen",
+      "origin_country": "China",
+      "origin_label": "Yantian - Shenzhen - China",
+      "currency": "USD",
+      "source_status": "pending_public_capture",
+      "source_name": "Public freight source capture pending",
+      "source_url": "",
+      "container_fees": {}
+    },
+    {
+      "origin_port": "Shekou",
+      "origin_city": "Shenzhen",
+      "origin_country": "China",
+      "origin_label": "Shekou - Shenzhen - China",
+      "currency": "USD",
+      "source_status": "pending_public_capture",
+      "source_name": "Public freight source capture pending",
+      "source_url": "",
+      "container_fees": {}
+    },
+    {
+      "origin_port": "Nansha",
+      "origin_city": "Guangzhou",
+      "origin_country": "China",
+      "origin_label": "Nansha - Guangzhou - China",
+      "currency": "USD",
+      "source_status": "pending_public_capture",
+      "source_name": "Public freight source capture pending",
+      "source_url": "",
+      "container_fees": {}
+    },
+    {
+      "origin_port": "Ningbo",
+      "origin_city": "Ningbo",
+      "origin_country": "China",
+      "origin_label": "Ningbo - Ningbo - China",
+      "currency": "USD",
+      "source_status": "pending_public_capture",
+      "source_name": "Public freight source capture pending",
+      "source_url": "",
+      "container_fees": {}
+    },
+    {
+      "origin_port": "Shanghai",
+      "origin_city": "Shanghai",
+      "origin_country": "China",
+      "origin_label": "Shanghai - Shanghai - China",
+      "currency": "USD",
+      "source_status": "pending_public_capture",
+      "source_name": "Public freight source capture pending",
+      "source_url": "",
+      "container_fees": {}
+    },
+    {
+      "origin_port": "Qingdao",
+      "origin_city": "Qingdao",
+      "origin_country": "China",
+      "origin_label": "Qingdao - Qingdao - China",
+      "currency": "USD",
+      "source_status": "pending_public_capture",
+      "source_name": "Public freight source capture pending",
+      "source_url": "",
+      "container_fees": {}
+    },
+    {
+      "origin_port": "Xiamen",
+      "origin_city": "Xiamen",
+      "origin_country": "China",
+      "origin_label": "Xiamen - Xiamen - China",
+      "currency": "USD",
+      "source_status": "pending_public_capture",
+      "source_name": "Public freight source capture pending",
+      "source_url": "",
+      "container_fees": {}
+    },
+    {
+      "origin_port": "Tianjin Xingang",
+      "origin_city": "Tianjin",
+      "origin_country": "China",
+      "origin_label": "Tianjin Xingang - Tianjin - China",
+      "currency": "USD",
+      "source_status": "pending_public_capture",
+      "source_name": "Public freight source capture pending",
+      "source_url": "",
+      "container_fees": {}
+    }
+  ]
+}

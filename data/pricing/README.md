@@ -12,3 +12,5 @@ This folder stores internal carrier/channel pricing workbooks.
 
 - `RN`, `YTHQ`, and `HMLX` were read successfully and indexed.
 - `BC` was copied into `raw/`, but its workbook structure could not be parsed as a standard `.xlsx` file and needs manual verification before automated use.
+- Amazon warehouse autocomplete data is generated into `src/data/amazonWarehouseCatalog.generated.json`.
+- Refresh that catalog with `npm run pricing:amazon-warehouses` after updating the latest FBA-related workbooks in `Downloads`.

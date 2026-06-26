@@ -1,0 +1,2554 @@
+{
+  "updated_at": "2026-06-25",
+  "description": "Amazon warehouse catalog for quote page autocomplete and address autofill.",
+  "records": [
+    {
+      "code": "YOW3",
+      "market": "CA",
+      "country": "Canada",
+      "address": "Ottawa, Ontario, Canada",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "YVR2",
+      "market": "CA",
+      "country": "Canada",
+      "address": "450 Derwent St., Delta, BC V3M5Y9",
+      "source": "HYJM 美加专线价格表.xlsx / 加拿大FBA海外仓分区"
+    },
+    {
+      "code": "YVR3",
+      "market": "CA",
+      "country": "Canada",
+      "address": "109 Braid St, New Westminster, BC V3L5H4",
+      "source": "HYJM 美加专线价格表.xlsx / 加拿大FBA海外仓分区"
+    },
+    {
+      "code": "YVR4",
+      "market": "CA",
+      "country": "Canada",
+      "address": "4189 Salish Sea Way, Tsawwassen, BC V4M0B9",
+      "source": "HYJM 美加专线价格表.xlsx / 加拿大FBA海外仓分区"
+    },
+    {
+      "code": "YXX1",
+      "market": "CA",
+      "country": "Canada",
+      "address": "19300 Airport Way, Pitt Meadows, BC V3Y2M5",
+      "source": "HYJM 美加专线价格表.xlsx / 加拿大FBA海外仓分区"
+    },
+    {
+      "code": "YYZ7",
+      "market": "CA",
+      "country": "Canada",
+      "address": "Caledon / Bolton, Ontario, Canada",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "DTM2",
+      "market": "DE",
+      "country": "Germany",
+      "address": "Dortmund, North Rhine-Westphalia, Germany",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "FRA7",
+      "market": "DE",
+      "country": "Germany",
+      "address": "Frankenthal, Rhineland-Palatinate, Germany",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "LEJ1",
+      "market": "DE",
+      "country": "Germany",
+      "address": "Leipzig, Saxony, Germany",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "BCN1",
+      "market": "ES",
+      "country": "Spain",
+      "address": "Spain Amazon Fulfillment Center",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "MAD4",
+      "market": "ES",
+      "country": "Spain",
+      "address": "Spain Amazon Fulfillment Center",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "BVA1",
+      "market": "FR",
+      "country": "France",
+      "address": "France Amazon Fulfillment Center",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "MRS1",
+      "market": "FR",
+      "country": "France",
+      "address": "France Amazon Fulfillment Center",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "MXP5",
+      "market": "IT",
+      "country": "Italy",
+      "address": "Italy Amazon Fulfillment Center",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "TRN1",
+      "market": "IT",
+      "country": "Italy",
+      "address": "Italy Amazon Fulfillment Center",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "KIX6",
+      "market": "JP",
+      "country": "Japan",
+      "address": "Osaka / Kansai Area, Japan",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "NRT5",
+      "market": "JP",
+      "country": "Japan",
+      "address": "Narita / Greater Tokyo Area, Japan",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "AMS7",
+      "market": "NL",
+      "country": "Netherlands",
+      "address": "Netherlands Amazon Fulfillment Center",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "RTM1",
+      "market": "NL",
+      "country": "Netherlands",
+      "address": "Netherlands Amazon Fulfillment Center",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "BHX4",
+      "market": "UK",
+      "country": "United Kingdom",
+      "address": "Coventry, England, United Kingdom",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "EMA1",
+      "market": "UK",
+      "country": "United Kingdom",
+      "address": "Derby / Coalville area, England, United Kingdom",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "MAN1",
+      "market": "UK",
+      "country": "United Kingdom",
+      "address": "Manchester / Bolton, England, United Kingdom",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "ABE2",
+      "market": "US",
+      "country": "United States",
+      "address": "705 Boulder Drive, Breinigsville, PA, 18031",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "ABE3",
+      "market": "US",
+      "country": "United States",
+      "address": "650 Boulder Drive, Breinigsville, PA, 18031",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "ABE4",
+      "market": "US",
+      "country": "United States",
+      "address": "1610 Van Buren Road, Easton, PA, 180451707",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "ABE5",
+      "market": "US",
+      "country": "United States",
+      "address": "6455 Allentown Boulevard, Harrisburg, PA, 17112",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "ABE8",
+      "market": "US",
+      "country": "United States",
+      "address": "401 INDEPENDENCE ROAD, Florence, NJ, 08518",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "ABQ2",
+      "market": "US",
+      "country": "United States",
+      "address": "6251 Pioneer Trail NW, 87031",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "ACY2",
+      "market": "US",
+      "country": "United States",
+      "address": "1101 E PEARL ST, 08016-1934",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "AFW1",
+      "market": "US",
+      "country": "United States",
+      "address": "1851 NE LOOP 820 76131-1694 - FORT WORTH, TX - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "AFW5",
+      "market": "US",
+      "country": "United States",
+      "address": "AFW5 - 12374 LAKE JUNE RD 75180-1636 - BALCH SPRINGS, TX - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "AKR1",
+      "market": "US",
+      "country": "United States",
+      "address": "4747 Rebar Ave NE CANTON, 44705",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "ALB1",
+      "market": "US",
+      "country": "United States",
+      "address": "1835 US Route 9, 12033-9634",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "AMA1",
+      "market": "US",
+      "country": "United States",
+      "address": "8590 NE 24th Ave, Amarillo, TX 79108, 79108-7749",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "ATL6",
+      "market": "US",
+      "country": "United States",
+      "address": "4200 North Commerce., East Point, GA, 30344",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "ATL7",
+      "market": "US",
+      "country": "United States",
+      "address": "6855 Shannon Pkwy., Union City, GA, 302912091",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "ATL8",
+      "market": "US",
+      "country": "United States",
+      "address": "2201 Thornton Rd., Lithia Springs, GA, 301223895",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "ATL9",
+      "market": "US",
+      "country": "United States",
+      "address": "2232 Northmont Parkway, Duluth, GA, 30096",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "AVP1",
+      "market": "US",
+      "country": "United States",
+      "address": "550 Oak Ridge Road, Hazleton, PA, 18202",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "AVP3",
+      "market": "US",
+      "country": "United States",
+      "address": "310 First Ave Covington Township, Hazleton, PA, 184249464",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "AVP8",
+      "market": "US",
+      "country": "United States",
+      "address": "250 Enterprise Way, Pittston, PA, 18640",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "AVP9",
+      "market": "US",
+      "country": "United States",
+      "address": "45 VALLEY VIEW DR, 18434-1153",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "AZA4",
+      "market": "US",
+      "country": "United States",
+      "address": "3333 59th Ave, 85043-7904",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "BAN4",
+      "market": "US",
+      "country": "United States",
+      "address": "50 Airways Blvd Nashville TN, 37217",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "BDL1",
+      "market": "US",
+      "country": "United States",
+      "address": "801 Day Hill Rd., Windsor, CT, 06095",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "BDL2",
+      "market": "US",
+      "country": "United States",
+      "address": "200 Old Iron Ore Road​, Windsor, CT, 06095",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "BDL6",
+      "market": "US",
+      "country": "United States",
+      "address": "120 County Line Dr, 06416",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "BFI1",
+      "market": "US",
+      "country": "United States",
+      "address": "1800 140th Avenue E., Sumner, WA, 98390",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "BFI3",
+      "market": "US",
+      "country": "United States",
+      "address": "2700 Center Drive, DuPont, WA 98327-9607",
+      "source": "HMLX 美国 加拿大 海派 海卡 FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "BFI4",
+      "market": "US",
+      "country": "United States",
+      "address": "21005 64th Ave S, Kent, WA, 98032",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "BFI7",
+      "market": "US",
+      "country": "United States",
+      "address": "1901 140th Ave E, Sumner, WA 98390",
+      "source": "HMLX 美国 加拿大 海派 海卡 FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "BFI9",
+      "market": "US",
+      "country": "United States",
+      "address": "3230 International Pl, DuPont, WA 98327-7707",
+      "source": "HMLX 美国 加拿大 海派 海卡 FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "BFL1",
+      "market": "US",
+      "country": "United States",
+      "address": "1601 Petrol Road, 93308-9755",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "BFL2",
+      "market": "US",
+      "country": "United States",
+      "address": "4500 EXPRESS AVE 93263-2246 - SHAFTER, CA - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "BFL6",
+      "market": "US",
+      "country": "United States",
+      "address": "20280 84th Ave S, Kent, WA, 98032",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "BFL7",
+      "market": "US",
+      "country": "United States",
+      "address": "1901 140th Ave E, Sumner, WA, 98390",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "BNA1",
+      "market": "US",
+      "country": "United States",
+      "address": "14840 Central Pike, Suite 190, Lebanon, TN, 37090",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "BNA2",
+      "market": "US",
+      "country": "United States",
+      "address": "500 Duke DR, Lebanon, TN, 37087",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "BNA3",
+      "market": "US",
+      "country": "United States",
+      "address": "2020 Joe B Jackson Pkwy, Murfreesboro, TN, 37127",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "BNA5",
+      "market": "US",
+      "country": "United States",
+      "address": "50 Airways Blvd., Nashville, TN, 37217",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "BNA6",
+      "market": "US",
+      "country": "United States",
+      "address": "3875 GUTHRIE HWY, 37040-5502",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "BOS1",
+      "market": "US",
+      "country": "United States",
+      "address": "10 State Street, Nashua, NH, 03063",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "BOS5",
+      "market": "US",
+      "country": "United States",
+      "address": "1000 Tech Center Drive, Stoughton, MA, 020724744",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "BOS6",
+      "market": "US",
+      "country": "United States",
+      "address": "201 Beacham Street,, Celsea, MA, 02150",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "BOS7",
+      "market": "US",
+      "country": "United States",
+      "address": "1180 Innovation Way, Fall River, MA, 02722",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "BWI1",
+      "market": "US",
+      "country": "United States",
+      "address": "2010 Broening Highway, Baltimore, MD, 21224",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "BWI2",
+      "market": "US",
+      "country": "United States",
+      "address": "2010 Broening Highway, Baltimore, MD, 21224",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "BWI4",
+      "market": "US",
+      "country": "United States",
+      "address": "165 Business Blvd, 22624-1568",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "BWI5",
+      "market": "US",
+      "country": "United States",
+      "address": "5001 Holabird Ave., Baltimore, MD, 21224",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "BWI6",
+      "market": "US",
+      "country": "United States",
+      "address": "5617 Industrial Dr, Suite C, Springfield, VA, 22151",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "CAE1",
+      "market": "US",
+      "country": "United States",
+      "address": "4400 12 Street Extension, West Columbia, SC, 29172",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "CHA1",
+      "market": "US",
+      "country": "United States",
+      "address": "7200 Discovery Drive, Chattanooga, TN, 37421",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "CHA2",
+      "market": "US",
+      "country": "United States",
+      "address": "225 Infinity Dr NW, Charleston, TN, 37310",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "CHO1",
+      "market": "US",
+      "country": "United States",
+      "address": "32 TRADER RD FISHERSVILLE, VA 22939-2437 US (CHO1)",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "CLE3",
+      "market": "US",
+      "country": "United States",
+      "address": "1155 Babbitt Road, 44132",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "CLT2",
+      "market": "US",
+      "country": "United States",
+      "address": "10240 Old Dowd Rd, Charlotte, NC, 282148082",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "CLT3",
+      "market": "US",
+      "country": "United States",
+      "address": "6500 Davidson Hwy, 28027-7995",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "CLT5",
+      "market": "US",
+      "country": "United States",
+      "address": "7035 Northwinds Drive, Concord, NC, 28027",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "CLT6",
+      "market": "US",
+      "country": "United States",
+      "address": "12220 Carolina Logistics Drive 28134-9457 - PINEVILLE, NC - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "CMH1",
+      "market": "US",
+      "country": "United States",
+      "address": "11903 National Road SW, Etna, OH, 43062",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "CMH2",
+      "market": "US",
+      "country": "United States",
+      "address": "6050 Gateway Court, Groveport, OH, 431259016",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "CMH3",
+      "market": "US",
+      "country": "United States",
+      "address": "700 GATEWAY BLVD, 45050",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "CMH7",
+      "market": "US",
+      "country": "United States",
+      "address": "1245 BEECH RD SW 43054-7762 - NEW ALBANY, OH - United States--",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "CVG1",
+      "market": "US",
+      "country": "United States",
+      "address": "1155 Worldwide Blvd., Hebron, KY, 41048",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "CVG2",
+      "market": "US",
+      "country": "United States",
+      "address": "1600 Worldwide Blvd., Hebron, KY, 41048",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "CVG3",
+      "market": "US",
+      "country": "United States",
+      "address": "3680 Langley Dr., Suite 100, Hebron, KY, 41048",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "CVG5",
+      "market": "US",
+      "country": "United States",
+      "address": "2285 Litton Lane, Hebron Building 2 ,, Hebron, KY, 410488435",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "CVG7",
+      "market": "US",
+      "country": "United States",
+      "address": "2285 Litton Lane, Hebron, KY, 410488435",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "DAL2",
+      "market": "US",
+      "country": "United States",
+      "address": "2601 S. Airfield Drive, 75261",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "DAL6",
+      "market": "US",
+      "country": "United States",
+      "address": "4601 Gold Spike Drive, Fort Worth, TX, 76106",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "DCA6",
+      "market": "US",
+      "country": "United States",
+      "address": "6001 BETHLEHEM BLVD, 21219-1041",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "DEN2",
+      "market": "US",
+      "country": "United States",
+      "address": "22205 E. 19th Ave, Aurora, CO, 80019",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "DEN6",
+      "market": "US",
+      "country": "United States",
+      "address": "480 East 55th Avenue, Denver, CO, 80216",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "DEN8",
+      "market": "US",
+      "country": "United States",
+      "address": "Stafford Logistics Center Building 5, 21000 E 13th Ave, Aurora, CO 80018",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "DET1",
+      "market": "US",
+      "country": "United States",
+      "address": "39000 Amrhein Road, 48150",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "DET2",
+      "market": "US",
+      "country": "United States",
+      "address": "50500 Mound Rd, 48317",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "DFW1",
+      "market": "US",
+      "country": "United States",
+      "address": "2700 Regent Blvd, Dallas, TX, 75261",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "DFW6",
+      "market": "US",
+      "country": "United States",
+      "address": "940 W Bethel Road, Coppell, TX, 75019",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "DFW7",
+      "market": "US",
+      "country": "United States",
+      "address": "700 Westport Parkway, Fort Worth, TX, 76177",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "DFW8",
+      "market": "US",
+      "country": "United States",
+      "address": "2700 Regent Blvd, Dallas, TX, 75261",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "DFW9",
+      "market": "US",
+      "country": "United States",
+      "address": "2700 Regent Boulevard,, Irving, TX, 75063",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "DPX1",
+      "market": "US",
+      "country": "United States",
+      "address": "500 S. 48th Street, Phoenix, AZ 85034",
+      "source": "HYJM 美加专线价格表.xlsx / 美国FBA仓"
+    },
+    {
+      "code": "DTW1",
+      "market": "US",
+      "country": "United States",
+      "address": "32801 Ecorse Road, 48174",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "DTW3",
+      "market": "US",
+      "country": "United States",
+      "address": "33701 PRESCOTT ST, 48174",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "EWR4",
+      "market": "US",
+      "country": "United States",
+      "address": "50 New Canton Way, Robbinsville, NJ, 08691",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "EWR5",
+      "market": "US",
+      "country": "United States",
+      "address": "301?Blair?Road?#100, 07001-2225",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "EWR6",
+      "market": "US",
+      "country": "United States",
+      "address": "275 Omar Avenue, Avenel, NJ, 07001",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "EWR7",
+      "market": "US",
+      "country": "United States",
+      "address": "275 Omar Avenue, Avenel, NJ, 07001",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "EWR9",
+      "market": "US",
+      "country": "United States",
+      "address": "8003 Industrial Ave., Carteret, NJ, 070083529",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "FAT2",
+      "market": "US",
+      "country": "United States",
+      "address": "3315 N Kelsey St, Visalia, CA 93291",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "FOE1",
+      "market": "US",
+      "country": "United States",
+      "address": "9400 LEAVENWORTH RD, 66109",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "FTW1",
+      "market": "US",
+      "country": "United States",
+      "address": "33333 Lyndon B Johnson Freeway, 75241",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "FTW2",
+      "market": "US",
+      "country": "United States",
+      "address": "2701 West Bethel Road, Coppell, TX, 75019",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "FTW3",
+      "market": "US",
+      "country": "United States",
+      "address": "15201 Heritage Parkway, Fort Worth, TX, 761772571",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "FTW4",
+      "market": "US",
+      "country": "United States",
+      "address": "15201 Heritage Parkway, Fort Worth, TX, 761772517",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "FTW5",
+      "market": "US",
+      "country": "United States",
+      "address": "1475 AKRON WAY, 75126-3566",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "FTW6",
+      "market": "US",
+      "country": "United States",
+      "address": "2601 W Bethel Road, 75261-4034",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "FTW9",
+      "market": "US",
+      "country": "United States",
+      "address": "944 West Sandy Lake Road, 75019",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "FWA4",
+      "market": "US",
+      "country": "United States",
+      "address": "Fort Wayne, Indiana, United States",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "GEG2",
+      "market": "US",
+      "country": "United States",
+      "address": "18007 E Garland Ave, Spokane Valley, WA 99216-6102",
+      "source": "HMLX 美国 加拿大 海派 海卡 FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "GEU2",
+      "market": "US",
+      "country": "United States",
+      "address": "15301 West Northern Avenue, 85307",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "GEU3",
+      "market": "US",
+      "country": "United States",
+      "address": "18900 W McDowell Road, 85396",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "GEU5",
+      "market": "US",
+      "country": "United States",
+      "address": "4660 North Cotton Lane, 85395",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "GRR1",
+      "market": "US",
+      "country": "United States",
+      "address": "500 68th Street SE, 49316-9141",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "GSO1",
+      "market": "US",
+      "country": "United States",
+      "address": "1656 OLD GREENSBORO RD, 27284-6855",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "GSP1",
+      "market": "US",
+      "country": "United States",
+      "address": "402 John Dodd Rd, Spartanburg, SC, 29303",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "GYR2",
+      "market": "US",
+      "country": "United States",
+      "address": "GYR2 - 17341 W MINNEZONA AVE 85395-7672 - GOODYEAR, AZ - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "GYR3",
+      "market": "US",
+      "country": "United States",
+      "address": "8181 W ROOSEVELT ST 85043-2356 - PHOENIX, AZ - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "HCA6",
+      "market": "US",
+      "country": "United States",
+      "address": "2727 Kurtz St,, San Diego, CA, 92110",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "HEA2",
+      "market": "US",
+      "country": "United States",
+      "address": "650 BOULDER DR, 18031",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "HEA2-UPS",
+      "market": "US",
+      "country": "United States",
+      "address": "650 BOULDER DR, 18105",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "HGR2",
+      "market": "US",
+      "country": "United States",
+      "address": "1115 WESEL BLVD, 21740-8126",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "HGR6",
+      "market": "US",
+      "country": "United States",
+      "address": "55 West Oak Ridge Drive, 21740",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "HIA1",
+      "market": "US",
+      "country": "United States",
+      "address": "3327 E HARRISBURG PIKE, 17057",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "HIL2",
+      "market": "US",
+      "country": "United States",
+      "address": "1111 North Cherry Ave, Chicago, IL, 60642",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "HLI2",
+      "market": "US",
+      "country": "United States",
+      "address": "600 Ernie Drive 95023",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "HLI2-UPS",
+      "market": "US",
+      "country": "United States",
+      "address": "8410 PARDEE DR., 94621",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "HOU1",
+      "market": "US",
+      "country": "United States",
+      "address": "8120 Humble Westfield Rd, Humble, TX, 77338",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "HOU2",
+      "market": "US",
+      "country": "United States",
+      "address": "10550 Ella Boulevard, Houston, TX, 77090",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "HOU3",
+      "market": "US",
+      "country": "United States",
+      "address": "31555 Highway 90 E, 77423-2769",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "HOU7",
+      "market": "US",
+      "country": "United States",
+      "address": "16225 Tomball Pkwy, 77064-1111",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "HOU8",
+      "market": "US",
+      "country": "United States",
+      "address": "2303 Hurricane Lane, FRESNO, TX,77545",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "HSV1",
+      "market": "US",
+      "country": "United States",
+      "address": "7817 Greenbrier Rd, 35756",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "HSV2",
+      "market": "US",
+      "country": "United States",
+      "address": "28869 Fanning Dr NW, 35756",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "HTX2",
+      "market": "US",
+      "country": "United States",
+      "address": "4221 Way Out West Drive, Suite #200, Houston, TX, 77092",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "IAH3",
+      "market": "US",
+      "country": "United States",
+      "address": "15525 Milner Road 77032 -HOUSTON, TX-United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "ICT2",
+      "market": "US",
+      "country": "United States",
+      "address": "7130 N BROADWAY, 67219-1410",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "IGQ2",
+      "market": "US",
+      "country": "United States",
+      "address": "23257 S. Central Avenue     University Park, IL 60484-3271     US (IGQ2)",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "ILG1",
+      "market": "US",
+      "country": "United States",
+      "address": "780 S. DuPont HighwayNEW CASTLE, DE 19720-4610US (ILG1)",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "IND1",
+      "market": "US",
+      "country": "United States",
+      "address": "4255 Anson Blvd., Whitestown, IN, 46075",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "IND2",
+      "market": "US",
+      "country": "United States",
+      "address": "715 Airtech Pkwy., Plainfield, IN, 46168",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "IND3",
+      "market": "US",
+      "country": "United States",
+      "address": "717 Airtech Pkwy, Plainfield, IN, 46168",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "IND4",
+      "market": "US",
+      "country": "United States",
+      "address": "710 S. Girls School Rd., Indianapolis, IN, 46231",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "IND5",
+      "market": "US",
+      "country": "United States",
+      "address": "800 Perry Road., Plainfield, IN, 46168",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "IND9",
+      "market": "US",
+      "country": "United States",
+      "address": "1151 S GRAHAM RD, 46143-7830",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "ITX2",
+      "market": "US",
+      "country": "United States",
+      "address": "6911 FAIRBANKS N HOUSTON RD, 77040-1437",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "JAX2",
+      "market": "US",
+      "country": "United States",
+      "address": "12900 Pecan Park Road, Jacksonville, FL, 32218",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "JAX3",
+      "market": "US",
+      "country": "United States",
+      "address": "13333 103rd Street,, Jacksonville, FL, 32218",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "JFK8",
+      "market": "US",
+      "country": "United States",
+      "address": "Staten Island, New York, United States",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "JOT1",
+      "market": "US",
+      "country": "United States",
+      "address": "1494 S WATERMAN AVE, 92408",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "JVL1",
+      "market": "US",
+      "country": "United States",
+      "address": "1255 GATEWAY BLVD, 53511-9709",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "KRB1",
+      "market": "US",
+      "country": "United States",
+      "address": "6001 Bethlehem Blvd, 92408",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "KRB2",
+      "market": "US",
+      "country": "United States",
+      "address": "1155 Babbitt Road, 23875",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "KRB4",
+      "market": "US",
+      "country": "United States",
+      "address": "Finsterwalder Transport und Logistik GmbH , Schieferstrabe 16, 92571-9722",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "LAL1",
+      "market": "US",
+      "country": "United States",
+      "address": "1760 County Line Rd., Lakeland, FL, 33811",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "LAN2",
+      "market": "US",
+      "country": "United States",
+      "address": "6500 W Mt Hope Hwy, 48917",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "LAS1",
+      "market": "US",
+      "country": "United States",
+      "address": "12300 Bermuda Road, 89044-8746",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "LAS2",
+      "market": "US",
+      "country": "United States",
+      "address": "3837 Bay Lake Trail, Suite 111 North, Las Vegas, NV, 89030",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "LAS6",
+      "market": "US",
+      "country": "United States",
+      "address": "4550 Nexus Way, Las Vegas, NV, 89115",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "LAS7",
+      "market": "US",
+      "country": "United States",
+      "address": "6001 East Tropical Parkway, 89115-1935",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "LAX6",
+      "market": "US",
+      "country": "United States",
+      "address": "5119 District Blvd, Vernon, CA, 90058",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "LAX9",
+      "market": "US",
+      "country": "United States",
+      "address": "Fontana, California, United States",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "LBE1",
+      "market": "US",
+      "country": "United States",
+      "address": "165 GLENN FOX RD, 15672-9703",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "LBE1-UPS",
+      "market": "US",
+      "country": "United States",
+      "address": "165 Glen Fox Road, 15605",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "LEX1",
+      "market": "US",
+      "country": "United States",
+      "address": "1850 Mercer Rd., Lexington, KY, 40511",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "LEX2",
+      "market": "US",
+      "country": "United States",
+      "address": "172 Trade St., Lexington, KY, 40511",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "LFT1",
+      "market": "US",
+      "country": "United States",
+      "address": "3550 NE EVANGELINE TRWY, 70520-5976",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "LGB3",
+      "market": "US",
+      "country": "United States",
+      "address": "4501 PATTERSON AVE, 91752-5087",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "LGB4",
+      "market": "US",
+      "country": "United States",
+      "address": "27517 W Pioneer Ave, Redlands, CA, 92374",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "LGB6",
+      "market": "US",
+      "country": "United States",
+      "address": "20901 Krameria Ave, 92518-1513",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "LGB7",
+      "market": "US",
+      "country": "United States",
+      "address": "1660 N. Linden Avenue, 92376-2427",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "LGB8",
+      "market": "US",
+      "country": "United States",
+      "address": "1568 N Linden Ave, Rialto, CA, 92376",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "LGB9",
+      "market": "US",
+      "country": "United States",
+      "address": "4375 N Perris Blvd, 92571-7901",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "LIT2",
+      "market": "US",
+      "country": "United States",
+      "address": "LIT2 - 13001 HIGHWAY 70 72117-5026 - NORTH LITTLE ROCK, AR - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MAG1",
+      "market": "US",
+      "country": "United States",
+      "address": "Zip Code, 90045",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MCC1",
+      "market": "US",
+      "country": "United States",
+      "address": "3300 Rancho Cordova Pkwy, 95742",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MCE1",
+      "market": "US",
+      "country": "United States",
+      "address": "3200 Fulkerth Rd， 特洛克， CA 9595380",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MCI1",
+      "market": "US",
+      "country": "United States",
+      "address": "16851 W 113th St, 66219",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MCI3",
+      "market": "US",
+      "country": "United States",
+      "address": "2361 S. Withers Road, 64068",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MCI5",
+      "market": "US",
+      "country": "United States",
+      "address": "16851 W 113th St, Lenexa, KS, 66219",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "MCI7",
+      "market": "US",
+      "country": "United States",
+      "address": "27200 W 157th Street, New Century, KS, 66031",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "MCO1",
+      "market": "US",
+      "country": "United States",
+      "address": "12340 Boggy Creek Rd, Orlando, FL 32824 (MCO1)",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MCO2",
+      "market": "US",
+      "country": "United States",
+      "address": "2600 N Normandy Blvd 32725-2610 - Deltona, FL - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MCO5",
+      "market": "US",
+      "country": "United States",
+      "address": "205 Deen Still Rd., Davenport, FL, 33897",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "MDT1",
+      "market": "US",
+      "country": "United States",
+      "address": "2 Ames Drive,, Carlisle, PA, 17015",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "MDT2",
+      "market": "US",
+      "country": "United States",
+      "address": "600 Principio Parkway West, North East, MD, 21901",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "MDT4",
+      "market": "US",
+      "country": "United States",
+      "address": "5125 Commerce DriveYORK，PA 17408",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MDW2",
+      "market": "US",
+      "country": "United States",
+      "address": "250 Emerald Dr., Joliet, IL, 60433",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "MDW4",
+      "market": "US",
+      "country": "United States",
+      "address": "201 Emerald Drive, Joliet, IL, 60477",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "MDW6",
+      "market": "US",
+      "country": "United States",
+      "address": "1125 W Remington Blvd., Romeoville, IL, 604466529",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "MDW7",
+      "market": "US",
+      "country": "United States",
+      "address": "6605 W.Manhattan Rd, Monee, IL, 60449",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "MDW8",
+      "market": "US",
+      "country": "United States",
+      "address": "1750 Bridge Drive,, Waukegan, IL, 60085",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "MDW9",
+      "market": "US",
+      "country": "United States",
+      "address": "2865 Duke Parkway, 60502",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MEM1",
+      "market": "US",
+      "country": "United States",
+      "address": "3292 E Holmes Rd, 38118-8102",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MEM2",
+      "market": "US",
+      "country": "United States",
+      "address": "191 NORFOLK SOUTHERN WAY 38611-2306 - BYHALIA, MS - United States--",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MEM6",
+      "market": "US",
+      "country": "United States",
+      "address": "11505 Progress Way 38654-2510 - OLIVE BRANCH, MS - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MEM8",
+      "market": "US",
+      "country": "United States",
+      "address": "850 Gateway Global Dr, 38611",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MGE1",
+      "market": "US",
+      "country": "United States",
+      "address": "Services, Inc. 650 Broadway Avenue Braselton, GA 30517-3002",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MGE3",
+      "market": "US",
+      "country": "United States",
+      "address": "808 Hog Mountain road, Jefferson, GA, 3054",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "MIA5",
+      "market": "US",
+      "country": "United States",
+      "address": "1900 NW 132nd Place., Miami, FL, 33182",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "MIA6",
+      "market": "US",
+      "country": "United States",
+      "address": "3200 NW 67th Ave,, Bldg 5, Miam, FL, 33122",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "MIT2",
+      "market": "US",
+      "country": "United States",
+      "address": "5408 Express Avenue, 93263",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MIT2-UPS",
+      "market": "US",
+      "country": "United States",
+      "address": "3256 N Plaza Dr, 93291",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MKC4",
+      "market": "US",
+      "country": "United States",
+      "address": "19645 Waverly Rd., Edgerton, KS, 660219588",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "MKC6",
+      "market": "US",
+      "country": "United States",
+      "address": "6925 Riverview Avenue, 66102-3047",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MKE1",
+      "market": "US",
+      "country": "United States",
+      "address": "3501 120th Ave., Kenosha, WI, 53144",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "MKE5",
+      "market": "US",
+      "country": "United States",
+      "address": "11211 Burlington Road, Kenosha, WI, 53144",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "MLB1",
+      "market": "US",
+      "country": "United States",
+      "address": "3655 GRISSOM PKWY, 32926",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MOB5",
+      "market": "US",
+      "country": "United States",
+      "address": "6735 Trippel Road, Mobile, AL 36619",
+      "source": "HYJM 美加专线价格表.xlsx / 美国FBA仓"
+    },
+    {
+      "code": "MQJ1",
+      "market": "US",
+      "country": "United States",
+      "address": "4412 W 300 N 46140-7099 - GREENFIELD, IN - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MQJ1-UPS",
+      "market": "US",
+      "country": "United States",
+      "address": "4412 W 300 RD N, 46168",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MQJ2",
+      "market": "US",
+      "country": "United States",
+      "address": "19 BOB GLIDDEN BLVD 46184-9108 - WHITELAND, IN - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "MSP1",
+      "market": "US",
+      "country": "United States",
+      "address": "2601 4th Avenue East, Shakopee, MN, 55379",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "MSP6",
+      "market": "US",
+      "country": "United States",
+      "address": "9800 217TH ST W, 55044",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "OAK3",
+      "market": "US",
+      "country": "United States",
+      "address": "255 Park Center Drive., Patterson, CA, 953638876",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "OAK4",
+      "market": "US",
+      "country": "United States",
+      "address": "1555 N. Chrisman Rd., Tracy, CA, 95304",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "OAK5",
+      "market": "US",
+      "country": "United States",
+      "address": "3822 Cherry Street, Newark, CA, 94560",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "OAK6",
+      "market": "US",
+      "country": "United States",
+      "address": "1555 N. Chrisman Rd, Tracy, CA, 95304",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "OAK7",
+      "market": "US",
+      "country": "United States",
+      "address": "38811 Cherry St, Newark, CA, 94560",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "OKC1",
+      "market": "US",
+      "country": "United States",
+      "address": "9201 S Portland Avenue, 73159-0003",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "OKC2",
+      "market": "US",
+      "country": "United States",
+      "address": "OKC2-8991 S Portland Avenue 73159-0003-OKLAHOMA CITY,OK-United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "ONT2",
+      "market": "US",
+      "country": "United States",
+      "address": "1910 E Central Ave., San Bernardino, CA, 92408",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "ONT4",
+      "market": "US",
+      "country": "United States",
+      "address": "1910 E Central Ave,, San Bernardino, CA, 92408",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "ONT5",
+      "market": "US",
+      "country": "United States",
+      "address": "2020 E. Central Ave., Southgate Building 4, San Bernardino, CA, 924082606",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "ONT6",
+      "market": "US",
+      "country": "United States",
+      "address": "24208 San Michele Rd., Moreno Valley, CA, 92551",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "ONT8",
+      "market": "US",
+      "country": "United States",
+      "address": "24300 Nandina Ave., Moreno Valley, CA, 92551",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "ONT9",
+      "market": "US",
+      "country": "United States",
+      "address": "2125 W. San Bernardino Ave., Redlands, CA, 92374",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "ORD2",
+      "market": "US",
+      "country": "United States",
+      "address": "23714 W Amoco RdCHANNAHON, IL 60410-8758US (ORD2)",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "ORD6",
+      "market": "US",
+      "country": "United States",
+      "address": "1250 N Mittel Blvd, Wood Dale, IL, 60191",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "ORF1",
+      "market": "US",
+      "country": "United States",
+      "address": "3516 South Military Hwy, 23323",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "ORF2",
+      "market": "US",
+      "country": "United States",
+      "address": "5045 PORTSMOUTH BLVD CHESAPEAKE  VA  23321-1425",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "ORF2-17057",
+      "market": "US",
+      "country": "United States",
+      "address": "2114 N Union St, 17057",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "PBI2",
+      "market": "US",
+      "country": "United States",
+      "address": "14490 Corporate Road N, 33478-6456",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "PBI3",
+      "market": "US",
+      "country": "United States",
+      "address": "7600 LTCParkway, 34986",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "PCW1",
+      "market": "US",
+      "country": "United States",
+      "address": "27400 Crossroads Parkway, 43460-1706",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "PDX6",
+      "market": "US",
+      "country": "United States",
+      "address": "15000 N. Lombard St, Portland, OR 97203",
+      "source": "HMLX 美国 加拿大 海派 海卡 FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "PDX7",
+      "market": "US",
+      "country": "United States",
+      "address": "4775 Depot Ct SE, Salem, OR 97317",
+      "source": "HMLX 美国 加拿大 海派 海卡 FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "PHL1",
+      "market": "US",
+      "country": "United States",
+      "address": "1 Centerpoint Blvd., New Castle, DE, 19720",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "PHL3",
+      "market": "US",
+      "country": "United States",
+      "address": "1600 Johnson Way., New Castle, DE, 197208111",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "PHL4",
+      "market": "US",
+      "country": "United States",
+      "address": "21 Roadway Dr, Carlisle, PA, 17015",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "PHL5",
+      "market": "US",
+      "country": "United States",
+      "address": "500 McCarthy Dr., Lewisberry, PA, 17339",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "PHL6",
+      "market": "US",
+      "country": "United States",
+      "address": "675 Allen Rd., Carlisle, PA, 170157788",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "PHL7",
+      "market": "US",
+      "country": "United States",
+      "address": "560 Merrimac Ave., Middletown, DE, 19709",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "PHL8",
+      "market": "US",
+      "country": "United States",
+      "address": "727 N. Broad St., Middletown, DE, 197091166",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "PHX3",
+      "market": "US",
+      "country": "United States",
+      "address": "6835 West Buckeye Road, Phoenix, AZ 85043",
+      "source": "HYJM 美加专线价格表.xlsx / 美国FBA仓"
+    },
+    {
+      "code": "PHX5",
+      "market": "US",
+      "country": "United States",
+      "address": "16980 W Commerce Drive, Goodyear, AZ 85338",
+      "source": "HYJM 美加专线价格表.xlsx / 美国FBA仓"
+    },
+    {
+      "code": "PHX6",
+      "market": "US",
+      "country": "United States",
+      "address": "4750 West Mohave St, Phoenix, AZ 85043",
+      "source": "HYJM 美加专线价格表.xlsx / 美国FBA仓"
+    },
+    {
+      "code": "PHX7",
+      "market": "US",
+      "country": "United States",
+      "address": "800 N. 75th Ave, Phoenix, AZ, 85043",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "PHX8",
+      "market": "US",
+      "country": "United States",
+      "address": "800 N 75th Ave, Phoenix, AZ 85043",
+      "source": "HYJM 美加专线价格表.xlsx / 美国FBA仓"
+    },
+    {
+      "code": "PIT2",
+      "market": "US",
+      "country": "United States",
+      "address": "1200 Westport Rd, 15126",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "PIT5",
+      "market": "US",
+      "country": "United States",
+      "address": "2250 Roswell Drive, Pittsburgh, PA, 15205",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "POC1",
+      "market": "US",
+      "country": "United States",
+      "address": "4121 LYTLE CREEK RD, 92336-1123",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "POC2",
+      "market": "US",
+      "country": "United States",
+      "address": "4000 South Hamner Avenue, 91761",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "POC3",
+      "market": "US",
+      "country": "United States",
+      "address": "6120 Clinker Drive, 92509",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "POC3-UPS",
+      "market": "US",
+      "country": "United States",
+      "address": "6120 Clinker Dr, 92508",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "PPO4",
+      "market": "US",
+      "country": "United States",
+      "address": "9850 Mississippi Street, 46307",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "PSC2",
+      "market": "US",
+      "country": "United States",
+      "address": "1351 S Road 40 E, Pasco, WA 99301",
+      "source": "HMLX 美国 加拿大 海派 海卡 FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "PSC2-UPS",
+      "market": "US",
+      "country": "United States",
+      "address": "9930 NE Alderwood Rd, 97242",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "PSP3",
+      "market": "US",
+      "country": "United States",
+      "address": "64165 19th AVE 92240 - DESERT HOT SPRINGS, CA - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "PSP3-UPS",
+      "market": "US",
+      "country": "United States",
+      "address": "20821 Krameria Avenue, 92518",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "QXY5",
+      "market": "US",
+      "country": "United States",
+      "address": "4532 NEWCASTLE RD, 95215",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "QXY8",
+      "market": "US",
+      "country": "United States",
+      "address": "3611 S NORTHPOINTE DR, 93725-1962",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "RDU1",
+      "market": "US",
+      "country": "United States",
+      "address": "Ship to RDU1 4851 Jones Sausage Rd, 27529-9438",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "RDU2",
+      "market": "US",
+      "country": "United States",
+      "address": "2150 US HWY 70 Business West 27577 - SMITHFIELD, NC - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "RDU4",
+      "market": "US",
+      "country": "United States",
+      "address": "6309 Bragg Blvd, 28303",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "RFD2",
+      "market": "US",
+      "country": "United States",
+      "address": "RFD2 - 11500 Freeman Road 60142 - HUNTLEY, IL - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "RFD4",
+      "market": "US",
+      "country": "United States",
+      "address": "11400 Venture Court, 60142",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "RIC1",
+      "market": "US",
+      "country": "United States",
+      "address": "5000 Commerce Way, Petersburg, VA, 23803",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "RIC2",
+      "market": "US",
+      "country": "United States",
+      "address": "1901 Meadowville Technology Parkway, Chester, VA, 23836",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "RIC3",
+      "market": "US",
+      "country": "United States",
+      "address": "1901 Meadowville Technology Parkway, Chester, VA, 23836",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "RMN3",
+      "market": "US",
+      "country": "United States",
+      "address": "RMN3 - 220 Centreport Parkway 22406 - FREDERICKSBURG, VA - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "RNO1",
+      "market": "US",
+      "country": "United States",
+      "address": "1600 East Newlands Drive, Fernley, NV, 89408",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "RNO2",
+      "market": "US",
+      "country": "United States",
+      "address": "8000 North Virginia Street, Reno, NE, 85906",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "RNO4",
+      "market": "US",
+      "country": "United States",
+      "address": "8000 North Virginia Street, Reno, NV, 89506",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "RYY2",
+      "market": "US",
+      "country": "United States",
+      "address": "1250 CassvilleWhite Road, 30184",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "SAT1",
+      "market": "US",
+      "country": "United States",
+      "address": "6000 Enterprise Avenue, Schertz, TX, 781541461",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "SAT2",
+      "market": "US",
+      "country": "United States",
+      "address": "1401 E McCarty Lane, San Marcos, TX, 786668969",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "SAT4",
+      "market": "US",
+      "country": "United States",
+      "address": "10384 W US HIGHWAY 90 78245-9512 - SAN ANTONIO, TX - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "SAT6",
+      "market": "US",
+      "country": "United States",
+      "address": "1346 Fortuna Road, SAN MARCOS, TX, 78666",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "SAV3",
+      "market": "US",
+      "country": "United States",
+      "address": "7001 Skipper Rd,, 31216",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "SBD1",
+      "market": "US",
+      "country": "United States",
+      "address": "Bloomington, California, United States",
+      "source": "manual fallback / coarse location"
+    },
+    {
+      "code": "SBD2",
+      "market": "US",
+      "country": "United States",
+      "address": "1494 S Waterman Ave, San Bernardino, CA 92408",
+      "source": "HMLX 美国 加拿大 海派 海卡 FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "SBD3",
+      "market": "US",
+      "country": "United States",
+      "address": "5990 Cajon Blvd, 92407",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "SCK1",
+      "market": "US",
+      "country": "United States",
+      "address": "4532 NEWCASTLE RD, 95215-9465",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "SCK3",
+      "market": "US",
+      "country": "United States",
+      "address": "3565 N AIRPORT WAY, 95336-8696",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "SCK4",
+      "market": "US",
+      "country": "United States",
+      "address": "SCK4 - 6001 S AUSTIN RD 95215-8354 - STOCKTON, CA - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "SCK8",
+      "market": "US",
+      "country": "United States",
+      "address": "4700 WILBUR AVE, 94561",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "SCK8-UPS",
+      "market": "US",
+      "country": "United States",
+      "address": "SCK8 via UPS Oakand,8436 Pardee Dr, Oakland,CA,94621",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "SDF1",
+      "market": "US",
+      "country": "United States",
+      "address": "1105 S Columbia Ave., Campbellsville, KY, 42718",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "SDF2",
+      "market": "US",
+      "country": "United States",
+      "address": "4360 Robards Ln., Louisville, KY, 402184512",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "SDF4",
+      "market": "US",
+      "country": "United States",
+      "address": "376 Zappos.com Blvd., Shepherdsville, KY, 40165",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "SDF6",
+      "market": "US",
+      "country": "United States",
+      "address": "271 Omega Pkwy, Shepherdsville, KY, 40165",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "SDF7",
+      "market": "US",
+      "country": "United States",
+      "address": "300 Omicron Court, Shepherdsville, KY, 40165",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "SDF8",
+      "market": "US",
+      "country": "United States",
+      "address": "900 Patrol Rd, Jeffersonville, KY, 471307716",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "SDF9",
+      "market": "US",
+      "country": "United States",
+      "address": "Thomas P. Echols Lane, 100 W., Shepherdsville, KY, 40165",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "SEA6",
+      "market": "US",
+      "country": "United States",
+      "address": "2646 Rainier Avenue South, Bellevue, WA, 98144",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "SEA8",
+      "market": "US",
+      "country": "United States",
+      "address": "1227 124th Avenue Northeast, Bellevue, WA, 98005",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "SJC7",
+      "market": "US",
+      "country": "United States",
+      "address": "188 Mountain House Pkwy., Tracy, CA, 95391",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "SLC2",
+      "market": "US",
+      "country": "United States",
+      "address": "7148 W. Old Bingham Hwy 84081 - West Jordan, UT - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "SLC3",
+      "market": "US",
+      "country": "United States",
+      "address": "355 N JOHN GLENN RD, 84116-4413",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "SMF1",
+      "market": "US",
+      "country": "United States",
+      "address": "4900 W Elkhorn Blvd, 95835-9505",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "SMF3",
+      "market": "US",
+      "country": "United States",
+      "address": "3923 S B ST, 95206-8202",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "SMF6",
+      "market": "US",
+      "country": "United States",
+      "address": "6900 AIRPORT BLVD City SACRAMENTO State California, 95837-1109",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "SMF7",
+      "market": "US",
+      "country": "United States",
+      "address": "4800 MIDDAY ROAD, 95688-9626",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "SNA4",
+      "market": "US",
+      "country": "United States",
+      "address": "2496 W Walnut Ave, Rialto, CA, 923763009",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "SNA6",
+      "market": "US",
+      "country": "United States",
+      "address": "5250 Goodman Road., Eastvale, CA, 91752",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "SNA7",
+      "market": "US",
+      "country": "United States",
+      "address": "555 East Orange Show Rd,, San Bernadino, CA, 92408",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "SNA8",
+      "market": "US",
+      "country": "United States",
+      "address": "555 East Orange Show Rd,, San Bernadino, CA, 92408",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "SNA9",
+      "market": "US",
+      "country": "United States",
+      "address": "5250 Goodman Road., Eastvale, CA, 91752",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "STL3",
+      "market": "US",
+      "country": "United States",
+      "address": "3200 E Sawyer Rd Republic, MO 65738",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "STL4",
+      "market": "US",
+      "country": "United States",
+      "address": "3050 Gateway Commerce Center Dr S., Edwardsville, IL, 620252815",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "STL6",
+      "market": "US",
+      "country": "United States",
+      "address": "3931 Lakeview Corporate Drive 62025-2801 - Edwardsville, IL - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "STL7",
+      "market": "US",
+      "country": "United States",
+      "address": "3931 Lakeview Corporate Drive., Edwardsville, IL, 62025",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "SWF1",
+      "market": "US",
+      "country": "United States",
+      "address": "635 INTERNATIONAL BLVD, 12575-5150",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "SWF2",
+      "market": "US",
+      "country": "United States",
+      "address": "76 Patriot Way, 12533-6159",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "SWF2-UPS",
+      "market": "US",
+      "country": "United States",
+      "address": "557 Tuckahoe Road, 10710",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "TCY1",
+      "market": "US",
+      "country": "United States",
+      "address": "2690 East Arch Airport Road, 95206",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "TCY2",
+      "market": "US",
+      "country": "United States",
+      "address": "6201 Newcastle Rd, 95215",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "TEB3",
+      "market": "US",
+      "country": "United States",
+      "address": "2651 Oldmans Creek Rd,, Pedricktown, NJ, 08067",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "TEB4",
+      "market": "US",
+      "country": "United States",
+      "address": "747 COURSES LANDING RD ,PENNS GROVE,NJ, 08069-2956, 08069-2955",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "TEB6",
+      "market": "US",
+      "country": "United States",
+      "address": "22 Highstown Cranbury State Road, Cranbury, NJ, 08512",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "TEB9",
+      "market": "US",
+      "country": "United States",
+      "address": "601 Randolph Road 08873 - SOMERSET, NJ - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "TFC1",
+      "market": "US",
+      "country": "United States",
+      "address": "5050 West Mohave St, Phoenix, AZ 85043",
+      "source": "HYJM 美加专线价格表.xlsx / 美国FBA仓"
+    },
+    {
+      "code": "TMB8",
+      "market": "US",
+      "country": "United States",
+      "address": "27505 SW 132nd AVE, 33032-8597",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "TPA1",
+      "market": "US",
+      "country": "United States",
+      "address": "3350 Laurel Ridge Ave., Ruskin, FL, 33570",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "TPA2",
+      "market": "US",
+      "country": "United States",
+      "address": "1760 County Line Rd., Lakeland, FL, 33811",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "TPA3",
+      "market": "US",
+      "country": "United States",
+      "address": "676 C Fred Jones Blvd 33823-9429 - Auburndale, FL - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "TPA6",
+      "market": "US",
+      "country": "United States",
+      "address": "3400 NW 35th Avenue Road OCALA FL, 34475-4625",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "TTN2",
+      "market": "US",
+      "country": "United States",
+      "address": "343 Cranbury Half Acre Rd, 08512-3253",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "TUL1",
+      "market": "US",
+      "country": "United States",
+      "address": "2654 North Highway 169, Coffeyville, KS, 67337",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "TYS5",
+      "market": "US",
+      "country": "United States",
+      "address": "TYS5-210 Partnership Parkway37801-MARYVILLE,TN - United States via",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "UAZ1",
+      "market": "US",
+      "country": "United States",
+      "address": "500 S 48th St, Phoenix, AZ, 85034",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "UNC2",
+      "market": "US",
+      "country": "United States",
+      "address": "1590 Wolfpack Ln, Raleigh, NC, 27609",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "UOR1",
+      "market": "US",
+      "country": "United States",
+      "address": "2250 NW 22nd Ave,, Portland, OR, 97210",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "USA9",
+      "market": "US",
+      "country": "United States",
+      "address": "2934 Ramona Ave, Sacramento, CA, 95826",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "UTX5",
+      "market": "US",
+      "country": "United States",
+      "address": "4848 Perrin Creek #680, San Antonio, TX, 78217",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "UVA1",
+      "market": "US",
+      "country": "United States",
+      "address": "5617 Industrial Dr., Suite A, Springfiled,, VA, 22151",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "UWA1",
+      "market": "US",
+      "country": "United States",
+      "address": "5617 Industrial Dr., Suite A, Springfiled, VA, 98034",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "UWA2",
+      "market": "US",
+      "country": "United States",
+      "address": "11710 118th Ave, NE Building B, Kirkland, WA, 98133",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "VGT2",
+      "market": "US",
+      "country": "United States",
+      "address": "6401 Howdy Wells Ave 89115-2013 - LAS VEGAS, NV - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "WBW2",
+      "market": "US",
+      "country": "United States",
+      "address": "1300 Corporate Way, 18447",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "WBW2-UPS",
+      "market": "US",
+      "country": "United States",
+      "address": "1300 Corporate Way, 18348",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "XAV3",
+      "market": "US",
+      "country": "United States",
+      "address": "120 CrossgateDr 31407-PortWentworth,GAUnited States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "XBC1",
+      "market": "US",
+      "country": "United States",
+      "address": "15750 Mountain Avs, Chino, CA, 91708",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    },
+    {
+      "code": "XEW5",
+      "market": "US",
+      "country": "United States",
+      "address": "995 Taylors Ln, 08077-2015",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "XLG1",
+      "market": "US",
+      "country": "United States",
+      "address": "1901 California St, 92374",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "XLX1",
+      "market": "US",
+      "country": "United States",
+      "address": "1115 Wesel Blvd, 21740-8126",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "XLX6",
+      "market": "US",
+      "country": "United States",
+      "address": "XLX6,12220 Carolina Logistics Drive,PINEVILLE,NC 28134,US",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "XLX7",
+      "market": "US",
+      "country": "United States",
+      "address": "18580 Gateway Dr, 92394",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "XMD4",
+      "market": "US",
+      "country": "United States",
+      "address": "6222 77th Ave 53142 - Kenosha,, WI - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "XON1",
+      "market": "US",
+      "country": "United States",
+      "address": "2290 Palmetto Ave 92374 - Redlands, CA - United States",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "XPB2",
+      "market": "US",
+      "country": "United States",
+      "address": "4661 Apopka Logistics Pkwy, 32712",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "XRI3",
+      "market": "US",
+      "country": "United States",
+      "address": "4949 Commerce Rd, 23234",
+      "source": "HMLX   美国  加拿大 海派  海卡  FBA .xlsx / FBA仓库代码表"
+    },
+    {
+      "code": "XSP1",
+      "market": "US",
+      "country": "United States",
+      "address": "1117 Vaughn Parkway,, Portland, TN, 37148",
+      "source": "RN 美国专线价格表.xlsx / FBA仓库地址表"
+    }
+  ]
+}

@@ -1,10 +1,18 @@
 <script setup>
-import { computed, nextTick, onMounted, reactive, ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { Microphone, Paperclip, Picture, RefreshRight, Search } from '@element-plus/icons-vue'
-import { submitSiteFeedback } from '@/services/siteFeedbackService'
-import { getLocal } from '@/utils/common'
+import {
+  ArrowRight,
+  House,
+  Microphone,
+  Paperclip,
+  Picture,
+  Search,
+  Ship,
+  ShoppingCart,
+  Van,
+} from '@element-plus/icons-vue'
+import heroLogistics from '@/assets/homepage/hero-logistics.png'
 
 const router = useRouter()
 
@@ -13,73 +21,40 @@ const searchInputRef = ref(null)
 const attachmentInputRef = ref(null)
 const imageInputRef = ref(null)
 
-const promptSets = [
-  [
-    [
-      'Sea DDP to Los Angeles',
-      'Air freight to Germany',
-      'Amazon FBA delivery to the UK',
-      'Warehouse storage in Shenzhen',
-      'DDP delivery to Amazon FBA',
-    ],
-    [
-      'Best route to Sydney',
-      'Track my shipment status',
-      'Check my order from China',
-      '1688 sourcing and inspection',
-      'Sea freight to Europe',
-    ],
-  ],
-  [
-    [
-      'Ship 3 pallets from Ningbo to Dallas',
-      'DDP sea shipping to New Jersey',
-      'Compare air and sea freight to Canada',
-      'FBA replenishment from Shenzhen',
-      'Consolidate 1688 orders for export',
-    ],
-    [
-      'Quote 10 cartons to Los Angeles',
-      'Track container arrival update',
-      'Warehouse inspection before shipment',
-      'Customs-ready DDP delivery',
-      'Door delivery to Amazon warehouse',
-    ],
-  ],
+const promptItems = [
+  'Sea DDP to Los Angeles',
+  'Track my shipment',
+  'Send goods to Amazon FBA',
+  'Help me buy from 1688',
+  'Need warehouse help',
 ]
 
-const activePromptSetIndex = ref(0)
-const promptColumns = ref(promptSets[activePromptSetIndex.value])
-const feedbackDialogVisible = ref(false)
-const feedbackSubmitting = ref(false)
-const feedbackFormRef = ref(null)
-const feedbackForm = reactive({
-  customerName: '',
-  feedbackType: 'suggestion',
-  content: '',
-})
-const feedbackRules = {
-  customerName: [{ required: true, message: 'Please enter your name', trigger: 'blur' }],
-  content: [{ required: true, message: 'Please enter your feedback', trigger: 'blur' }],
-}
-const storedUserInfo = computed(() => {
-  const raw = getLocal('userInfo')
-  if (!raw) return null
-  try {
-    return JSON.parse(raw)
-  } catch {
-    return null
-  }
-})
-const storedGuestChatInfo = computed(() => {
-  const raw = getLocal('chat_info')
-  if (!raw) return null
-  try {
-    return JSON.parse(raw)
-  } catch {
-    return null
-  }
-})
+const capabilities = [
+  {
+    key: 'freight',
+    title: 'Freight from China',
+    description: 'Ocean, air, rail, and truck freight',
+    icon: Ship,
+  },
+  {
+    key: 'sourcing',
+    title: 'Buying & Sourcing',
+    description: '1688 sourcing and quality inspection',
+    icon: ShoppingCart,
+  },
+  {
+    key: 'warehouse',
+    title: 'Warehouse Support',
+    description: 'Storage, inventory, and fulfillment',
+    icon: House,
+  },
+  {
+    key: 'tracking',
+    title: 'Tracking & Delivery',
+    description: 'Real-time tracking and delivery',
+    icon: Van,
+  },
+]
 
 const jumpToAiChat = (text = '') => {
   const query = { mode: 'ai' }
@@ -99,47 +74,6 @@ const askAI = (text) => {
   askInput.value = ''
 }
 
-const openFeedbackDialog = () => {
-  feedbackForm.customerName = storedUserInfo.value
-    ? `${storedUserInfo.value.first_name || ''} ${storedUserInfo.value.last_name || ''}`.trim()
-    : ''
-  feedbackForm.feedbackType = 'suggestion'
-  feedbackForm.content = ''
-  feedbackDialogVisible.value = true
-}
-
-const submitFeedback = async () => {
-  const formEl = feedbackFormRef.value
-  if (!formEl) return
-
-  await formEl.validate(async (valid) => {
-    if (!valid) return
-
-    feedbackSubmitting.value = true
-    try {
-      submitSiteFeedback({
-        userId: storedUserInfo.value?.id || storedGuestChatInfo.value?.chat_id || 'guest-user',
-        customerName: feedbackForm.customerName.trim(),
-        sourcePage: '/',
-        sourceModule: 'home-page',
-        feedbackType: feedbackForm.feedbackType,
-        content: feedbackForm.content.trim(),
-        priority: feedbackForm.feedbackType === 'bug' ? 'high' : 'medium',
-      })
-
-      feedbackDialogVisible.value = false
-      ElMessage.success('Feedback submitted successfully')
-    } finally {
-      feedbackSubmitting.value = false
-    }
-  })
-}
-
-const refreshPrompts = () => {
-  activePromptSetIndex.value = (activePromptSetIndex.value + 1) % promptSets.length
-  promptColumns.value = promptSets[activePromptSetIndex.value]
-}
-
 const triggerAttachmentUpload = () => {
   attachmentInputRef.value?.click()
 }
@@ -151,7 +85,7 @@ const triggerImageSearch = () => {
 const startVoiceSearch = () => {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
   if (!SpeechRecognition) {
-    askInput.value = 'Voice search request: '
+    askInput.value = 'Check prices from Shenzhen to Los Angeles'
     return
   }
 
@@ -169,33 +103,15 @@ const startVoiceSearch = () => {
 const handleAttachmentSelect = (event) => {
   const file = event.target.files?.[0]
   if (!file) return
-  askInput.value = `Attachment added: ${file.name}`
+  askInput.value = `Help me review this file: ${file.name}`
   event.target.value = ''
 }
 
 const handleImageSelect = (event) => {
   const file = event.target.files?.[0]
   if (!file) return
-  askInput.value = `Image search request: ${file.name}`
+  askInput.value = `Help me review this cargo image: ${file.name}`
   event.target.value = ''
-}
-
-const promptBadge = (groupIndex, itemIndex) => {
-  if (groupIndex === 0 && [1, 2, 4].includes(itemIndex)) return 'New'
-  if (groupIndex === 1 && [0, 1].includes(itemIndex)) return 'Hot'
-  return ''
-}
-
-const promptRankLabel = (groupIndex, itemIndex) => {
-  if (groupIndex === 0 && itemIndex === 0) return ''
-  return String(groupIndex === 0 ? itemIndex : itemIndex + 5)
-}
-
-const promptRankClass = (groupIndex, itemIndex) => {
-  if (groupIndex === 0 && itemIndex === 0) return 'prompt-rank prompt-rank-top-word'
-  const rank = groupIndex === 0 ? itemIndex + 1 : itemIndex + 5
-  if (rank <= 3) return `prompt-rank prompt-rank-top-${rank}`
-  return 'prompt-rank'
 }
 
 onMounted(() => {
@@ -209,314 +125,255 @@ onMounted(() => {
 <template>
   <div class="hero-page">
     <section class="hero-wrap">
-      <div class="hero-inner">
-        <div class="hero-brand">
-          <div class="brand-art">
-            <div class="brand-original" aria-label="CargoSoon">
-              <img src="@/assets/logo/cargosoonLogo1.png" class="brand-original-mark" alt="" />
-              <img src="@/assets/logo/cargosoonLogo2.png" class="brand-original-text" alt="CargoSoon" />
+      <div class="hero-panel">
+        <div class="hero-main">
+          <div class="hero-copy">
+            <h1 class="hero-title">
+              Shipping from China,
+              <span>made simple</span>
+            </h1>
+
+            <p class="hero-subtitle">
+              Check shipping prices, track your shipment, and get help buying and shipping from China.
+            </p>
+
+            <div class="search-shell">
+              <div class="search-card">
+                <div class="search-leading">
+                  <Search class="search-leading-icon" aria-hidden="true" />
+                </div>
+
+                <textarea
+                  ref="searchInputRef"
+                  v-model="askInput"
+                  class="search-input"
+                  rows="2"
+                  placeholder="Check shipping prices, track your shipment, or ask for help shipping from China"
+                  @keyup.enter.exact.prevent="askAI()"
+                  @keyup.ctrl.enter.stop
+                ></textarea>
+
+                <input
+                  ref="attachmentInputRef"
+                  class="search-hidden-input"
+                  type="file"
+                  @change="handleAttachmentSelect"
+                >
+                <input
+                  ref="imageInputRef"
+                  class="search-hidden-input"
+                  type="file"
+                  accept="image/*"
+                  @change="handleImageSelect"
+                >
+
+                <div class="search-actions">
+                  <button
+                    class="search-icon-btn"
+                    type="button"
+                    title="Voice search"
+                    aria-label="Voice search"
+                    @click="startVoiceSearch"
+                  >
+                    <Microphone class="search-icon" aria-hidden="true" />
+                  </button>
+                  <button
+                    class="search-icon-btn"
+                    type="button"
+                    title="Upload attachment"
+                    aria-label="Upload attachment"
+                    @click="triggerAttachmentUpload"
+                  >
+                    <Paperclip class="search-icon" aria-hidden="true" />
+                  </button>
+                  <button
+                    class="search-icon-btn"
+                    type="button"
+                    title="Search by image"
+                    aria-label="Search by image"
+                    @click="triggerImageSearch"
+                  >
+                    <Picture class="search-icon" aria-hidden="true" />
+                  </button>
+
+                  <div class="search-divider" aria-hidden="true"></div>
+
+                  <button class="primary-btn" type="button" @click="askAI()">
+                    <span class="primary-btn-star" aria-hidden="true">✦</span>
+                    AI Assistant
+                  </button>
+                </div>
+              </div>
+
+              <div class="prompt-strip">
+                <span class="prompt-label">Try asking:</span>
+                <button
+                  v-for="prompt in promptItems"
+                  :key="prompt"
+                  type="button"
+                  class="prompt-link"
+                  @click="askAI(prompt)"
+                >
+                  {{ prompt }}
+                  <ArrowRight class="prompt-link-icon" aria-hidden="true" />
+                </button>
+              </div>
             </div>
           </div>
-          <h1 class="sr-only">CargoSoon</h1>
+
         </div>
 
-        <p class="hero-subtitle">
-          Check shipping prices, track your shipment, and get help buying and shipping from China.
-        </p>
+        <div class="hero-image-band" aria-hidden="true">
+          <img :src="heroLogistics" alt="" class="hero-image" />
+          <div class="hero-image-fade"></div>
+        </div>
 
-        <div id="ai-quote-box" class="search-shell">
-          <div class="search-card">
-            <textarea
-              ref="searchInputRef"
-              v-model="askInput"
-              class="search-input"
-              rows="3"
-              placeholder="Enter your logistics request, e.g. Sea DDP to Los Angeles"
-              @keyup.enter.exact.prevent="askAI()"
-              @keyup.ctrl.enter.stop
-            ></textarea>
-
-            <input
-              ref="attachmentInputRef"
-              class="search-hidden-input"
-              type="file"
-              @change="handleAttachmentSelect"
-            >
-            <input
-              ref="imageInputRef"
-              class="search-hidden-input"
-              type="file"
-              accept="image/*"
-              @change="handleImageSelect"
-            >
-
-            <div class="search-actions">
-              <div class="search-icons">
-                <button
-                  class="search-icon-btn"
-                  type="button"
-                  title="Voice search"
-                  aria-label="Voice search"
-                  @click="startVoiceSearch"
-                >
-                  <Microphone class="search-icon" aria-hidden="true" />
-                </button>
-                <button
-                  class="search-icon-btn"
-                  type="button"
-                  title="Upload attachment"
-                  aria-label="Upload attachment"
-                  @click="triggerAttachmentUpload"
-                >
-                  <Paperclip class="search-icon" aria-hidden="true" />
-                </button>
-                <button
-                  class="search-icon-btn"
-                  type="button"
-                  title="Search by image"
-                  aria-label="Search by image"
-                  @click="triggerImageSearch"
-                >
-                  <Picture class="search-icon" aria-hidden="true" />
-                </button>
-              </div>
-              <button class="primary-btn" @click="askAI()">
-                <Search class="primary-icon" aria-hidden="true" />
-                AI Search
-              </button>
+        <div class="capability-strip">
+          <article
+            v-for="item in capabilities"
+            :key="item.key"
+            class="capability-item"
+          >
+            <component :is="item.icon" class="capability-icon" aria-hidden="true" />
+            <div class="capability-copy">
+              <strong>{{ item.title }}</strong>
+              <span>{{ item.description }}</span>
             </div>
-          </div>
-
-          <div class="prompt-board">
-            <div class="prompt-board-head">
-              <div class="prompt-board-title-wrap">
-                <span class="prompt-board-title">CargoSoon Trending</span>
-              </div>
-              <button class="prompt-board-switch" @click="refreshPrompts">
-                <RefreshRight class="prompt-refresh-icon" aria-hidden="true" />
-                Refresh
-              </button>
-            </div>
-
-            <div class="prompt-columns">
-              <div
-                v-for="(group, groupIndex) in promptColumns"
-                :key="groupIndex"
-                class="prompt-column"
-              >
-                <button
-                  v-for="(item, itemIndex) in group"
-                  :key="item"
-                  class="prompt-line"
-                  @click="askAI(item)"
-                >
-                  <span :class="promptRankClass(groupIndex, itemIndex)">
-                    <span
-                      v-if="groupIndex === 0 && itemIndex === 0"
-                      class="prompt-rank-top-icon"
-                      aria-hidden="true"
-                    ></span>
-                    {{ promptRankLabel(groupIndex, itemIndex) }}
-                  </span>
-                  <span class="prompt-line-text">{{ item }}</span>
-                  <span v-if="promptBadge(groupIndex, itemIndex)" class="prompt-badge">
-                    {{ promptBadge(groupIndex, itemIndex) }}
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>
+          </article>
         </div>
       </div>
     </section>
-
-    <el-dialog
-      v-model="feedbackDialogVisible"
-      width="min(92vw, 560px)"
-      title="Customer Feedback"
-      class="feedback-dialog"
-    >
-      <el-form
-        ref="feedbackFormRef"
-        :model="feedbackForm"
-        :rules="feedbackRules"
-        label-position="top"
-        class="feedback-form"
-      >
-        <el-form-item label="Your Name" prop="customerName">
-          <el-input v-model="feedbackForm.customerName" placeholder="Enter your name" />
-        </el-form-item>
-        <el-form-item label="Feedback Type" prop="feedbackType">
-          <el-select v-model="feedbackForm.feedbackType" placeholder="Select feedback type">
-            <el-option label="Suggestion" value="suggestion" />
-            <el-option label="UX Issue" value="ux issue" />
-            <el-option label="Price Issue" value="price issue" />
-            <el-option label="Bug" value="bug" />
-            <el-option label="Other" value="other" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Details" prop="content">
-          <el-input
-            v-model="feedbackForm.content"
-            type="textarea"
-            :rows="5"
-            placeholder="Tell us what can be improved or what issue you found"
-          />
-        </el-form-item>
-      </el-form>
-
-      <template #footer>
-        <div class="feedback-dialog-actions">
-          <button class="feedback-secondary-btn" type="button" @click="feedbackDialogVisible = false">
-            Cancel
-          </button>
-          <button
-            class="feedback-primary-btn"
-            type="button"
-            :disabled="feedbackSubmitting"
-            @click="submitFeedback"
-          >
-            Submit Feedback
-          </button>
-        </div>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <style scoped>
 .hero-page {
   min-height: calc(100vh - 56px);
-  background: #ffffff;
-  color: #222222;
+  background:
+    radial-gradient(circle at top right, rgba(248, 165, 96, 0.1), transparent 24%),
+    linear-gradient(180deg, #fffdfb 0%, #fffaf7 44%, #ffffff 100%);
+  color: #161b26;
 }
 
 .hero-wrap {
-  min-height: calc(100vh - 56px);
-  padding: 34px 20px 10px;
-  display: flex;
-  align-items: flex-start;
+  padding: 18px 18px 40px;
 }
 
-.hero-inner {
-  width: 100%;
+.hero-panel {
   max-width: 1240px;
   margin: 0 auto;
-  text-align: center;
+  overflow: hidden;
+  border-radius: 30px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 253, 250, 0.98) 100%);
+  box-shadow: 0 20px 54px rgba(53, 41, 31, 0.08);
 }
 
-.hero-brand {
+.hero-main {
+  min-height: 0;
+}
+
+.hero-copy {
+  position: relative;
+  z-index: 2;
   display: flex;
+  flex-direction: column;
   justify-content: center;
+  padding: 44px 56px 26px;
+}
+
+.hero-title {
+  max-width: 620px;
+  margin: 0;
+  color: #131b32;
+  font-size: clamp(50px, 5.6vw, 64px);
+  font-weight: 800;
+  line-height: 0.97;
+  letter-spacing: -0.03em;
+}
+
+.hero-title span {
+  display: block;
+  margin-top: 8px;
+  color: #f26a1b;
 }
 
 .hero-subtitle {
-  max-width: 760px;
-  margin: -6px auto 18px;
-  color: #7d766f;
-  font-size: 15px;
-  line-height: 1.55;
-  text-align: center;
-}
-
-.brand-art {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: min(100%, 980px);
-  min-height: 118px;
-}
-
-.brand-original {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 0 10px;
-}
-
-.brand-original-mark {
-  width: clamp(62px, 6vw, 80px);
-  height: auto;
-  display: block;
-}
-
-.brand-original-text {
-  width: clamp(168px, 18vw, 246px);
-  height: auto;
-  display: block;
+  max-width: 500px;
+  margin: 24px 0 0;
+  color: #697387;
+  font-size: 18px;
+  line-height: 1.45;
 }
 
 .search-shell {
-  width: min(100%, 800px);
-  margin: 18px auto 0;
+  max-width: 830px;
+  margin-top: 30px;
 }
 
 .search-card {
-  position: relative;
-  padding: 14px 14px;
-  border-radius: 18px;
-  background: #ffffff;
-  border: 1px solid rgba(242, 106, 27, 0.32);
-  box-shadow: 0 16px 38px rgba(242, 106, 27, 0.08);
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid rgba(242, 106, 27, 0.34);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 18px 36px rgba(242, 106, 27, 0.08);
 }
 
 .search-card:focus-within {
-  border-color: rgba(242, 106, 27, 0.62);
-  box-shadow: 0 18px 42px rgba(242, 106, 27, 0.13);
+  border-color: rgba(242, 106, 27, 0.48);
+  box-shadow: 0 20px 40px rgba(242, 106, 27, 0.12);
+}
+
+.search-leading {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #3c4659;
+}
+
+.search-leading-icon {
+  width: 23px;
+  height: 23px;
 }
 
 .search-input {
+  min-height: 52px;
   width: 100%;
-  min-height: 72px;
   resize: none;
   border: 0;
   outline: 0;
+  padding: 8px 0 0;
   background: transparent;
-  border-radius: 14px;
-  padding: 2px 234px 2px 4px;
-  box-sizing: border-box;
-  font-size: 15px;
-  line-height: 1.25;
-  color: #2a241f;
-  caret-color: #f26a1b;
-  text-align: left;
+  color: #2d3442;
+  font-size: 17px;
+  line-height: 1.42;
 }
 
 .search-input::placeholder {
-  color: #a0a7b5;
-}
-
-.search-input:focus::placeholder {
-  opacity: 0.82;
-}
-
-.search-actions {
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.search-icons {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-height: 28px;
+  color: #75809a;
 }
 
 .search-hidden-input {
   display: none;
 }
 
+.search-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .search-icon-btn {
+  width: 30px;
+  height: 30px;
   border: 0;
-  background: transparent;
   padding: 0;
+  background: transparent;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -524,413 +381,273 @@ onMounted(() => {
 }
 
 .search-icon {
-  width: 22px;
-  height: 22px;
-  color: #61554d;
-  opacity: 0.84;
-  transition: color 0.18s ease, opacity 0.18s ease;
+  width: 20px;
+  height: 20px;
+  color: #4d5568;
+  opacity: 0.86;
 }
 
-.search-icon-btn:hover .search-icon,
-.search-icon-btn:focus-visible .search-icon {
+.search-icon-btn:hover .search-icon {
   color: #f26a1b;
   opacity: 1;
 }
 
-.primary-icon {
-  width: 15px;
-  height: 15px;
+.search-divider {
+  width: 1px;
+  height: 26px;
+  margin: 0 4px 0 2px;
+  background: rgba(17, 26, 43, 0.12);
 }
 
 .primary-btn {
+  min-height: 50px;
+  padding: 0 22px;
   border: 0;
-  cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-}
-
-.primary-btn {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 12px 28px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #ff9340 0%, #f37a24 64%, #eb691a 100%);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 700;
-  box-shadow: 0 12px 28px rgba(242, 106, 27, 0.2);
-}
-
-.primary-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 14px 30px rgba(242, 106, 27, 0.24);
-}
-
-.feedback-entry-btn,
-.feedback-primary-btn,
-.feedback-secondary-btn {
-  border: 0;
-  cursor: pointer;
-  font: inherit;
-}
-
-.feedback-form :deep(.el-input__wrapper),
-.feedback-form :deep(.el-textarea__inner) {
-  box-shadow: 0 0 0 1px rgba(242, 106, 27, 0.12) inset;
-}
-
-.feedback-dialog-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.feedback-secondary-btn,
-.feedback-primary-btn {
-  min-height: 40px;
-  padding: 0 18px;
-  border-radius: 12px;
-}
-
-.feedback-secondary-btn {
-  background: #f7f4f1;
-  color: #6d625a;
-}
-
-.feedback-primary-btn {
-  background: linear-gradient(135deg, #ff9340 0%, #f37a24 64%, #eb691a 100%);
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ff8f35 0%, #f26a1b 100%);
   color: #ffffff;
-  box-shadow: 0 12px 26px rgba(242, 106, 27, 0.18);
-}
-
-.feedback-primary-btn:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-
-.prompt-board {
-  width: min(100%, 780px);
-  margin: 42px auto 0;
-  text-align: left;
-}
-
-.prompt-board-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  margin-bottom: 18px;
-}
-
-.prompt-board-title-wrap {
-  border: 0;
-  background: transparent;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 0;
-}
-
-.prompt-board-title {
   font-size: 16px;
   font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: 0;
-  color: #272a31;
+  cursor: pointer;
+  box-shadow: 0 14px 28px rgba(242, 106, 27, 0.24);
 }
 
-.prompt-board-switch {
-  border: 0;
-  background: transparent;
-  color: #8b95a7;
+.primary-btn-star {
   font-size: 14px;
-  font-weight: 400;
-  cursor: pointer;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+.prompt-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 0;
+  margin-top: 24px;
+  color: #4f5768;
+  font-size: 15px;
+}
+
+.prompt-label {
+  margin-right: 18px;
+  color: #7a8190;
+}
+
+.prompt-link {
+  border: 0;
+  padding: 0 18px;
+  background: transparent;
+  color: #374055;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  line-height: 1;
-}
-
-.prompt-refresh-icon {
-  width: 14px;
-  height: 14px;
-}
-
-.prompt-columns {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 78px;
-}
-
-.prompt-column {
-  display: grid;
-  gap: 18px;
-}
-
-.prompt-column:nth-child(2) {
-  padding-top: 1px;
-}
-
-.prompt-line {
-  border: 0;
-  background: transparent;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #222222;
-  font-size: 16px;
-  line-height: 1.2;
-  font-weight: 500;
-  letter-spacing: 0;
-  text-align: left;
+  gap: 5px;
+  font: inherit;
   cursor: pointer;
-  min-height: 28px;
+  border-right: 1px solid rgba(17, 26, 43, 0.12);
 }
 
-.prompt-line:hover {
-  color: #262a31;
+.prompt-link:first-of-type {
+  padding-left: 0;
 }
 
-.prompt-line:hover .prompt-line-text {
+.prompt-link:last-child {
+  padding-right: 0;
+  border-right: 0;
+}
+
+.prompt-link:hover {
   color: #f26a1b;
 }
 
-.prompt-rank {
-  width: 26px;
-  flex: 0 0 26px;
-  color: #9ca4b5;
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1;
-  text-align: left;
+.prompt-link-icon {
+  width: 13px;
+  height: 13px;
 }
 
-.prompt-rank-top-word {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #ff5568;
-  font-size: 0;
-  font-weight: 700;
-  letter-spacing: 0;
+.hero-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  opacity: 0.98;
 }
 
-.prompt-rank-top-icon {
+.hero-image-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 116px;
+  height: clamp(220px, 28vw, 360px);
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hero-image-fade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 250, 0.95) 0%, rgba(255, 253, 250, 0.5) 24%, rgba(255, 253, 250, 0.08) 54%, rgba(255, 253, 250, 0) 100%),
+    linear-gradient(90deg, rgba(255, 253, 250, 0.14) 0%, rgba(255, 253, 250, 0) 100%);
+}
+
+.capability-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 24px 18px 26px;
+  border-top: 1px solid rgba(17, 26, 43, 0.06);
+  background: rgba(255, 255, 255, 0.94);
   position: relative;
-  display: inline-block;
-  width: 15px;
-  height: 20px;
+  z-index: 2;
+  margin-top: clamp(180px, 24vw, 300px);
 }
 
-.prompt-rank-top-icon::before {
-  content: '';
-  position: absolute;
-  left: 6px;
-  top: 6px;
-  width: 2px;
-  height: 12px;
-  border-radius: 999px;
-  background: #ff5568;
-}
-
-.prompt-rank-top-icon::after {
-  content: '';
-  position: absolute;
-  left: 3px;
-  top: 1px;
-  width: 9px;
-  height: 9px;
-  border-left: 2px solid #ff5568;
-  border-top: 2px solid #ff5568;
-  transform: rotate(45deg);
-}
-
-.prompt-rank-top-1 {
-  color: #ff4f66;
-}
-
-.prompt-rank-top-2 {
-  color: #ff6d1f;
-}
-
-.prompt-rank-top-3 {
-  color: #f2a11e;
-}
-
-.prompt-line-text {
-  color: inherit;
-  white-space: nowrap;
-  min-width: 0;
-  overflow-wrap: anywhere;
-  transform: translateY(-0.5px);
-}
-
-.prompt-badge {
-  display: inline-flex;
+.capability-item {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  min-width: 24px;
-  height: 18px;
-  padding: 0 6px;
-  margin-left: 3px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #ff7f31, #ff5f1f);
-  color: #ffffff;
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1;
+  gap: 16px;
+  min-width: 0;
+  padding: 6px 20px;
+  border-right: 1px solid rgba(17, 26, 43, 0.1);
 }
 
-@media (max-width: 900px) {
-  .hero-page,
+.capability-item:last-child {
+  border-right: 0;
+}
+
+.capability-icon {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  color: #f26a1b;
+}
+
+.capability-copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.capability-copy strong {
+  color: #1f2638;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.capability-copy span {
+  color: #808896;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+@media (max-width: 1100px) {
+  .hero-copy {
+    padding: 56px 28px 28px;
+  }
+
+  .hero-image-band {
+    bottom: 184px;
+    height: clamp(200px, 34vw, 300px);
+  }
+
+  .capability-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 0;
+    padding-top: 18px;
+    margin-top: clamp(160px, 28vw, 240px);
+  }
+
+  .capability-item:nth-child(2n) {
+    border-right: 0;
+  }
+}
+
+@media (max-width: 760px) {
   .hero-wrap {
-    min-height: auto;
+    padding: 12px 12px 28px;
   }
 
-  .hero-wrap {
-    padding: 22px 16px 24px;
+  .hero-panel {
+    border-radius: 24px;
   }
 
-  .hero-inner {
-    max-width: 100%;
+  .hero-copy {
+    padding: 34px 18px 26px;
   }
 
-  .brand-art {
-    width: min(100%, 760px);
-    min-height: 108px;
+  .hero-title {
+    font-size: 40px;
+    line-height: 1.02;
   }
 
   .hero-subtitle {
-    max-width: 680px;
-    margin: -10px auto 16px;
-    padding: 0 10px;
-    font-size: 14px;
-    line-height: 1.5;
+    margin-top: 18px;
+    font-size: 16px;
   }
 
   .search-card {
-    padding: 10px 12px;
-    border-radius: 16px;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 14px 14px 16px;
+  }
+
+  .search-leading {
+    display: none;
   }
 
   .search-input {
     min-height: 74px;
-    padding: 6px 10px 50px 2px;
-    border-radius: 14px;
+    font-size: 16px;
   }
 
   .search-actions {
-    right: 12px;
-    left: 12px;
-    top: auto;
-    bottom: 10px;
-    transform: none;
     justify-content: space-between;
   }
 
-  .search-icons {
-    justify-content: center;
-  }
-
-  .prompt-board {
-    width: min(100%, 620px);
-    margin-top: 26px;
-  }
-
-  .prompt-board-title {
-    font-size: 17px;
-  }
-
-  .prompt-columns {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-
-  .prompt-column {
-    gap: 12px;
-  }
-
-  .prompt-column:nth-child(2) {
-    padding-top: 0;
-  }
-
-}
-
-@media (max-width: 560px) {
-  .hero-wrap {
-    padding: 16px 14px 18px;
-  }
-
-  .search-shell {
-    width: 100%;
-  }
-
-  .search-shell {
-    margin-top: 16px;
-  }
-
-  .brand-original {
-    gap: 8px;
-  }
-
-  .brand-original-mark {
-    width: 48px;
-  }
-
-  .brand-original-text {
-    width: min(46vw, 180px);
-  }
-
-  .search-input {
-    min-height: 82px;
-    font-size: 15px;
-    line-height: 1.32;
-  }
-
-  .prompt-board {
-    margin-top: 24px;
-  }
-
-  .prompt-board-head {
-    align-items: flex-start;
-  }
-
-  .prompt-columns {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-  }
-
-  .prompt-column {
-    gap: 8px;
-  }
-
-  .prompt-line {
-    align-items: flex-start;
-    gap: 5px;
-    font-size: 13px;
-    line-height: 1.2;
-    min-height: 42px;
-  }
-
-  .prompt-rank {
-    width: 16px;
-    flex-basis: 16px;
-    padding-top: 1px;
+  .prompt-strip {
+    margin-top: 18px;
+    gap: 10px 0;
     font-size: 14px;
   }
 
-  .prompt-badge {
-    min-width: 20px;
-    height: 16px;
-    padding: 0 4px;
-    margin-left: 0;
-    font-size: 9px;
+  .prompt-label {
+    width: 100%;
+    margin-right: 0;
   }
 
-  .prompt-line-text {
-    white-space: normal;
+  .prompt-link {
+    padding: 0 12px;
+  }
+
+  .prompt-link:first-of-type {
+    padding-left: 0;
+  }
+
+  .hero-image-band {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    height: 200px;
+    margin-top: 14px;
+  }
+
+  .capability-strip {
+    grid-template-columns: 1fr;
+    padding: 12px 6px 16px;
+    margin-top: 0;
+  }
+
+  .capability-item,
+  .capability-item:nth-child(2n) {
+    border-right: 0;
+    padding: 12px 12px;
   }
 }
 </style>

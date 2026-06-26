@@ -1,0 +1,221 @@
+{
+  "week_of": "2026-06-25",
+  "description": "Weekly pricing source map for the quote page. Grouped by page entry and route family.",
+  "quote_page_mapping": {
+    "ocean_fcl": [
+      {
+        "file_name": "cargosoon 新 Peggy 美加整柜模版.xlsx",
+        "category": "FCL import template",
+        "markets": ["USA", "Canada"],
+        "status": "readable",
+        "notes": "Standard ocean import template with origin port, destination port, carrier, 20GP, 40GP, 40HQ."
+      },
+      {
+        "file_name": "cargosoon 整柜模版.xlsx",
+        "category": "FCL import template",
+        "markets": ["Europe"],
+        "status": "readable",
+        "notes": "Standard ocean import template for Europe lanes."
+      },
+      {
+        "file_name": "Rita系统-中南美.xlsx",
+        "category": "FCL import template",
+        "markets": ["Central America", "South America"],
+        "status": "readable",
+        "notes": "Ocean pricing import template with port-to-port container pricing."
+      },
+      {
+        "file_name": "海运整柜6.18xlsx(最新）.xlsx",
+        "category": "FCL working sheet",
+        "markets": ["Unknown"],
+        "status": "needs_manual_resave",
+        "notes": "Likely current FCL source but workbook could not be parsed as a standard xlsx."
+      },
+      {
+        "file_name": "欧黑 A 区(2).xlsx",
+        "category": "FCL area sheet",
+        "markets": ["Europe"],
+        "status": "needs_manual_resave",
+        "notes": "Likely Europe container area pricing. Needs resave before automated parsing."
+      },
+      {
+        "file_name": "欧黑B1区.xlsx",
+        "category": "FCL area sheet",
+        "markets": ["Europe"],
+        "status": "needs_manual_resave",
+        "notes": "Likely Europe container area pricing. Needs resave before automated parsing."
+      }
+    ],
+    "ddp": [
+      {
+        "file_name": "YTHQ 美国专线价格表.xlsx",
+        "category": "USA DDP / sea-truck / truck",
+        "markets": ["USA", "UK", "Europe"],
+        "status": "readable",
+        "notes": "Contains schedule, sea DDP, truck delivery, UK and EU sea delivery, and Amazon warehouse code sheets."
+      },
+      {
+        "file_name": "RN 美国专线价格表.xlsx",
+        "category": "USA DDP / truck / air",
+        "markets": ["USA", "Canada"],
+        "status": "readable",
+        "notes": "Contains schedule, USA sea DDP, FBA special warehouse, truck delivery, air pricing, and Canada zoning."
+      },
+      {
+        "file_name": "HYJM 美加专线价格表.xlsx",
+        "category": "USA/Canada air, express, sea, FBA",
+        "markets": ["USA", "Canada"],
+        "status": "readable",
+        "notes": "Rich multi-sheet workbook with air delivery, express, sea delivery, FBA, and zoning references."
+      },
+      {
+        "file_name": "HMLX 美国 加拿大 海派 海卡 FBA.xlsx",
+        "category": "USA/Canada sea DDP, truck, FBA, DG",
+        "markets": ["USA", "Canada"],
+        "status": "readable",
+        "notes": "Contains Canada direct truck, USA courier delivery, FBA codes, whole-container direct delivery, and DG routes."
+      },
+      {
+        "file_name": "SXD 美国专线价格表.xlsx",
+        "category": "USA air, sea DDP, FBA sea truck",
+        "markets": ["USA", "Canada"],
+        "status": "readable",
+        "notes": "Contains FBA quick quote, USA air, USA sea delivery, FBA sea truck, business address truck, and Canada direct."
+      },
+      {
+        "file_name": "YP 美国专线价格表（空派）.xlsx",
+        "category": "USA air, sea delivery, truck, FBA transfer",
+        "markets": ["USA"],
+        "status": "readable",
+        "notes": "Strong fit for air DDP and USA route-specific lane setup."
+      },
+      {
+        "file_name": "YH_PC 欧洲英国海运海卡6.15起.xlsx",
+        "category": "EU/UK sea, sea truck, truck",
+        "markets": ["Europe", "UK"],
+        "status": "readable",
+        "notes": "Useful for Europe and UK DDP routing."
+      },
+      {
+        "file_name": "YM 欧洲英国空派6.22起.xlsx",
+        "category": "EU/UK air DDP",
+        "markets": ["Europe", "UK"],
+        "status": "readable",
+        "notes": "Useful for Europe and UK air routes."
+      },
+      {
+        "file_name": "YT 阿联酋 沙特 海派 空派.xlsx",
+        "category": "Middle East sea DDP / air DDP",
+        "markets": ["UAE", "Saudi Arabia"],
+        "status": "readable",
+        "notes": "Contains UAE air, UAE sea, Saudi air, and Saudi sea lanes."
+      },
+      {
+        "file_name": "XJBD 阿联酋 阿曼 巴林专线价格表.xlsx",
+        "category": "Middle East special line",
+        "markets": ["UAE", "Oman", "Bahrain"],
+        "status": "needs_manual_resave",
+        "notes": "Filename clearly maps to Middle East DDP lanes but workbook needs standard resave."
+      },
+      {
+        "file_name": "YX 澳大利亚 海_空 派卡.xlsx",
+        "category": "Australia air / sea / truck",
+        "markets": ["Australia"],
+        "status": "readable",
+        "notes": "Contains Australia air, sea tax-included, sea non-tax, zone sheets, and warehouse references."
+      },
+      {
+        "file_name": "GZRK 南美多国专线 6.4起.xlsx",
+        "category": "South America special line",
+        "markets": ["South America"],
+        "status": "needs_manual_resave",
+        "notes": "Likely South America air/sea DDP source. Needs standard resave."
+      }
+    ],
+    "fba_delivery": [
+      {
+        "file_name": "HMLX 美国 加拿大 海派 海卡 FBA.xlsx",
+        "category": "FBA",
+        "markets": ["USA", "Canada"],
+        "status": "readable",
+        "notes": "Includes dedicated FBA warehouse code sheet and FBA-compatible channel structure."
+      },
+      {
+        "file_name": "HYJM 美加专线价格表.xlsx",
+        "category": "FBA",
+        "markets": ["USA", "Canada"],
+        "status": "readable",
+        "notes": "Includes US FBA warehouse and Canada FBA overseas warehouse zoning."
+      },
+      {
+        "file_name": "RN 美国专线价格表.xlsx",
+        "category": "FBA",
+        "markets": ["USA", "Canada"],
+        "status": "readable",
+        "notes": "Includes FBA special warehouse and FBA address sheets."
+      },
+      {
+        "file_name": "SXD 美国专线价格表.xlsx",
+        "category": "FBA",
+        "markets": ["USA"],
+        "status": "readable",
+        "notes": "Includes FBA quick quote and Amazon warehouse sheets."
+      },
+      {
+        "file_name": "YTHQ 美国专线价格表.xlsx",
+        "category": "FBA",
+        "markets": ["USA", "UK", "Europe"],
+        "status": "readable",
+        "notes": "Includes Amazon warehouse code sheet and related sea/truck lanes."
+      }
+    ],
+    "dangerous_goods": [
+      {
+        "file_name": "HMLX 美国 加拿大 海派 海卡 FBA.xlsx",
+        "category": "DG",
+        "markets": ["USA", "Canada"],
+        "status": "readable",
+        "notes": "Contains USA 9-class DG and Canada 9-class DG routes."
+      },
+      {
+        "file_name": "YM 欧洲英国空派6.22起.xlsx",
+        "category": "DG related",
+        "markets": ["Europe", "UK"],
+        "status": "partial_manual_check",
+        "notes": "Related workbook family indicates DG and oversized capabilities, but exact DG sheet use should be checked manually."
+      }
+    ],
+    "sailing_schedule": [
+      {
+        "file_name": "RN 美国专线价格表.xlsx",
+        "category": "Schedule",
+        "markets": ["USA", "Canada"],
+        "status": "readable",
+        "notes": "Has a dedicated sailing schedule sheet."
+      },
+      {
+        "file_name": "YTHQ 美国专线价格表.xlsx",
+        "category": "Schedule",
+        "markets": ["USA"],
+        "status": "readable",
+        "notes": "Has a dedicated US sailing schedule sheet."
+      },
+      {
+        "file_name": "SXD 美国专线价格表.xlsx",
+        "category": "Schedule",
+        "markets": ["USA"],
+        "status": "readable",
+        "notes": "Has a dedicated sailing schedule sheet."
+      }
+    ]
+  },
+  "files_needing_manual_resave": [
+    "BC 欧洲 英国 空派 .xlsx",
+    "DX 美国专线价格表.xlsx",
+    "海运整柜6.18xlsx(最新）.xlsx",
+    "欧黑 A 区(2).xlsx",
+    "欧黑B1区.xlsx",
+    "XJBD 阿联酋 阿曼 巴林专线价格表.xlsx",
+    "GZRK 南美多国专线 6.4起.xlsx"
+  ]
+}
